@@ -19,27 +19,30 @@ contract LiBA {
 
     struct Auction {
         address asker;
-        mapping(address => Bid) bids;
-        address[] bidders;
-        address[] winners;
-        address challenger;
-        uint bidEnd;
-        uint revealEnd;
-        uint claimEnd;
-        uint challengeEnd;
-        uint challengeDuration;
         uint value;
         uint duration;
         uint maxRate;
         uint minValue;
         uint maxBidRate;
         uint maxBidFactor;
+        bool finalized;
+        address[] bidders;
+        address[] winners;
+        address challenger;
+        uint challengeDuration;
+        uint finalizeDuration;
+        uint bidEnd;
+        uint revealEnd;
+        uint claimEnd;
+        uint challengeEnd;
+        uint finalizeEnd;
     }
 
     address private celerTokenAddress;
-    mapping(uint => Auction) private auctions;
-    uint private auctionLength;
     uint private auctionDeposit;
+    uint private auctionLength;
+    mapping(uint => Auction) private auctions;
+    mapping(address => mapping(uint => Bid)) private bidsByUser;
 
     event NewAuction(uint auctionId);
     event NewBid(uint auctionId, address bidder);
@@ -69,6 +72,7 @@ contract LiBA {
         uint _revealDuration,
         uint _claimDuration,
         uint _challengeDuration,
+        uint _finalizeDuration,
         uint _value,
         uint _duration,
         uint _maxRate,
@@ -76,46 +80,48 @@ contract LiBA {
     )
         public
     {
-        Auction auction = auctions[auctionLength];
+        Auction storage auction = auctions[auctionLength];
         auction.asker = msg.sender;
-        auction.bidEnd = block.number.add(_bidDuration);
-        auction.revealEnd = auction.bidEnd.add(_revealDuration);
-        auction.claimEnd = auction.revealEnd.add(_claimDuration);
-        auction.challengeEnd = auction.claimEnd.add(_challengeDuration);
+        auction.challengeDuration = _challengeDuration;
+        auction.finalizeDuration = _finalizeDuration;
         auction.value = _value;
         auction.duration = _duration;
         auction.maxRate = _maxRate;
         auction.minValue = _minValue;
+        auction.bidEnd = block.number.add(_bidDuration);
+        auction.revealEnd = auction.bidEnd.add(_revealDuration);
+        auction.claimEnd = auction.revealEnd.add(_claimDuration);
+        auction.challengeEnd = auction.claimEnd.add(_challengeDuration);
+        auction.finalizeEnd = auction.challengeEnd.add(_finalizeDuration);
 
         ERC20(celerTokenAddress).safeTransferFrom(msg.sender, address(this), auctionDeposit);
-        NewAuction(auctionLength);
-
+        emit NewAuction(auctionLength);
         auctionLength += 1;
     }
 
     /**
      * @dev Bid for an auction
-     * @param _auctionId Id of the acution
+     * @param _auctionId Id of the auction
      * @param _hash hash based on desired rate, value, celerValue and salt
      * @param _celerValue potential celer value for bidding, it can be larger than actual celer value
      */
-    function bid(
+    function placeBid(
         uint _auctionId,
         bytes32 _hash,
         uint _celerValue
     )
         public
     {
-        Auction auction = auctions[_auctionId];
+        Auction storage auction = auctions[_auctionId];
         require(block.number <= auction.bidEnd);
 
-        Bid bid = auction.bids[msg.sender];
+        Bid storage bid = bidsByUser[msg.sender][_auctionId];
 
         if (bid.hash == 0) {
             auction.bidders.push(msg.sender);
-            NewBid(_auctionId, msg.sender);
+            emit NewBid(_auctionId, msg.sender);
         } else {
-            UpdateBid(_auctionId, msg.sender);
+            emit UpdateBid(_auctionId, msg.sender);
         }
 
         bid.hash = _hash;
@@ -126,14 +132,14 @@ contract LiBA {
     // TODO: verify _commitmentsIds having enough fund
     /**
      * @dev Reveal the bid of current user for an auction
-     * @param _auctionId Id of the acution
+     * @param _auctionId Id of the auction
      * @param _rate interest rate for bidding
      * @param _value value for bidding
      * @param _celerValue celer value for bidding
      * @param _salt a random value used for hash
      * @param _commitmentsIds a list of commitments Id for bidding
      */
-    function reveal(
+    function revealBid(
         uint _auctionId,
         uint _rate,
         uint _value,
@@ -143,13 +149,13 @@ contract LiBA {
     )
         public
     {
-        Auction auction = auctions[_auctionId];
+        Auction storage auction = auctions[_auctionId];
         require(block.number > auction.bidEnd);
         require(block.number <= auction.revealEnd);
         require(_rate <= auction.maxRate);
         require(_value >= auction.minValue);
 
-        Bid bid = auction.bids[msg.sender];
+        Bid storage bid = bidsByUser[msg.sender][_auctionId];
         bytes32 hash = keccak256(_rate, _value, _celerValue, _salt);
         require(hash == bid.hash);
 
@@ -162,6 +168,7 @@ contract LiBA {
         bid.commitmentsIds = _commitmentsIds;
         bid.rate = _rate;
         bid.value = _value;
+        bid.hash = bytes32(0);
 
         if (_rate > auction.maxBidRate) {
             auction.maxBidRate = _rate;
@@ -172,12 +179,12 @@ contract LiBA {
             auction.maxBidFactor = factor;
         }
 
-        RevealBid(_auctionId, msg.sender);
+        emit RevealBid(_auctionId, msg.sender);
     }
 
     /**
      * @dev The auction asker claims winners for the auction
-     * @param _auctionId Id of the acution
+     * @param _auctionId Id of the auction
      * @param _winners a list of winner addresses
      */
     function claimWinners(
@@ -186,19 +193,18 @@ contract LiBA {
     )
         public
     {
-        Auction auction = auctions[_auctionId];
+        Auction storage auction = auctions[_auctionId];
         require(block.number > auction.revealEnd);
         require(block.number <= auction.claimEnd);
         require(msg.sender == auction.asker);
 
         auction.winners = _winners;
-        ClaimWinners(_auctionId);
+        emit ClaimWinners(_auctionId);
     }
-
 
     /**
      * @dev A potential winner, who is not claimed as one of winners, is able to challenge the auction
-     * @param _auctionId Id of the acution
+     * @param _auctionId Id of the auction
      * @param _winners a list of winner addresses
      */
     function challengeWinners(
@@ -207,34 +213,94 @@ contract LiBA {
     )
         public
     {
-        Auction auction = auctions[_auctionId];
+        Auction storage auction = auctions[_auctionId];
         require(block.number > auction.claimEnd);
         require(block.number <= auction.challengeEnd);
-        require(_validateChallenger(auction, msg.sender));
+        require(_validateChallenger(_auctionId, msg.sender));
 
         auction.winners = _winners;
-        auction.challengeEnd = auction.challengeEnd.add(auction.challengeDuration);
         auction.challenger = msg.sender;
+        auction.challengeEnd = auction.challengeEnd.add(auction.challengeDuration);
+        auction.finalizeEnd = auction.challengeEnd.add(auction.finalizeDuration);
 
-        ChallengeWinners(_auctionId);
+        emit ChallengeWinners(_auctionId);
+    }
+
+    /**
+     * @dev withdraw challenge reward for challenger
+     * @param _auctionId Id of the auction
+     */
+    function withdrawChallengeReward(uint _auctionId) public {
+        Auction storage auction = auctions[_auctionId];
+        require(block.number > auction.challengeEnd);
+        require(msg.sender == auction.challenger);
+
+        ERC20(celerTokenAddress).safeTransferFrom(address(this), auction.challenger, auctionDeposit);
+    }
+
+    // TODO: need to lock the fund in PoLC and issue new token
+    /**
+     * @dev finalize the auction
+     * @param _auctionId Id of the auction
+     */
+    function finalizeAuction(uint _auctionId) public {
+        Auction storage auction = auctions[_auctionId];
+        require(block.number > auction.challengeEnd);
+        require(block.number <= auction.finalizeEnd);
+        require(!auction.finalized);
+
+        // If there is no challenger, refund the deposit to asker
+        if (auction.challenger == 0x0) {
+            ERC20(celerTokenAddress).safeTransferFrom(address(this), auction.asker, auctionDeposit);
+        }
+
+        auction.finalized = true;
+    }
+
+    /**
+     * @dev finalize the bid for the acution for bidders, who are not winning the auction,
+     * or asker fails to finalize the auction before finalizeEnd
+     * @param _auctionId Id of the auction
+     */
+    function finalizeBid(uint _auctionId) public {
+        bool allowWithdraw = false;
+        Auction storage auction = auctions[_auctionId];
+
+        if (auction.finalized) {
+            allowWithdraw = !_checkWinner(_auctionId, msg.sender);
+        } else {
+            allowWithdraw = block.number > auction.finalizeEnd;
+        }
+        require(allowWithdraw);
+
+        Bid storage bid = bidsByUser[msg.sender][_auctionId];
+        require(bid.celerValue > 0);
+
+        uint celerValue = bid.celerValue;
+        bid.celerValue = 0;
+        bid.rate = 0;
+        bid.value = 0;
+        ERC20(celerTokenAddress).safeTransferFrom(address(this), msg.sender, celerValue);
     }
 
     /**
      * @dev validate if challenger is valid one
-     * @param _auction acution instance
+     * @param _auctionId Id of the auction
      * @param _challenger address for challenger, who may have higher score than current winners
      */
     function _validateChallenger(
-        Auction storage _auction,
+        uint _auctionId,
         address _challenger
     )
+        view
         private
         returns(bool)
     {
         bool exist = false;
         bool higherScore = false;
-        address[] winners = _auction.winners;
-        uint challengerScore = _calculateScore(_auction, _challenger);
+        Auction storage auction = auctions[_auctionId];
+        address[] storage winners = auction.winners;
+        uint challengerScore = _calculateScore(_auctionId, _challenger);
 
         for (uint i = 0; i < winners.length; i++) {
             address winner = winners[i];
@@ -244,7 +310,7 @@ contract LiBA {
             }
 
             if (!higherScore) {
-                uint winnerScore = _calculateScore(_auction, winner);
+                uint winnerScore = _calculateScore(_auctionId, winner);
 
                 if (challengerScore > winnerScore) {
                     higherScore = true;
@@ -257,17 +323,48 @@ contract LiBA {
 
     /**
      * @dev calcuate ranking score
-     * @param _auction acution instance
+     * @param _auctionId Id of the auction
      * @param _bidder a bidder address
      */
     function _calculateScore(
-        Auction storage _auction,
+        uint _auctionId,
         address _bidder
     )
+        view
         private
         returns(uint)
     {
-        Bid bid = _auction.bids[_bidder];
-        return bid._celerValue.div(bid._value).div(_auction.maxBidFactor) - bid._rate.div(_auction.maxBidRate);
+        Auction storage auction = auctions[_auctionId];
+        Bid storage bid = bidsByUser[_bidder][_auctionId];
+        uint valueFactor = bid.celerValue.div(bid.value).div(auction.maxBidFactor);
+
+        uint rateFactor = bid.rate.div(auction.maxBidRate);
+
+        return valueFactor.sub(rateFactor);
+    }
+
+    /**
+     * @dev check if the bidder is winner
+     * @param _auctionId Id of the auction
+     * @param _bidder a bidder address
+     */
+    function _checkWinner(
+        uint _auctionId,
+        address _bidder
+    )
+        view
+        private
+        returns(bool)
+    {
+        Auction storage auction = auctions[_auctionId];
+        address[] storage winners = auction.winners;
+
+        for (uint i = 0; i < winners.length; i++) {
+            if (winners[i] == _bidder) {
+                return true;
+            }
+        }
+
+        return false;
     }
 }
