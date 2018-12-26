@@ -44,7 +44,7 @@ contract LiBA {
     mapping(uint => Auction) private auctions;
     mapping(address => mapping(uint => Bid)) private bidsByUser;
 
-    event NewAuction(uint auctionId);
+    event NewAuction(uint auctionId, address asker);
     event NewBid(uint auctionId, address bidder);
     event UpdateBid(uint auctionId, address bidder);
     event RevealBid(uint auctionId, address bidder);
@@ -95,7 +95,7 @@ contract LiBA {
         auction.finalizeEnd = auction.challengeEnd.add(_finalizeDuration);
 
         ERC20(celerTokenAddress).safeTransferFrom(msg.sender, address(this), auctionDeposit);
-        emit NewAuction(auctionLength);
+        emit NewAuction(auctionLength, auction.asker);
         auctionLength += 1;
     }
 
@@ -160,11 +160,11 @@ contract LiBA {
         require(hash == bid.hash);
 
         uint celerRefund = bid.celerValue.sub(_celerValue);
+        bid.celerValue = _celerValue;
         if (celerRefund > 0) {
             ERC20(celerTokenAddress).safeTransferFrom(address(this), msg.sender, celerRefund);
         }
 
-        bid.celerValue = _celerValue;
         bid.commitmentsIds = _commitmentsIds;
         bid.rate = _rate;
         bid.value = _value;
@@ -235,7 +235,8 @@ contract LiBA {
         require(block.number > auction.challengeEnd);
         require(msg.sender == auction.challenger);
 
-        ERC20(celerTokenAddress).safeTransferFrom(address(this), auction.challenger, auctionDeposit);
+        auction.challenger = 0x0;
+        ERC20(celerTokenAddress).safeTransferFrom(address(this), msg.sender, auctionDeposit);
     }
 
     // TODO: need to lock the fund in PoLC and issue new token
@@ -249,12 +250,11 @@ contract LiBA {
         require(block.number <= auction.finalizeEnd);
         require(!auction.finalized);
 
+        auction.finalized = true;
         // If there is no challenger, refund the deposit to asker
         if (auction.challenger == 0x0) {
             ERC20(celerTokenAddress).safeTransferFrom(address(this), auction.asker, auctionDeposit);
         }
-
-        auction.finalized = true;
     }
 
     /**
