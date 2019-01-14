@@ -1,8 +1,8 @@
-pragma solidity ^0.4.18;
+pragma solidity ^0.5.0;
 
-import "zeppelin-solidity/contracts/math/SafeMath.sol";
-import "zeppelin-solidity/contracts/token/ERC20/ERC20.sol";
-import "zeppelin-solidity/contracts/token/ERC20/SafeERC20.sol";
+import "openzeppelin-solidity/contracts/math/SafeMath.sol";
+import "openzeppelin-solidity/contracts/token/ERC20/ERC20.sol";
+import "openzeppelin-solidity/contracts/token/ERC20/SafeERC20.sol";
 
 contract LiBA {
     using SafeERC20 for ERC20;
@@ -51,7 +51,7 @@ contract LiBA {
     event ClaimWinners(uint auctionId);
     event ChallengeWinners(uint auctionId);
 
-    constructor(address _celerTokenAddress, uint _auctionDeposit) {
+    constructor(address _celerTokenAddress, uint _auctionDeposit) public {
         celerTokenAddress = _celerTokenAddress;
         auctionDeposit = _auctionDeposit;
     }
@@ -145,7 +145,7 @@ contract LiBA {
         uint _value,
         uint _celerValue,
         uint _salt,
-        uint[] _commitmentsIds
+        uint[] memory _commitmentsIds
     )
         public
     {
@@ -156,7 +156,7 @@ contract LiBA {
         require(_value >= auction.minValue);
 
         Bid storage bid = bidsByUser[msg.sender][_auctionId];
-        bytes32 hash = keccak256(_rate, _value, _celerValue, _salt);
+        bytes32 hash = keccak256(abi.encodePacked(_rate, _value, _celerValue, _salt));
         require(hash == bid.hash);
 
         uint celerRefund = bid.celerValue.sub(_celerValue);
@@ -189,7 +189,7 @@ contract LiBA {
      */
     function claimWinners(
         uint _auctionId,
-        address[] _winners
+        address[] memory _winners
     )
         public
     {
@@ -209,7 +209,7 @@ contract LiBA {
      */
     function challengeWinners(
         uint _auctionId,
-        address[] _winners
+        address[] memory _winners
     )
         public
     {
@@ -235,7 +235,7 @@ contract LiBA {
         require(block.number > auction.challengeEnd);
         require(msg.sender == auction.challenger);
 
-        auction.challenger = 0x0;
+        auction.challenger = address(0x0);
         ERC20(celerTokenAddress).safeTransferFrom(address(this), msg.sender, auctionDeposit);
     }
 
@@ -252,7 +252,7 @@ contract LiBA {
 
         auction.finalized = true;
         // If there is no challenger, refund the deposit to asker
-        if (auction.challenger == 0x0) {
+        if (auction.challenger == address(0x0)) {
             ERC20(celerTokenAddress).safeTransferFrom(address(this), auction.asker, auctionDeposit);
         }
     }

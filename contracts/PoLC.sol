@@ -1,8 +1,8 @@
-pragma solidity ^0.4.18;
+pragma solidity ^0.5.0;
 
-import "zeppelin-solidity/contracts/math/SafeMath.sol";
-import "zeppelin-solidity/contracts/token/ERC20/ERC20.sol";
-import "zeppelin-solidity/contracts/token/ERC20/SafeERC20.sol";
+import "openzeppelin-solidity/contracts/math/SafeMath.sol";
+import "openzeppelin-solidity/contracts/token/ERC20/ERC20.sol";
+import "openzeppelin-solidity/contracts/token/ERC20/SafeERC20.sol";
 
 contract PoLC {
     using SafeERC20 for ERC20;
@@ -27,7 +27,7 @@ contract PoLC {
         address => mapping (uint => Commitment)
     ) public commitmentsByUser;
 
-    constructor(address _celerTokenAddress, uint _blockReward) {
+    constructor(address _celerTokenAddress, uint _blockReward) public {
         celerTokenAddress = _celerTokenAddress;
         blockReward = _blockReward;
     }
@@ -39,7 +39,7 @@ contract PoLC {
      * @param _commitmentId ID of the commitment
      */
     modifier lockExpired(uint _commitmentId) {
-        Commitment commitment = commitmentsByUser[msg.sender][_commitmentId];
+        Commitment memory commitment = commitmentsByUser[msg.sender][_commitmentId];
         require(
             commitment.lockEnd != 0,
             "commitment must exist"
@@ -65,7 +65,7 @@ contract PoLC {
             "duration must fall into the 0-365 range"
         );
 
-        Commitment commitment = commitmentsByUser[msg.sender][block.timestamp];
+        Commitment memory commitment = commitmentsByUser[msg.sender][block.timestamp];
         require(
             commitment.lockEnd == 0,
             "one timestamp can only have one commitment"
@@ -83,7 +83,7 @@ contract PoLC {
             powerByTime[i] = powerByTime[i].add(power);
         }
 
-        NewCommitment(block.timestamp);
+        emit NewCommitment(block.timestamp);
     }
 
   /**
@@ -96,7 +96,7 @@ contract PoLC {
         public
         lockExpired(_commitmentId)
     {
-        Commitment commitment = commitmentsByUser[msg.sender][_commitmentId];
+        Commitment memory commitment = commitmentsByUser[msg.sender][_commitmentId];
         uint availableValue = commitment.availableValue;
         commitment.availableValue = 0;
         msg.sender.transfer(availableValue);
@@ -112,7 +112,7 @@ contract PoLC {
         public
         lockExpired(_commitmentId)
     {
-        Commitment commitment = commitmentsByUser[msg.sender][_commitmentId];
+        Commitment memory commitment = commitmentsByUser[msg.sender][_commitmentId];
         uint totalReward = 0;
         uint power = commitment.lockedValue.mul(
             commitment.lockEnd.sub(commitment.lockStart)
