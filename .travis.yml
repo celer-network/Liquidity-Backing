@@ -11,6 +11,6 @@ install:
   - npm install
   - npm install -g ganache-cli
 script:
-  - ganache-cli
+  - ganache-cli&
   - sleep 2 # to make sure docker container is ready before compiling
   - npm run test
