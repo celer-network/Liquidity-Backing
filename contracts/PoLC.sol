@@ -33,6 +33,8 @@ contract PoLC {
     }
 
     event NewCommitment(uint commitmentId);
+    event WithdrawFund(uint commitmentId);
+    event WithdrawReward(uint commitmentId);
 
     /**
      * @dev check if the commitment lock has expired
@@ -45,7 +47,7 @@ contract PoLC {
             "commitment must exist"
         );
         require(
-            commitment.lockEnd < block.timestamp,
+            commitment.lockEnd < block.timestamp.div(1 days),
             "commitment lock must expire"
         );
         _;
@@ -65,7 +67,7 @@ contract PoLC {
             "duration must fall into the 0-365 range"
         );
 
-        Commitment memory commitment = commitmentsByUser[msg.sender][block.timestamp];
+        Commitment storage commitment = commitmentsByUser[msg.sender][block.timestamp];
         require(
             commitment.lockEnd == 0,
             "one timestamp can only have one commitment"
@@ -96,10 +98,12 @@ contract PoLC {
         public
         lockExpired(_commitmentId)
     {
-        Commitment memory commitment = commitmentsByUser[msg.sender][_commitmentId];
+        Commitment storage commitment = commitmentsByUser[msg.sender][_commitmentId];
         uint availableValue = commitment.availableValue;
         commitment.availableValue = 0;
         msg.sender.transfer(availableValue);
+
+        emit WithdrawFund(_commitmentId);
     }
 
   /**
@@ -112,7 +116,7 @@ contract PoLC {
         public
         lockExpired(_commitmentId)
     {
-        Commitment memory commitment = commitmentsByUser[msg.sender][_commitmentId];
+        Commitment storage commitment = commitmentsByUser[msg.sender][_commitmentId];
         uint totalReward = 0;
         uint power = commitment.lockedValue.mul(
             commitment.lockEnd.sub(commitment.lockStart)
@@ -124,6 +128,7 @@ contract PoLC {
         }
 
         commitment.withdrawedReward = totalReward;
-        // ERC20(celerTokenAddress).safeTransferFrom(address(this), msg.sender, totalReward);
+        ERC20(celerTokenAddress).safeTransfer(msg.sender, totalReward);
+        emit WithdrawReward(_commitmentId);
     }
 }
