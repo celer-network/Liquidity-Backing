@@ -40,7 +40,7 @@ contract LiBA {
 
     address private celerTokenAddress;
     uint private auctionDeposit;
-    uint private auctionLength;
+    uint private auctionCount;
     mapping(uint => Auction) private auctions;
     mapping(address => mapping(uint => Bid)) private bidsByUser;
 
@@ -50,6 +50,18 @@ contract LiBA {
     event RevealBid(uint auctionId, address bidder);
     event ClaimWinners(uint auctionId);
     event ChallengeWinners(uint auctionId);
+
+    /**
+     * @dev check if the Id of acution is valid
+     * @param _auctionId ID of the auction
+     */
+    modifier validAuction(uint _auctionId) {
+        require(
+            _auctionId < auctionCount,
+            "auctionId must be valid"
+        );
+        _;
+    }
 
     constructor(address _celerTokenAddress, uint _auctionDeposit) public {
         celerTokenAddress = _celerTokenAddress;
@@ -80,7 +92,7 @@ contract LiBA {
     )
         public
     {
-        Auction storage auction = auctions[auctionLength];
+        Auction storage auction = auctions[auctionCount];
         auction.asker = msg.sender;
         auction.challengeDuration = _challengeDuration;
         auction.finalizeDuration = _finalizeDuration;
@@ -95,8 +107,8 @@ contract LiBA {
         auction.finalizeEnd = auction.challengeEnd.add(_finalizeDuration);
 
         ERC20(celerTokenAddress).safeTransferFrom(msg.sender, address(this), auctionDeposit);
-        emit NewAuction(auctionLength, auction.asker);
-        auctionLength += 1;
+        emit NewAuction(auctionCount, auction.asker);
+        auctionCount += 1;
     }
 
     /**
@@ -111,9 +123,10 @@ contract LiBA {
         uint _celerValue
     )
         public
+        validAuction(_auctionId)
     {
         Auction storage auction = auctions[_auctionId];
-        require(block.number <= auction.bidEnd);
+        require(block.number <= auction.bidEnd, "must be within bid duration");
 
         Bid storage bid = bidsByUser[msg.sender][_auctionId];
 
@@ -126,6 +139,7 @@ contract LiBA {
 
         bid.hash = _hash;
         bid.celerValue = _celerValue;
+        // Previous celer token will be forfeited if update bid
         ERC20(celerTokenAddress).safeTransferFrom(msg.sender, address(this), _celerValue);
     }
 
