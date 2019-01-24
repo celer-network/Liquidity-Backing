@@ -1,5 +1,6 @@
 pragma solidity ^0.5.0;
 
+import "./PoLCInterface.sol";
 import "openzeppelin-solidity/contracts/math/SafeMath.sol";
 import "openzeppelin-solidity/contracts/token/ERC20/ERC20.sol";
 import "openzeppelin-solidity/contracts/token/ERC20/SafeERC20.sol";
@@ -39,32 +40,23 @@ contract LiBA {
     }
 
     address private celerTokenAddress;
+    PoLCInterface private polc;
     uint private auctionDeposit;
     uint private auctionCount;
     mapping(uint => Auction) private auctions;
-    mapping(address => mapping(uint => Bid)) private bidsByUser;
+    mapping(address => mapping(uint => Bid)) public bidsByUser;
 
     event NewAuction(uint auctionId, address asker);
     event NewBid(uint auctionId, address bidder);
     event UpdateBid(uint auctionId, address bidder);
     event RevealBid(uint auctionId, address bidder);
-    event ClaimWinners(uint auctionId);
-    event ChallengeWinners(uint auctionId);
+    event ClaimWinners(uint auctionId, address[] winners);
+    event ChallengeWinners(uint auctionId, address challenger, address[] winners);
+    event FinalizeAuction(uint auctionId);
 
-    /**
-     * @dev check if the Id of acution is valid
-     * @param _auctionId ID of the auction
-     */
-    modifier validAuction(uint _auctionId) {
-        require(
-            _auctionId < auctionCount,
-            "auctionId must be valid"
-        );
-        _;
-    }
-
-    constructor(address _celerTokenAddress, uint _auctionDeposit) public {
+    constructor(address _celerTokenAddress, address _polcAddress, uint _auctionDeposit) public {
         celerTokenAddress = _celerTokenAddress;
+        polc = PoLCInterface(_polcAddress);
         auctionDeposit = _auctionDeposit;
     }
 
@@ -112,6 +104,42 @@ contract LiBA {
     }
 
     /**
+     * @dev Get auction info
+     * @param _auctionId Id of the auction
+     */
+    function getAuction(
+        uint _auctionId
+    )
+        view
+        public
+        returns (
+            address asker,
+            uint value,
+            uint duration,
+            uint maxRate,
+            uint minValue,
+            uint bidEnd,
+            uint revealEnd,
+            uint claimEnd,
+            uint challengeEnd,
+            uint finalizeEnd
+        )
+    {
+        Auction storage auction = auctions[_auctionId];
+
+        asker = auction.asker;
+        value = auction.value;
+        duration = auction.duration;
+        maxRate = auction.maxRate;
+        minValue = auction.minValue;
+        bidEnd = auction.bidEnd;
+        revealEnd = auction.revealEnd;
+        claimEnd = auction.claimEnd;
+        challengeEnd = auction.challengeEnd;
+        finalizeEnd = auction.finalizeEnd;
+    }
+
+    /**
      * @dev Bid for an auction
      * @param _auctionId Id of the auction
      * @param _hash hash based on desired rate, value, celerValue and salt
@@ -123,7 +151,6 @@ contract LiBA {
         uint _celerValue
     )
         public
-        validAuction(_auctionId)
     {
         Auction storage auction = auctions[_auctionId];
         require(block.number <= auction.bidEnd, "must be within bid duration");
@@ -164,20 +191,28 @@ contract LiBA {
         public
     {
         Auction storage auction = auctions[_auctionId];
-        require(block.number > auction.bidEnd);
-        require(block.number <= auction.revealEnd);
-        require(_rate <= auction.maxRate);
-        require(_value >= auction.minValue);
+        require(block.number > auction.bidEnd, "must be within reveal duration");
+        require(block.number <= auction.revealEnd, "must be within reveal duration");
+        require(_rate <= auction.maxRate, "rate must be smaller than maxRate");
+        require(_value >= auction.minValue, "value must be larger than minValue");
 
         Bid storage bid = bidsByUser[msg.sender][_auctionId];
         bytes32 hash = keccak256(abi.encodePacked(_rate, _value, _celerValue, _salt));
-        require(hash == bid.hash);
+        require(hash == bid.hash, "hash must be same as the bid hash");
+        require(_celerValue > _value, "celer value must be larger than value");
 
         uint celerRefund = bid.celerValue.sub(_celerValue);
         bid.celerValue = _celerValue;
         if (celerRefund > 0) {
-            ERC20(celerTokenAddress).safeTransferFrom(address(this), msg.sender, celerRefund);
+            ERC20(celerTokenAddress).safeTransfer(msg.sender, celerRefund);
         }
+
+        uint totalAvailableValues = 0;
+        for (uint i = 0; i < _commitmentsIds.length; i++) {
+            (,,,uint availableValue,,) = polc.commitmentsByUser(msg.sender, _commitmentsIds[i]);
+            totalAvailableValues += availableValue;
+        }
+        require(totalAvailableValues >= _value, "must have enough value in commitments");
 
         bid.commitmentsIds = _commitmentsIds;
         bid.rate = _rate;
@@ -208,12 +243,12 @@ contract LiBA {
         public
     {
         Auction storage auction = auctions[_auctionId];
-        require(block.number > auction.revealEnd);
-        require(block.number <= auction.claimEnd);
-        require(msg.sender == auction.asker);
+        require(block.number > auction.revealEnd, "must be within claim duration");
+        require(block.number <= auction.claimEnd, "must be within claim duration");
+        require(msg.sender == auction.asker, "sender must be the auction asker");
 
         auction.winners = _winners;
-        emit ClaimWinners(_auctionId);
+        emit ClaimWinners(_auctionId, _winners);
     }
 
     /**
@@ -228,29 +263,16 @@ contract LiBA {
         public
     {
         Auction storage auction = auctions[_auctionId];
-        require(block.number > auction.claimEnd);
-        require(block.number <= auction.challengeEnd);
-        require(_validateChallenger(_auctionId, msg.sender));
+        require(block.number > auction.claimEnd, "must be within challenge");
+        require(block.number <= auction.challengeEnd, "must be within challenge duration");
+        require(_validateChallenger(_auctionId, msg.sender), "must be valid challenger");
 
         auction.winners = _winners;
         auction.challenger = msg.sender;
         auction.challengeEnd = auction.challengeEnd.add(auction.challengeDuration);
         auction.finalizeEnd = auction.challengeEnd.add(auction.finalizeDuration);
 
-        emit ChallengeWinners(_auctionId);
-    }
-
-    /**
-     * @dev withdraw challenge reward for challenger
-     * @param _auctionId Id of the auction
-     */
-    function withdrawChallengeReward(uint _auctionId) public {
-        Auction storage auction = auctions[_auctionId];
-        require(block.number > auction.challengeEnd);
-        require(msg.sender == auction.challenger);
-
-        auction.challenger = address(0x0);
-        ERC20(celerTokenAddress).safeTransferFrom(address(this), msg.sender, auctionDeposit);
+        emit ChallengeWinners(_auctionId, msg.sender, _winners);
     }
 
     // TODO: need to lock the fund in PoLC and issue new token
@@ -260,15 +282,19 @@ contract LiBA {
      */
     function finalizeAuction(uint _auctionId) public {
         Auction storage auction = auctions[_auctionId];
-        require(block.number > auction.challengeEnd);
-        require(block.number <= auction.finalizeEnd);
-        require(!auction.finalized);
+        require(block.number > auction.challengeEnd,  "must be within finalize duration");
+        require(block.number <= auction.finalizeEnd,  "must be within finalize duration");
+        require(!auction.finalized, "auction must not be finalized");
 
         auction.finalized = true;
         // If there is no challenger, refund the deposit to asker
         if (auction.challenger == address(0x0)) {
-            ERC20(celerTokenAddress).safeTransferFrom(address(this), auction.asker, auctionDeposit);
+            ERC20(celerTokenAddress).safeTransfer(auction.asker, auctionDeposit);
+        } else {
+            ERC20(celerTokenAddress).safeTransfer(auction.challenger, auctionDeposit);
         }
+
+        emit FinalizeAuction(_auctionId);
     }
 
     /**
@@ -306,8 +332,8 @@ contract LiBA {
         uint _auctionId,
         address _challenger
     )
-        view
         private
+        view
         returns(bool)
     {
         bool exist = false;
@@ -344,14 +370,13 @@ contract LiBA {
         uint _auctionId,
         address _bidder
     )
-        view
         private
+        view
         returns(uint)
     {
         Auction storage auction = auctions[_auctionId];
         Bid storage bid = bidsByUser[_bidder][_auctionId];
         uint valueFactor = bid.celerValue.div(bid.value).div(auction.maxBidFactor);
-
         uint rateFactor = bid.rate.div(auction.maxBidRate);
 
         return valueFactor.sub(rateFactor);
@@ -366,8 +391,8 @@ contract LiBA {
         uint _auctionId,
         address _bidder
     )
-        view
         private
+        view
         returns(bool)
     {
         Auction storage auction = auctions[_auctionId];
