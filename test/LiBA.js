@@ -56,7 +56,7 @@ contract('LiBA', ([provider, bidder0, bidder1]) => {
         await token.transfer(bidder1, 1000);
     });
 
-    it('should fail to init auction if no auction deposit', async () => {
+    it('should fail to init auction for missing auction deposit', async () => {
         try {
             await liba.initAuction(
                 BID_DURATION,
@@ -126,7 +126,7 @@ contract('LiBA', ([provider, bidder0, bidder1]) => {
         );
     });
 
-    it('should fail to bid auction for no celer token', async () => {
+    it('should fail to bid auction for missing celer token', async () => {
         try {
             await liba.placeBid(1, BID0.hash, BID0.celerValue);
         } catch (e) {
@@ -208,7 +208,7 @@ contract('LiBA', ([provider, bidder0, bidder1]) => {
         assert.equal(userBid.celerValue.toNumber(), celerValue);
     };
 
-    it('should fail to reveal auction due to large rate', async () => {
+    it('should fail to reveal auction for large rate', async () => {
         try {
             await revealBid({ ...BID0, rate: MAX_RATE + 1 }, bidder0);
         } catch (e) {
@@ -222,7 +222,7 @@ contract('LiBA', ([provider, bidder0, bidder1]) => {
         assert.fail('should have thrown before');
     });
 
-    it('should fail to reveal auction due to small value', async () => {
+    it('should fail to reveal auction for small value', async () => {
         try {
             await revealBid({ ...BID0, value: MIN_VALUE - 1 }, bidder0);
         } catch (e) {
@@ -236,7 +236,7 @@ contract('LiBA', ([provider, bidder0, bidder1]) => {
         assert.fail('should have thrown before');
     });
 
-    it('should fail to reveal auction due to wrong hash', async () => {
+    it('should fail to reveal auction for wrong hash', async () => {
         try {
             await revealBid({ ...BID0, salt: BID0.salt - 1 }, bidder0);
         } catch (e) {
@@ -250,7 +250,7 @@ contract('LiBA', ([provider, bidder0, bidder1]) => {
         assert.fail('should have thrown before');
     });
 
-    it('should fail to reveal auction due to lacking commitment', async () => {
+    it('should fail to reveal auction for lacking commitment', async () => {
         try {
             await revealBid(BID0, bidder0);
         } catch (e) {

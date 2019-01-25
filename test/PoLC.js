@@ -45,7 +45,7 @@ contract('PoLC', ([owner]) => {
         assert.equal(commitment.withdrawedReward.toNumber(), 0);
     });
 
-    it('should fail to withdraw fund', async () => {
+    it('should fail to withdraw fund for before lock expire', async () => {
         try {
             await polc.withdrawFund(commitmentId);
         } catch (e) {
@@ -56,7 +56,7 @@ contract('PoLC', ([owner]) => {
         assert.fail('should have thrown before');
     });
 
-    it('should fail to withdraw reward', async () => {
+    it('should fail to withdraw reward for before lock expire', async () => {
         try {
             await polc.withdrawReward(commitmentId);
         } catch (e) {
