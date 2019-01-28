@@ -1,7 +1,8 @@
 {
   "extends" : [
     "standard",
-    "plugin:promise/recommended"
+    "plugin:promise/recommended",
+    "plugin:prettier/recommended"
   ],
   "plugins": [
     "promise"
@@ -25,13 +26,12 @@
 
     // Code style
     "camelcase": ["error", {"properties": "always"}],
-    "comma-dangle": ["error", "always-multiline"],
+    // "comma-dangle": ["error", "always-multiline"],
     "comma-spacing": ["error", {"before": false, "after": true}],
     "dot-notation": ["error", {"allowKeywords": true, "allowPattern": ""}],
     "eol-last": ["error", "always"],
     "eqeqeq": ["error", "smart"],
     "generator-star-spacing": ["error", "before"],
-    "indent": ["error", 2],
     "linebreak-style": ["error", "unix"],
     "max-len": ["error", 120, 2],
     "no-debugger": "off",
@@ -46,10 +46,11 @@
     "object-curly-spacing": ["error", "always"],
     "prefer-const": "error",
     "quotes": ["error", "single"],
-    "semi": ["error", "always"],
+    // "semi": ["error", "always"],
     "space-before-function-paren": ["error", "always"],
 
     "promise/always-return": "off",
-    "promise/avoid-new": "off"
+    "promise/avoid-new": "off",
+    "prettier/prettier": ["error", {"singleQuote": true, "parser": "flow"}]
   }
 }
