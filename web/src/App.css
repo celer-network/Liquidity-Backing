@@ -1,0 +1,12 @@
+@import '~antd/dist/antd.css';
+
+#root {
+  display: flex;
+  flex: 1;
+  height: 100%;
+}
+
+.account-data h4, .account-data p {
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
