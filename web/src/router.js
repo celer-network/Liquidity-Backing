@@ -3,6 +3,8 @@ import PropTypes from 'prop-types';
 import { Router, Switch, Route, Redirect } from 'dva/router';
 import Dynamic from 'dva/dynamic';
 import { DrizzleProvider } from 'drizzle-react';
+import { LoadingContainer } from 'drizzle-react-components'
+import { Spin } from 'antd'
 
 import App from './App';
 import contractOptions from './utils/contracts';
@@ -21,12 +23,14 @@ function RouterConfig({
   return (
     <DrizzleProvider options={contractOptions} store={app._store}>
       <Router history={history}>
-        <App>
-          <Switch>
-            <Route exact path="/polc" component={Polc} />
-            <Route exact path="/" render={redirectToHome} />
-          </Switch>
-        </App>
+        <LoadingContainer loadingComp={Spin}>
+          <App>
+            <Switch>
+              <Route exact path="/polc" component={Polc} />
+              <Route exact path="/" render={redirectToHome} />
+            </Switch>
+          </App>
+        </LoadingContainer>
       </Router>
     </DrizzleProvider>
   );

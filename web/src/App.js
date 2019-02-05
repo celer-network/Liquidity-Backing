@@ -9,32 +9,64 @@ import './App.css';
 
 const { Sider, Content, Footer } = Layout;
 
-function App({ children, location, drizzleStatus }) {
-    const { pathname } = location;
-    return (
-        <Layout>
-            <Sider>
-                <Card className="account-data" title="Account info">
-                  <AccountData accountIndex={0} units={'ether'} />
-                </Card>
-                <Menu
-                    theme="dark"
-                    mode="inline"
-                    selectedKeys={[pathname.slice(1)]}
-                >
-                    <Menu.Item key="polc">
-                        <Link to="/polc">PoLC</Link>
-                    </Menu.Item>
-                </Menu>
-            </Sider>
+class App extends React.Component {
+    constructor(props, context) {
+        super(props);
+        this.contracts = context.drizzle.contracts;
+    }
+
+    componentWillMount() {
+        const { accounts, dispatch } = this.props;
+        const { PoLC } = this.contracts;
+
+        PoLC.events.NewCommitment(
+            {
+                fromBlock: 0,
+                filter: {
+                    user: accounts[0]
+                }
+            },
+            (err, event) => {
+                if (err) {
+                    return;
+                }
+
+                dispatch({
+                    type: 'PoLC/fetchCommitments',
+                    payload: { ...event.returnValues, PoLC }
+                });
+            }
+        );
+    }
+
+    render() {
+        const { children, location } = this.props;
+        const { pathname } = location;
+        return (
             <Layout>
-                <Content>{children}</Content>
-                <Footer style={{ textAlign: 'center' }}>
-                    cEconomy ©2019 Created by Celer Network
-                </Footer>
+                <Sider>
+                    <Card className="account-data" title="Account info">
+                        <AccountData accountIndex={0} units={'ether'} />
+                    </Card>
+                    <Menu
+                        theme="dark"
+                        mode="inline"
+                        selectedKeys={[pathname.slice(1)]}
+                    >
+                        <Menu.Item key="polc">
+                            <Link to="/polc">PoLC</Link>
+                        </Menu.Item>
+                    </Menu>
+                </Sider>
+                <Layout>
+                    <Content>{children}</Content>
+                    <Footer style={{ textAlign: 'center' }}>
+                        cEconomy ©2019 Created by Celer Network
+                    </Footer>
+                </Layout>
             </Layout>
-        </Layout>
-    );
+        );
+    }
 }
 
 App.propTypes = {
@@ -42,11 +74,15 @@ App.propTypes = {
     location: PropTypes.object.isRequired
 };
 
-function mapStateToProps (state) {
-    const { drizzleStatus } = state;
+App.contextTypes = {
+    drizzle: PropTypes.object
+};
+
+function mapStateToProps(state) {
+    const { accounts } = state;
 
     return {
-        drizzleStatus
+        accounts
     };
 }
 
