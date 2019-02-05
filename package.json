@@ -9,7 +9,7 @@
         "coverage": "npx solidity-coverage",
         "lint": "npx solium -d contracts/",
         "lint:js": "npx eslint .",
-        "migrate": "npx truffle migrate"
+        "migrate": "npx truffle migrate --reset"
     },
     "keywords": [
         "ethereum",

@@ -32,7 +32,7 @@ contract PoLC {
         blockReward = _blockReward;
     }
 
-    event NewCommitment(uint commitmentId);
+    event NewCommitment(uint commitmentId, address indexed user);
     event WithdrawFund(uint commitmentId);
     event WithdrawReward(uint commitmentId);
 
@@ -85,7 +85,7 @@ contract PoLC {
             powerByTime[i] = powerByTime[i].add(power);
         }
 
-        emit NewCommitment(block.timestamp);
+        emit NewCommitment(block.timestamp, msg.sender);
     }
 
   /**
