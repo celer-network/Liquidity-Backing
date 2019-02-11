@@ -4,9 +4,8 @@ import web3 from 'web3';
 import { Modal } from 'antd';
 
 import Form from '../form';
-import { etherFieldOptions, dayFieldOptions } from '../../utils/form';
 
-class CommimentForm extends React.Component {
+class ClaimForm extends React.Component {
     constructor(props, context) {
         super(props);
 
@@ -14,18 +13,19 @@ class CommimentForm extends React.Component {
         this.contracts = context.drizzle.contracts;
     }
 
-    handleCommitFund = () => {
-        const { onClose } = this.props;
+    onSubmit = () => {
+        const { auctionId, onClose } = this.props;
 
         this.form.current.validateFields((err, values) => {
             if (err) {
                 return;
             }
 
-            const { duration, value } = values;
-            this.contracts.PoLC.methods.commitFund.cacheSend(duration, {
-                value: web3.utils.toWei(value.toString(), 'ether')
-            });
+            const { winners } = values;
+            this.contracts.LiBA.methods.claimWinners.cacheSend(
+                auctionId,
+                winners.split(',')
+            );
             onClose();
         });
     };
@@ -34,23 +34,15 @@ class CommimentForm extends React.Component {
         const { visible, onClose } = this.props;
         const formItems = [
             {
-                name: 'value',
-                field: 'number',
-                fieldOptions: etherFieldOptions,
+                name: 'winners',
+                field: 'text',
+                fieldOptions: {
+                    placeholder:
+                        'Please enter winner addresses seperated by comma'
+                },
                 rules: [
                     {
                         message: 'Please enter a value!',
-                        required: true
-                    }
-                ]
-            },
-            {
-                name: 'duration',
-                field: 'number',
-                fieldOptions: dayFieldOptions,
-                rules: [
-                    {
-                        message: 'Please enter a duration!',
                         required: true
                     }
                 ]
@@ -59,9 +51,9 @@ class CommimentForm extends React.Component {
 
         return (
             <Modal
-                title="Commit Fund"
+                title="Claim Auction"
                 visible={visible}
-                onOk={this.handleCommitFund}
+                onOk={this.onSubmit}
                 onCancel={onClose}
             >
                 <Form ref={this.form} items={formItems} />
@@ -70,13 +62,14 @@ class CommimentForm extends React.Component {
     }
 }
 
-CommimentForm.propTypes = {
+ClaimForm.propTypes = {
+    auctionId: PropTypes.string.isRequired,
     visible: PropTypes.bool.isRequired,
     onClose: PropTypes.func.isRequired
 };
 
-CommimentForm.contextTypes = {
+ClaimForm.contextTypes = {
     drizzle: PropTypes.object
 };
 
-export default CommimentForm;
+export default ClaimForm;
