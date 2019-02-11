@@ -13,11 +13,12 @@ class App extends React.Component {
     constructor(props, context) {
         super(props);
         this.contracts = context.drizzle.contracts;
+        this.web3 = context.drizzle.web3;
     }
 
     componentWillMount() {
         const { accounts, dispatch } = this.props;
-        const { PoLC } = this.contracts;
+        const { PoLC, LiBA } = this.contracts;
 
         PoLC.events.NewCommitment(
             {
@@ -32,11 +33,34 @@ class App extends React.Component {
                 }
 
                 dispatch({
-                    type: 'PoLC/fetchCommitments',
+                    type: 'PoLC/fetchCommitment',
                     payload: { ...event.returnValues, PoLC }
                 });
             }
         );
+
+        LiBA.events.NewAuction(
+            {
+                fromBlock: 0
+            },
+            (err, event) => {
+                if (err) {
+                    return;
+                }
+
+                dispatch({
+                    type: 'LiBA/fetchAuction',
+                    payload: { ...event.returnValues, LiBA }
+                });
+            }
+        );
+
+        this.web3.eth.getBlock('latest').then(block => {
+            dispatch({
+                type: 'LiBA/save',
+                payload: { block }
+            });
+        });
     }
 
     render() {
@@ -55,6 +79,9 @@ class App extends React.Component {
                     >
                         <Menu.Item key="polc">
                             <Link to="/polc">PoLC</Link>
+                        </Menu.Item>
+                        <Menu.Item key="liba">
+                            <Link to="/liba">LiBA</Link>
                         </Menu.Item>
                     </Menu>
                 </Sider>

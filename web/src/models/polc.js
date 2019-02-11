@@ -4,7 +4,7 @@ export default {
     state: {},
 
     effects: {
-        *fetchCommitments({ payload }, { call, put }) {
+        *fetchCommitment({ payload }, { call, put }) {
             const { commitmentId, user, PoLC } = payload;
             PoLC.methods.commitmentsByUser.cacheCall(user, commitmentId);
         }

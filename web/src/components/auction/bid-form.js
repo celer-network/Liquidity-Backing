@@ -4,9 +4,9 @@ import web3 from 'web3';
 import { Modal } from 'antd';
 
 import Form from '../form';
-import { etherFieldOptions, dayFieldOptions } from '../../utils/form';
+import { etherFieldOptions } from '../../utils/form';
 
-class CommimentForm extends React.Component {
+class BidForm extends React.Component {
     constructor(props, context) {
         super(props);
 
@@ -14,18 +14,21 @@ class CommimentForm extends React.Component {
         this.contracts = context.drizzle.contracts;
     }
 
-    handleCommitFund = () => {
-        const { onClose } = this.props;
+    onSubmit = () => {
+        const { auctionId, onClose } = this.props;
 
         this.form.current.validateFields((err, values) => {
             if (err) {
                 return;
             }
 
-            const { duration, value } = values;
-            this.contracts.PoLC.methods.commitFund.cacheSend(duration, {
-                value: web3.utils.toWei(value.toString(), 'ether')
-            });
+            const { celerValue, value, rate, salt } = values;
+
+            this.contracts.LiBA.methods.placeBid.cacheSend(
+                auctionId,
+                web3.utils.soliditySha3(rate, value, celerValue, salt),
+                celerValue
+            );
             onClose();
         });
     };
@@ -45,12 +48,32 @@ class CommimentForm extends React.Component {
                 ]
             },
             {
-                name: 'duration',
+                name: 'rate',
                 field: 'number',
-                fieldOptions: dayFieldOptions,
                 rules: [
                     {
-                        message: 'Please enter a duration!',
+                        message: 'Please enter a rate!',
+                        required: true
+                    }
+                ]
+            },
+            {
+                name: 'celerValue',
+                label: 'Celer Value',
+                field: 'number',
+                rules: [
+                    {
+                        message: 'Please enter a celer value!',
+                        required: true
+                    }
+                ]
+            },
+            {
+                name: 'salt',
+                field: 'number',
+                rules: [
+                    {
+                        message: 'Please enter a salt!',
                         required: true
                     }
                 ]
@@ -59,9 +82,9 @@ class CommimentForm extends React.Component {
 
         return (
             <Modal
-                title="Commit Fund"
+                title="Bid Auction"
                 visible={visible}
-                onOk={this.handleCommitFund}
+                onOk={this.onSubmit}
                 onCancel={onClose}
             >
                 <Form ref={this.form} items={formItems} />
@@ -70,13 +93,14 @@ class CommimentForm extends React.Component {
     }
 }
 
-CommimentForm.propTypes = {
+BidForm.propTypes = {
+    auctionId: PropTypes.string.isRequired,
     visible: PropTypes.bool.isRequired,
     onClose: PropTypes.func.isRequired
 };
 
-CommimentForm.contextTypes = {
+BidForm.contextTypes = {
     drizzle: PropTypes.object
 };
 
-export default CommimentForm;
+export default BidForm;

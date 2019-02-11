@@ -1,4 +1,5 @@
 import PoLC from './../contracts/PoLC.json';
+import LiBA from './../contracts/LiBA.json';
 
 // let drizzle know what contracts we want
 const contractOptions = {
@@ -9,7 +10,7 @@ const contractOptions = {
             url: 'ws://localhost:8545'
         }
     },
-    contracts: [PoLC]
+    contracts: [PoLC, LiBA]
 };
 
 export default contractOptions;
