@@ -4,15 +4,15 @@ import "./PoLCInterface.sol";
 import "openzeppelin-solidity/contracts/math/SafeMath.sol";
 import "openzeppelin-solidity/contracts/token/ERC20/ERC20.sol";
 import "openzeppelin-solidity/contracts/token/ERC20/SafeERC20.sol";
+import "openzeppelin-solidity/contracts/payment/PullPayment.sol";
 
-contract LiBA {
+contract LiBA is PullPayment{
     using SafeERC20 for ERC20;
     using SafeMath for uint256;
 
     struct Bid {
         bytes32 hash;
-        uint[] commitmentsIds;
-        uint[] lendingValues;
+        uint commitmentId;
         uint rate;
         uint value;
         uint celerValue;
@@ -53,6 +53,7 @@ contract LiBA {
     event ClaimWinners(uint auctionId, address[] winners);
     event ChallengeWinners(uint auctionId, address challenger, address[] winners);
     event FinalizeAuction(uint auctionId);
+    event RepayAuction(uint auctionId);
 
     constructor(address _celerTokenAddress, address _polcAddress, uint _auctionDeposit) public {
         celerTokenAddress = _celerTokenAddress;
@@ -178,7 +179,7 @@ contract LiBA {
      * @param _value value for bidding
      * @param _celerValue celer value for bidding
      * @param _salt a random value used for hash
-     * @param _commitmentsIds a list of commitments Id for bidding
+     * @param _commitmentId commitment Id
      */
     function revealBid(
         uint _auctionId,
@@ -186,7 +187,7 @@ contract LiBA {
         uint _value,
         uint _celerValue,
         uint _salt,
-        uint[] memory _commitmentsIds
+        uint _commitmentId
     )
         public
     {
@@ -207,14 +208,10 @@ contract LiBA {
             ERC20(celerTokenAddress).safeTransfer(msg.sender, celerRefund);
         }
 
-        uint totalAvailableValues = 0;
-        for (uint i = 0; i < _commitmentsIds.length; i++) {
-            (,,,uint availableValue,,) = polc.commitmentsByUser(msg.sender, _commitmentsIds[i]);
-            totalAvailableValues += availableValue;
-        }
-        require(totalAvailableValues >= _value, "must have enough value in commitments");
+        uint availableValue = polc.getCommitmentAvailableValue(msg.sender, _commitmentId);
+        require(availableValue >= _value, "must have enough value in commitment");
 
-        bid.commitmentsIds = _commitmentsIds;
+        bid.commitmentId = _commitmentId;
         bid.rate = _rate;
         bid.value = _value;
         bid.hash = bytes32(0);
@@ -275,9 +272,8 @@ contract LiBA {
         emit ChallengeWinners(_auctionId, msg.sender, _winners);
     }
 
-    // TODO: need to lock the fund in PoLC and issue new token
     /**
-     * @dev finalize the auction
+     * @dev Finalize the auction
      * @param _auctionId Id of the auction
      */
     function finalizeAuction(uint _auctionId) public {
@@ -294,11 +290,48 @@ contract LiBA {
             ERC20(celerTokenAddress).safeTransfer(auction.challenger, auctionDeposit);
         }
 
+        address[] storage winners = auction.winners;
+        for (uint i = 0; i < winners.length; i++) {
+            address winner = winners[i];
+            Bid storage winnerBid = bidsByUser[winner][_auctionId];
+            polc.lendCommitment(
+                winner,
+                winnerBid.commitmentId,
+                winnerBid.value,
+                auction.asker
+            );
+        }
         emit FinalizeAuction(_auctionId);
     }
 
     /**
-     * @dev finalize the bid for the acution for bidders, who are not winning the auction,
+     * @dev Repay the auction
+     * @param _auctionId Id of the auction
+     */
+    function repayAuction(uint _auctionId) public payable {
+        Auction storage auction = auctions[_auctionId];
+        require(auction.finalized, "auction must be finalized");
+
+        uint value = msg.value;
+        address[] storage winners = auction.winners;
+
+        for (uint i = 0; i < winners.length; i++) {
+            address winner = winners[i];
+            Bid storage winnerBid = bidsByUser[winner][_auctionId];
+            uint bidValue = winnerBid.value;
+            winnerBid.value = 0;
+            value = value.sub(bidValue);
+            polc.repayCommitment.value(bidValue)(winner, winnerBid.commitmentId);
+
+            uint interest = bidValue.mul(winnerBid.rate).div(100);
+            value = value.sub(interest);
+            _asyncTransfer(winner, interest);
+        }
+        emit RepayAuction(_auctionId);
+    }
+
+    /**
+     * @dev Finalize the bid for the acution for bidders, who are not winning the auction,
      * or asker fails to finalize the auction before finalizeEnd
      * @param _auctionId Id of the auction
      */
@@ -311,10 +344,10 @@ contract LiBA {
         } else {
             allowWithdraw = block.number > auction.finalizeEnd;
         }
-        require(allowWithdraw);
+        require(allowWithdraw, "you are not allowed to withdraw currently");
 
         Bid storage bid = bidsByUser[msg.sender][_auctionId];
-        require(bid.celerValue > 0);
+        require(bid.celerValue > 0, "you do not have valid bid");
 
         uint celerValue = bid.celerValue;
         bid.celerValue = 0;
@@ -324,7 +357,7 @@ contract LiBA {
     }
 
     /**
-     * @dev validate if challenger is valid one
+     * @dev Validate if challenger is valid one
      * @param _auctionId Id of the auction
      * @param _challenger address for challenger, who may have higher score than current winners
      */
@@ -362,7 +395,7 @@ contract LiBA {
     }
 
     /**
-     * @dev calcuate ranking score
+     * @dev Calcuate ranking score
      * @param _auctionId Id of the auction
      * @param _bidder a bidder address
      */
@@ -383,7 +416,7 @@ contract LiBA {
     }
 
     /**
-     * @dev check if the bidder is winner
+     * @dev Check if the bidder is winner
      * @param _auctionId Id of the auction
      * @param _bidder a bidder address
      */

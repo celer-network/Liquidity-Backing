@@ -1,16 +1,7 @@
 pragma solidity ^0.5.0;
 
 contract PoLCInterface {
-    struct Commitment {
-        uint lockStart;
-        uint lockEnd;
-        uint lockedValue;
-        uint availableValue;
-        uint lendingValue;
-        uint withdrawedReward;
-    }
-
-    mapping(
-        address => mapping (uint => Commitment)
-    ) public commitmentsByUser;
+    function getCommitmentAvailableValue(address _user, uint _commitmentId) external view returns (uint);
+    function lendCommitment(address _user, uint _commitmentId, uint _value, address _borrower) external;
+    function repayCommitment(address _user, uint _commitmentId) external payable;
 }

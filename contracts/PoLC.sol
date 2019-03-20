@@ -1,10 +1,12 @@
 pragma solidity ^0.5.0;
 
+import "./helper/EthPoolInterface.sol";
 import "openzeppelin-solidity/contracts/math/SafeMath.sol";
 import "openzeppelin-solidity/contracts/token/ERC20/ERC20.sol";
 import "openzeppelin-solidity/contracts/token/ERC20/SafeERC20.sol";
+import "openzeppelin-solidity/contracts/ownership/Ownable.sol";
 
-contract PoLC {
+contract PoLC is Ownable {
     using SafeERC20 for ERC20;
     using SafeMath for uint256;
 
@@ -18,6 +20,8 @@ contract PoLC {
     }
 
     address private celerTokenAddress;
+    address private libaAddress;
+    EthPoolInterface private ethPool;
     // reward payout for each block
     uint private blockReward;
     // mapping mining power by day
@@ -37,7 +41,7 @@ contract PoLC {
     event WithdrawReward(uint commitmentId);
 
     /**
-     * @dev check if the commitment lock has expired
+     * @dev Check if the commitment lock has expired
      * @param _commitmentId ID of the commitment
      */
     modifier lockExpired(uint _commitmentId) {
@@ -53,7 +57,7 @@ contract PoLC {
         _;
     }
 
-   /**
+    /**
      * @dev Lock fund into the PoLC contract
      * @param _duration lock-in duration by days
      */
@@ -88,8 +92,8 @@ contract PoLC {
         emit NewCommitment(block.timestamp, msg.sender);
     }
 
-  /**
-     * @dev withdraw all available fund in a commitment
+    /**
+     * @dev Withdraw all available fund in a commitment
      * @param _commitmentId ID of the commitment
      */
     function withdrawFund(
@@ -106,8 +110,8 @@ contract PoLC {
         emit WithdrawFund(_commitmentId);
     }
 
-  /**
-     * @dev withdraw all available reward in a commitment
+    /**
+     * @dev Withdraw all available reward in a commitment
      * @param _commitmentId ID of the commitment
      */
     function withdrawReward(
@@ -130,5 +134,85 @@ contract PoLC {
         commitment.withdrawedReward = totalReward;
         ERC20(celerTokenAddress).safeTransfer(msg.sender, totalReward);
         emit WithdrawReward(_commitmentId);
+    }
+
+    /**
+     * @dev Set libaAddress state variable
+     * @param _libaAddress Liba address
+     */
+    function setLibaAddress(address _libaAddress) public onlyOwner
+    {
+        require(libaAddress == address(0), "libaAddress can only be set once");
+        libaAddress = _libaAddress;
+    }
+
+   /**
+     * @dev Set eth pool address
+     * @param _ethPoolAddress ethPool address
+     */
+    function setEthPool(address _ethPoolAddress) public onlyOwner
+    {
+        require(address(ethPool) == address(0), "ethPool can only be set once");
+        ethPool = EthPoolInterface(_ethPoolAddress);
+    }
+
+    /**
+     * @dev Get available value for specific commitment of a user
+     * @param _user User address
+     * @param _commitmentId ID of the commitment
+     */
+    function getCommitmentAvailableValue(
+        address _user,
+        uint _commitmentId
+    )
+        external
+        view
+        returns (uint)
+    {
+        Commitment storage commitment = commitmentsByUser[_user][_commitmentId];
+        return commitment.availableValue;
+    }
+
+    /**
+     * @dev Lend borrower a specific value
+     * @param _user User address
+     * @param _commitmentId ID of the commitment
+     * @param _value value to lend
+     * @param _borrower borrower address
+     */
+    function lendCommitment(
+        address _user,
+        uint _commitmentId,
+        uint _value,
+        address _borrower
+    )
+        external
+    {
+        require(msg.sender == libaAddress, "sender must be liba contract");
+        Commitment storage commitment = commitmentsByUser[_user][_commitmentId];
+        require(_value <= commitment.availableValue, "value must be smaller than available value");
+
+        commitment.availableValue = commitment.availableValue.sub(_value);
+        commitment.lendingValue = commitment.lendingValue.add(_value);
+        ethPool.deposit.value(_value)(_borrower);
+    }
+
+   /**
+     * @dev Repay to the commitment
+     * @param _user User address
+     * @param _commitmentId ID of the commitment
+     */
+    function repayCommitment(
+        address _user,
+        uint _commitmentId
+    )
+        external
+        payable
+    {
+        require(msg.sender == libaAddress, "sender must be liba contract");
+        Commitment storage commitment = commitmentsByUser[_user][_commitmentId];
+
+        commitment.lendingValue = commitment.lendingValue.sub(msg.value);
+        commitment.availableValue = commitment.availableValue.add(msg.value);
     }
 }
