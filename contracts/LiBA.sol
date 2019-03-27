@@ -2,13 +2,13 @@ pragma solidity ^0.5.0;
 
 import "./PoLCInterface.sol";
 import "openzeppelin-solidity/contracts/math/SafeMath.sol";
-import "openzeppelin-solidity/contracts/token/ERC20/ERC20.sol";
+import "openzeppelin-solidity/contracts/token/ERC20/IERC20.sol";
 import "openzeppelin-solidity/contracts/token/ERC20/SafeERC20.sol";
 import "openzeppelin-solidity/contracts/payment/PullPayment.sol";
 
 contract LiBA is PullPayment{
-    using SafeERC20 for ERC20;
-    using SafeMath for uint256;
+    using SafeERC20 for IERC20;
+    using SafeMath for uint;
 
     struct Bid {
         bytes32 hash;
@@ -39,7 +39,7 @@ contract LiBA is PullPayment{
         uint finalizeEnd;
     }
 
-    address private celerTokenAddress;
+    IERC20 private celerToken;
     PoLCInterface private polc;
     uint private auctionDeposit;
     uint private auctionCount;
@@ -56,13 +56,13 @@ contract LiBA is PullPayment{
     event RepayAuction(uint auctionId);
 
     constructor(address _celerTokenAddress, address _polcAddress, uint _auctionDeposit) public {
-        celerTokenAddress = _celerTokenAddress;
+        celerToken = IERC20(_celerTokenAddress);
         polc = PoLCInterface(_polcAddress);
         auctionDeposit = _auctionDeposit;
     }
 
     /**
-     * @dev Launch a new auction
+     * @notice Launch a new auction
      * @param _bidDuration duration for bidding
      * @param _revealDuration duration for revealing
      * @param _claimDuration duration for claiming
@@ -99,13 +99,13 @@ contract LiBA is PullPayment{
         auction.challengeEnd = auction.claimEnd.add(_challengeDuration);
         auction.finalizeEnd = auction.challengeEnd.add(_finalizeDuration);
 
-        ERC20(celerTokenAddress).safeTransferFrom(msg.sender, address(this), auctionDeposit);
+        celerToken.safeTransferFrom(msg.sender, address(this), auctionDeposit);
         emit NewAuction(auctionCount, auction.asker);
         auctionCount += 1;
     }
 
     /**
-     * @dev Get auction info
+     * @notice Get auction info
      * @param _auctionId Id of the auction
      */
     function getAuction(
@@ -141,7 +141,7 @@ contract LiBA is PullPayment{
     }
 
     /**
-     * @dev Bid for an auction
+     * @notice Bid for an auction
      * @param _auctionId Id of the auction
      * @param _hash hash based on desired rate, value, celerValue and salt
      * @param _celerValue potential celer value for bidding, it can be larger than actual celer value
@@ -168,12 +168,12 @@ contract LiBA is PullPayment{
         bid.hash = _hash;
         bid.celerValue = _celerValue;
         // Previous celer token will be forfeited if update bid
-        ERC20(celerTokenAddress).safeTransferFrom(msg.sender, address(this), _celerValue);
+        celerToken.safeTransferFrom(msg.sender, address(this), _celerValue);
     }
 
     // TODO: verify _commitmentsIds having enough fund
     /**
-     * @dev Reveal the bid of current user for an auction
+     * @notice Reveal the bid of current user for an auction
      * @param _auctionId Id of the auction
      * @param _rate interest rate for bidding
      * @param _value value for bidding
@@ -205,7 +205,7 @@ contract LiBA is PullPayment{
         uint celerRefund = bid.celerValue.sub(_celerValue);
         bid.celerValue = _celerValue;
         if (celerRefund > 0) {
-            ERC20(celerTokenAddress).safeTransfer(msg.sender, celerRefund);
+            celerToken.safeTransfer(msg.sender, celerRefund);
         }
 
         uint availableValue = polc.getCommitmentAvailableValue(msg.sender, _commitmentId);
@@ -229,7 +229,7 @@ contract LiBA is PullPayment{
     }
 
     /**
-     * @dev The auction asker claims winners for the auction
+     * @notice The auction asker claims winners for the auction
      * @param _auctionId Id of the auction
      * @param _winners a list of winner addresses
      */
@@ -249,7 +249,7 @@ contract LiBA is PullPayment{
     }
 
     /**
-     * @dev A potential winner, who is not claimed as one of winners, is able to challenge the auction
+     * @notice A potential winner, who is not claimed as one of winners, is able to challenge the auction
      * @param _auctionId Id of the auction
      * @param _winners a list of winner addresses
      */
@@ -273,7 +273,7 @@ contract LiBA is PullPayment{
     }
 
     /**
-     * @dev Finalize the auction
+     * @notice Finalize the auction
      * @param _auctionId Id of the auction
      */
     function finalizeAuction(uint _auctionId) public {
@@ -285,9 +285,9 @@ contract LiBA is PullPayment{
         auction.finalized = true;
         // If there is no challenger, refund the deposit to asker
         if (auction.challenger == address(0x0)) {
-            ERC20(celerTokenAddress).safeTransfer(auction.asker, auctionDeposit);
+            celerToken.safeTransfer(auction.asker, auctionDeposit);
         } else {
-            ERC20(celerTokenAddress).safeTransfer(auction.challenger, auctionDeposit);
+            celerToken.safeTransfer(auction.challenger, auctionDeposit);
         }
 
         address[] storage winners = auction.winners;
@@ -305,7 +305,7 @@ contract LiBA is PullPayment{
     }
 
     /**
-     * @dev Repay the auction
+     * @notice Repay the auction
      * @param _auctionId Id of the auction
      */
     function repayAuction(uint _auctionId) public payable {
@@ -331,7 +331,7 @@ contract LiBA is PullPayment{
     }
 
     /**
-     * @dev Finalize the bid for the acution for bidders, who are not winning the auction,
+     * @notice Finalize the bid for the acution for bidders, who are not winning the auction,
      * or asker fails to finalize the auction before finalizeEnd
      * @param _auctionId Id of the auction
      */
@@ -353,11 +353,11 @@ contract LiBA is PullPayment{
         bid.celerValue = 0;
         bid.rate = 0;
         bid.value = 0;
-        ERC20(celerTokenAddress).safeTransferFrom(address(this), msg.sender, celerValue);
+        celerToken.safeTransferFrom(address(this), msg.sender, celerValue);
     }
 
     /**
-     * @dev Validate if challenger is valid one
+     * @notice Validate if challenger is valid one
      * @param _auctionId Id of the auction
      * @param _challenger address for challenger, who may have higher score than current winners
      */
@@ -395,7 +395,7 @@ contract LiBA is PullPayment{
     }
 
     /**
-     * @dev Calcuate ranking score
+     * @notice Calcuate ranking score
      * @param _auctionId Id of the auction
      * @param _bidder a bidder address
      */
@@ -416,7 +416,7 @@ contract LiBA is PullPayment{
     }
 
     /**
-     * @dev Check if the bidder is winner
+     * @notice Check if the bidder is winner
      * @param _auctionId Id of the auction
      * @param _bidder a bidder address
      */

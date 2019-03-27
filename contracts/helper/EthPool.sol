@@ -6,7 +6,7 @@ import "openzeppelin-solidity/contracts/math/SafeMath.sol";
 /**
  * @title ETH Pool providing an ERC20 like interface
  * @notice Implementation of an ERC20 like pool for native ETH.
- * @dev Originally based on code of ERC20 by openzeppelin-solidity v2.1.2
+ * @notice Originally based on code of ERC20 by openzeppelin-solidity v2.1.2
  *   https://github.com/OpenZeppelin/openzeppelin-solidity/blob/v2.1.2/contracts/token/ERC20/ERC20.sol
  */
 contract EthPool is EthPoolInterface {
@@ -41,7 +41,7 @@ contract EthPool is EthPoolInterface {
 
     /**
      * @notice Approve the passed address to spend the specified amount of ETH on behalf of msg.sender.
-     * @dev Beware that changing an allowance with this method brings the risk that someone may use both the old
+     * @notice Beware that changing an allowance with this method brings the risk that someone may use both the old
      *   and the new allowance by unfortunate transaction ordering. One possible solution to mitigate this
      *   race condition is to first reduce the spender's allowance to 0 and set the desired value afterwards:
      *   https://github.com/ethereum/EIPs/issues/20#issuecomment-263524729
@@ -58,7 +58,7 @@ contract EthPool is EthPoolInterface {
 
     /**
      * @notice Transfer ETH from one address to another.
-     * @dev Note that while this function emits an Approval event, this is not required as per the specification.
+     * @notice Note that while this function emits an Approval event, this is not required as per the specification.
      * @param from address The address which you want to send ETH from
      * @param to address The address which you want to transfer to
      * @param value uint the amount of ETH to be transferred
@@ -72,7 +72,7 @@ contract EthPool is EthPoolInterface {
 
     /**
      * @notice Increase the amount of ETH that an owner allowed to a spender.
-     * @dev approve should be called when allowed_[_spender] == 0. To increment
+     * @notice approve should be called when allowed_[_spender] == 0. To increment
      *   allowed value is better to use this function to avoid 2 calls (and wait until
      *   the first transaction is mined)
      *   From MonolithDAO Token.sol
@@ -90,7 +90,7 @@ contract EthPool is EthPoolInterface {
 
     /**
      * @notice Decrease the amount of ETH that an owner allowed to a spender.
-     * @dev approve should be called when allowed_[_spender] == 0. To decrement
+     * @notice approve should be called when allowed_[_spender] == 0. To decrement
      *   allowed value is better to use this function to avoid 2 calls (and wait until
      *   the first transaction is mined)
      *   From MonolithDAO Token.sol
