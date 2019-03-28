@@ -62,16 +62,12 @@ contract PoLC is Ownable {
      * @param _duration lock-in duration by days
      */
     function commitFund(uint _duration) external payable {
-        uint value = msg.value;
-        require(
-            value > 0,
-            "must send the transcation with eth value"
-        );
         require(
             _duration > 0 && _duration < 365,
             "duration must fall into the 0-365 range"
         );
 
+        uint value = msg.value;
         address sender = msg.sender;
         uint currentTimestamp = block.timestamp;
         Commitment storage commitment = commitmentsByUser[sender][currentTimestamp];
