@@ -3,6 +3,7 @@ const chaiAsPromised = require('chai-as-promised');
 const Web3 = require('web3');
 
 const ERC20ExampleToken = artifacts.require('ERC20ExampleToken');
+const EthPool = artifacts.require('EthPool');
 const LiBA = artifacts.require('LiBA');
 const PoLC = artifacts.require('PoLC');
 
@@ -16,21 +17,21 @@ const REVEAL_DURATION = 10;
 const CLAIM_DURATION = 2;
 const CHALLENGE_DURATION = 2;
 const FINALIZE_DURATION = 2;
-const VALUE = 5;
+const VALUE = 100;
 const DURATION = 1;
 const MAX_RATE = 10;
 const MIN_VALUE = 2;
 const BID0 = {
     rate: 5,
     value: VALUE,
-    celerValue: 100,
+    celerValue: 1000,
     salt: 100,
-    commitmentsIds: [0]
+    commitmentId: 0
 };
 const BID1 = {
     ...BID0,
     rate: 4,
-    commitmentsIds: [0]
+    commitmentId: 0
 };
 
 const calculateBidHash = bid => {
@@ -42,18 +43,23 @@ calculateBidHash(BID0);
 calculateBidHash(BID1);
 
 contract('LiBA', ([provider, bidder0, bidder1]) => {
+    let ethPool;
+    let token;
     let liba;
     let polc;
-    let token;
     let auctionId;
 
     before(async () => {
+        ethPool = await EthPool.new();
         token = await ERC20ExampleToken.new();
         polc = await PoLC.new(token.address, 100);
         liba = await LiBA.new(token.address, polc.address, AUCTION_DEPOSIT);
-        await token.transfer(provider, 1000);
-        await token.transfer(bidder0, 1000);
-        await token.transfer(bidder1, 1000);
+
+        await polc.setLibaAddress(liba.address);
+        await polc.setEthPool(ethPool.address);
+        await token.transfer(provider, 10000);
+        await token.transfer(bidder0, 10000);
+        await token.transfer(bidder1, 10000);
     });
 
     it('should fail to init auction for missing auction deposit', async () => {
@@ -181,14 +187,14 @@ contract('LiBA', ([provider, bidder0, bidder1]) => {
     });
 
     const revealBid = async (bid, bidder) => {
-        const { rate, value, celerValue, salt, commitmentsIds } = bid;
+        const { rate, value, celerValue, salt, commitmentId } = bid;
         const receipt = await liba.revealBid(
             auctionId,
             rate,
             value,
             celerValue,
             salt,
-            commitmentsIds,
+            commitmentId,
             {
                 from: bidder
             }
@@ -255,7 +261,7 @@ contract('LiBA', ([provider, bidder0, bidder1]) => {
             await revealBid(BID0, bidder0);
         } catch (e) {
             assert.isAbove(
-                e.message.search('must have enough value in commitments'),
+                e.message.search('must have enough value in commitment'),
                 -1
             );
             return;
@@ -270,8 +276,7 @@ contract('LiBA', ([provider, bidder0, bidder1]) => {
             from: bidder
         });
         const { args } = receipt.logs[0];
-        const commitmentId = args.commitmentId.toNumber();
-        bid.commitmentsIds = [commitmentId];
+        bid.commitmentId = args.commitmentId.toNumber();
     };
 
     it('should reveal auction correctly', async () => {
@@ -385,11 +390,20 @@ contract('LiBA', ([provider, bidder0, bidder1]) => {
     });
 
     it('should finalize auction successfully', async () => {
-        // const auction = await liba.getAuction.call(auctionId);
-        // console.log(auction);
         const receipt = await liba.finalizeAuction(auctionId);
         const { event, args } = receipt.logs[0];
         assert.equal(event, 'FinalizeAuction');
+        assert.deepEqual(args.auctionId.toNumber(), auctionId);
+
+        const balance = await ethPool.balanceOf(provider);
+        assert.equal(balance.toNumber(), BID1.value);
+    });
+
+    it('should repay auction successfully', async () => {
+        const value = BID1.value + (BID1.value * BID1.rate) / 100;
+        const receipt = await liba.repayAuction(auctionId, { value });
+        const { event, args } = receipt.logs[0];
+        assert.equal(event, 'RepayAuction');
         assert.deepEqual(args.auctionId.toNumber(), auctionId);
     });
 });

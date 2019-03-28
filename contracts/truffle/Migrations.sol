@@ -1,7 +1,7 @@
 pragma solidity ^0.5.0;
 
 /**
- * @dev Used for Truffle framework. Do not edit.
+ * @notice Used for Truffle framework. Do not edit.
  */
 contract Migrations {
   address public owner;

@@ -1,12 +1,15 @@
 pragma solidity ^0.5.0;
 
+import "./lib/IEthPool.sol";
+import "./lib/IPoLC.sol";
 import "openzeppelin-solidity/contracts/math/SafeMath.sol";
-import "openzeppelin-solidity/contracts/token/ERC20/ERC20.sol";
+import "openzeppelin-solidity/contracts/token/ERC20/IERC20.sol";
 import "openzeppelin-solidity/contracts/token/ERC20/SafeERC20.sol";
+import "openzeppelin-solidity/contracts/ownership/Ownable.sol";
 
-contract PoLC {
-    using SafeERC20 for ERC20;
-    using SafeMath for uint256;
+contract PoLC is Ownable, IPoLC {
+    using SafeERC20 for IERC20;
+    using SafeMath for uint;
 
     struct Commitment {
         uint lockStart;
@@ -17,7 +20,9 @@ contract PoLC {
         uint withdrawedReward;
     }
 
-    address private celerTokenAddress;
+    address private libaAddress;
+    IERC20 private celerToken;
+    IEthPool private ethPool;
     // reward payout for each block
     uint private blockReward;
     // mapping mining power by day
@@ -28,7 +33,7 @@ contract PoLC {
     ) public commitmentsByUser;
 
     constructor(address _celerTokenAddress, uint _blockReward) public {
-        celerTokenAddress = _celerTokenAddress;
+        celerToken = IERC20(_celerTokenAddress);
         blockReward = _blockReward;
     }
 
@@ -37,7 +42,7 @@ contract PoLC {
     event WithdrawReward(uint commitmentId);
 
     /**
-     * @dev check if the commitment lock has expired
+     * @notice Check if the commitment lock has expired
      * @param _commitmentId ID of the commitment
      */
     modifier lockExpired(uint _commitmentId) {
@@ -53,49 +58,48 @@ contract PoLC {
         _;
     }
 
-   /**
-     * @dev Lock fund into the PoLC contract
+    /**
+     * @notice Lock fund into the PoLC contract
      * @param _duration lock-in duration by days
      */
-    function commitFund(uint _duration) public payable {
-        require(
-            msg.value > 0,
-            "must send the transcation with eth value"
-        );
+    function commitFund(uint _duration) external payable {
         require(
             _duration > 0 && _duration < 365,
             "duration must fall into the 0-365 range"
         );
 
-        Commitment storage commitment = commitmentsByUser[msg.sender][block.timestamp];
+        uint value = msg.value;
+        address sender = msg.sender;
+        uint currentTimestamp = block.timestamp;
+        Commitment storage commitment = commitmentsByUser[sender][currentTimestamp];
         require(
             commitment.lockEnd == 0,
             "one timestamp can only have one commitment"
         );
 
-        uint lockStart = block.timestamp.div(1 days).add(1);
+        uint lockStart = currentTimestamp.div(1 days).add(1);
         uint lockEnd = lockStart.add(_duration);
         commitment.lockStart = lockStart;
         commitment.lockEnd = lockEnd;
-        commitment.lockedValue = msg.value;
-        commitment.availableValue = msg.value;
+        commitment.lockedValue = value;
+        commitment.availableValue = value;
 
-        uint power = msg.value.mul(_duration);
+        uint power = value.mul(_duration);
         for (uint i = lockStart; i < lockEnd; i++) {
             powerByTime[i] = powerByTime[i].add(power);
         }
 
-        emit NewCommitment(block.timestamp, msg.sender);
+        emit NewCommitment(currentTimestamp, sender);
     }
 
-  /**
-     * @dev withdraw all available fund in a commitment
+    /**
+     * @notice Withdraw all available fund in a commitment
      * @param _commitmentId ID of the commitment
      */
     function withdrawFund(
         uint _commitmentId
     )
-        public
+        external
         lockExpired(_commitmentId)
     {
         Commitment storage commitment = commitmentsByUser[msg.sender][_commitmentId];
@@ -106,14 +110,14 @@ contract PoLC {
         emit WithdrawFund(_commitmentId);
     }
 
-  /**
-     * @dev withdraw all available reward in a commitment
+    /**
+     * @notice Withdraw all available reward in a commitment
      * @param _commitmentId ID of the commitment
      */
     function withdrawReward(
         uint _commitmentId
     )
-        public
+        external
         lockExpired(_commitmentId)
     {
         Commitment storage commitment = commitmentsByUser[msg.sender][_commitmentId];
@@ -128,7 +132,87 @@ contract PoLC {
         }
 
         commitment.withdrawedReward = totalReward;
-        ERC20(celerTokenAddress).safeTransfer(msg.sender, totalReward);
+        celerToken.safeTransfer(msg.sender, totalReward);
         emit WithdrawReward(_commitmentId);
+    }
+
+    /**
+     * @notice Set libaAddress state variable
+     * @param _libaAddress Liba address
+     */
+    function setLibaAddress(address _libaAddress) external onlyOwner
+    {
+        require(libaAddress == address(0), "libaAddress can only be set once");
+        libaAddress = _libaAddress;
+    }
+
+   /**
+     * @notice Set eth pool address
+     * @param _ethPoolAddress ethPool address
+     */
+    function setEthPool(address _ethPoolAddress) external onlyOwner
+    {
+        require(address(ethPool) == address(0), "ethPool can only be set once");
+        ethPool = IEthPool(_ethPoolAddress);
+    }
+
+    /**
+     * @notice Get available value for specific commitment of a user
+     * @param _user User address
+     * @param _commitmentId ID of the commitment
+     */
+    function getCommitmentAvailableValue(
+        address _user,
+        uint _commitmentId
+    )
+        external
+        view
+        returns (uint)
+    {
+        Commitment storage commitment = commitmentsByUser[_user][_commitmentId];
+        return commitment.availableValue;
+    }
+
+    /**
+     * @notice Lend borrower a specific value
+     * @param _user User address
+     * @param _commitmentId ID of the commitment
+     * @param _value value to lend
+     * @param _borrower borrower address
+     */
+    function lendCommitment(
+        address _user,
+        uint _commitmentId,
+        uint _value,
+        address _borrower
+    )
+        external
+    {
+        require(msg.sender == libaAddress, "sender must be liba contract");
+        Commitment storage commitment = commitmentsByUser[_user][_commitmentId];
+        require(_value <= commitment.availableValue, "value must be smaller than available value");
+
+        commitment.availableValue = commitment.availableValue.sub(_value);
+        commitment.lendingValue = commitment.lendingValue.add(_value);
+        ethPool.deposit.value(_value)(_borrower);
+    }
+
+   /**
+     * @notice Repay to the commitment
+     * @param _user User address
+     * @param _commitmentId ID of the commitment
+     */
+    function repayCommitment(
+        address _user,
+        uint _commitmentId
+    )
+        external
+        payable
+    {
+        require(msg.sender == libaAddress, "sender must be liba contract");
+        Commitment storage commitment = commitmentsByUser[_user][_commitmentId];
+
+        commitment.lendingValue = commitment.lendingValue.sub(msg.value);
+        commitment.availableValue = commitment.availableValue.add(msg.value);
     }
 }
