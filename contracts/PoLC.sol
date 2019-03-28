@@ -8,7 +8,7 @@ import "openzeppelin-solidity/contracts/ownership/Ownable.sol";
 
 contract PoLC is Ownable {
     using SafeERC20 for IERC20;
-    using SafeMath for uint256;
+    using SafeMath for uint;
 
     struct Commitment {
         uint lockStart;
@@ -32,7 +32,7 @@ contract PoLC is Ownable {
     ) public commitmentsByUser;
 
     constructor(address _celerTokenAddress, uint _blockReward) public {
-        celerTokes = IERC20(_celerTokenAddress);
+        celerToken = IERC20(_celerTokenAddress);
         blockReward = _blockReward;
     }
 
@@ -135,7 +135,7 @@ contract PoLC is Ownable {
         }
 
         commitment.withdrawedReward = totalReward;
-        celerTokes.safeTransfer(msg.sender, totalReward);
+        celerToken.safeTransfer(msg.sender, totalReward);
         emit WithdrawReward(_commitmentId);
     }
 
