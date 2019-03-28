@@ -1,12 +1,13 @@
 pragma solidity ^0.5.0;
 
 import "./lib/IEthPool.sol";
+import "./lib/IPoLC.sol";
 import "openzeppelin-solidity/contracts/math/SafeMath.sol";
 import "openzeppelin-solidity/contracts/token/ERC20/IERC20.sol";
 import "openzeppelin-solidity/contracts/token/ERC20/SafeERC20.sol";
 import "openzeppelin-solidity/contracts/ownership/Ownable.sol";
 
-contract PoLC is Ownable {
+contract PoLC is Ownable, IPoLC {
     using SafeERC20 for IERC20;
     using SafeMath for uint;
 

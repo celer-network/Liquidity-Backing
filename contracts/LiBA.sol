@@ -199,7 +199,7 @@ contract LiBA is PullPayment{
      */
     function claimWinners(
         uint _auctionId,
-        address[] memory _winners
+        address[] calldata _winners
     )
         external
     {
@@ -219,7 +219,7 @@ contract LiBA is PullPayment{
      */
     function challengeWinners(
         uint _auctionId,
-        address[] memory _winners
+        address[] calldata _winners
     )
         external
     {

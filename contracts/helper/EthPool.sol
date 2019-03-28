@@ -1,6 +1,6 @@
 pragma solidity ^0.5.0;
 
-import "./EthPoolInterface.sol";
+import "../lib/IEthPool.sol";
 import "openzeppelin-solidity/contracts/math/SafeMath.sol";
 
 /**
@@ -9,7 +9,7 @@ import "openzeppelin-solidity/contracts/math/SafeMath.sol";
  * @notice Originally based on code of ERC20 by openzeppelin-solidity v2.1.2
  *   https://github.com/OpenZeppelin/openzeppelin-solidity/blob/v2.1.2/contracts/token/ERC20/ERC20.sol
  */
-contract EthPool is EthPoolInterface {
+contract EthPool is IEthPool {
     using SafeMath for uint;
 
     mapping (address => uint) private _balances;
