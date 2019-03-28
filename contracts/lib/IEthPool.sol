@@ -1,6 +1,6 @@
 pragma solidity ^0.5.0;
 
-interface EthPoolInterface {
+interface IEthPool {
     event Deposit(address recipient, uint value);
     event Withdraw(address account, uint value);
     event Transfer(address indexed from, address indexed to, uint value);

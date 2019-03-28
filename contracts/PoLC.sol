@@ -1,6 +1,6 @@
 pragma solidity ^0.5.0;
 
-import "./helper/EthPoolInterface.sol";
+import "./lib/IEthPool.sol";
 import "openzeppelin-solidity/contracts/math/SafeMath.sol";
 import "openzeppelin-solidity/contracts/token/ERC20/IERC20.sol";
 import "openzeppelin-solidity/contracts/token/ERC20/SafeERC20.sol";
@@ -21,7 +21,7 @@ contract PoLC is Ownable {
 
     address private libaAddress;
     IERC20 private celerToken;
-    EthPoolInterface private ethPool;
+    IEthPool private ethPool;
     // reward payout for each block
     uint private blockReward;
     // mapping mining power by day
@@ -61,7 +61,7 @@ contract PoLC is Ownable {
      * @notice Lock fund into the PoLC contract
      * @param _duration lock-in duration by days
      */
-    function commitFund(uint _duration) public payable {
+    function commitFund(uint _duration) external payable {
         uint value = msg.value;
         require(
             value > 0,
@@ -102,7 +102,7 @@ contract PoLC is Ownable {
     function withdrawFund(
         uint _commitmentId
     )
-        public
+        external
         lockExpired(_commitmentId)
     {
         Commitment storage commitment = commitmentsByUser[msg.sender][_commitmentId];
@@ -120,7 +120,7 @@ contract PoLC is Ownable {
     function withdrawReward(
         uint _commitmentId
     )
-        public
+        external
         lockExpired(_commitmentId)
     {
         Commitment storage commitment = commitmentsByUser[msg.sender][_commitmentId];
@@ -143,7 +143,7 @@ contract PoLC is Ownable {
      * @notice Set libaAddress state variable
      * @param _libaAddress Liba address
      */
-    function setLibaAddress(address _libaAddress) public onlyOwner
+    function setLibaAddress(address _libaAddress) external onlyOwner
     {
         require(libaAddress == address(0), "libaAddress can only be set once");
         libaAddress = _libaAddress;
@@ -153,10 +153,10 @@ contract PoLC is Ownable {
      * @notice Set eth pool address
      * @param _ethPoolAddress ethPool address
      */
-    function setEthPool(address _ethPoolAddress) public onlyOwner
+    function setEthPool(address _ethPoolAddress) external onlyOwner
     {
         require(address(ethPool) == address(0), "ethPool can only be set once");
-        ethPool = EthPoolInterface(_ethPoolAddress);
+        ethPool = IEthPool(_ethPoolAddress);
     }
 
     /**

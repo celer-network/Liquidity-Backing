@@ -1,6 +1,6 @@
 pragma solidity ^0.5.0;
 
-import "./PoLCInterface.sol";
+import "./lib/IPoLC.sol";
 import "openzeppelin-solidity/contracts/math/SafeMath.sol";
 import "openzeppelin-solidity/contracts/token/ERC20/IERC20.sol";
 import "openzeppelin-solidity/contracts/token/ERC20/SafeERC20.sol";
@@ -40,7 +40,7 @@ contract LiBA is PullPayment{
     }
 
     IERC20 private celerToken;
-    PoLCInterface private polc;
+    IPoLC private polc;
     uint private auctionDeposit;
     uint private auctionCount;
     mapping(uint => Auction) private auctions;
@@ -57,7 +57,7 @@ contract LiBA is PullPayment{
 
     constructor(address _celerTokenAddress, address _polcAddress, uint _auctionDeposit) public {
         celerToken = IERC20(_celerTokenAddress);
-        polc = PoLCInterface(_polcAddress);
+        polc = IPoLC(_polcAddress);
         auctionDeposit = _auctionDeposit;
     }
 
@@ -105,42 +105,6 @@ contract LiBA is PullPayment{
     }
 
     /**
-     * @notice Get auction info
-     * @param _auctionId Id of the auction
-     */
-    function getAuction(
-        uint _auctionId
-    )
-        view
-        public
-        returns (
-            address asker,
-            uint value,
-            uint duration,
-            uint maxRate,
-            uint minValue,
-            uint bidEnd,
-            uint revealEnd,
-            uint claimEnd,
-            uint challengeEnd,
-            uint finalizeEnd
-        )
-    {
-        Auction storage auction = auctions[_auctionId];
-
-        asker = auction.asker;
-        value = auction.value;
-        duration = auction.duration;
-        maxRate = auction.maxRate;
-        minValue = auction.minValue;
-        bidEnd = auction.bidEnd;
-        revealEnd = auction.revealEnd;
-        claimEnd = auction.claimEnd;
-        challengeEnd = auction.challengeEnd;
-        finalizeEnd = auction.finalizeEnd;
-    }
-
-    /**
      * @notice Bid for an auction
      * @param _auctionId Id of the auction
      * @param _hash hash based on desired rate, value, celerValue and salt
@@ -151,7 +115,7 @@ contract LiBA is PullPayment{
         bytes32 _hash,
         uint _celerValue
     )
-        public
+        external
     {
         Auction storage auction = auctions[_auctionId];
         require(block.number <= auction.bidEnd, "must be within bid duration");
@@ -189,7 +153,7 @@ contract LiBA is PullPayment{
         uint _salt,
         uint _commitmentId
     )
-        public
+        external
     {
         Auction storage auction = auctions[_auctionId];
         require(block.number > auction.bidEnd, "must be within reveal duration");
@@ -237,7 +201,7 @@ contract LiBA is PullPayment{
         uint _auctionId,
         address[] memory _winners
     )
-        public
+        external
     {
         Auction storage auction = auctions[_auctionId];
         require(block.number > auction.revealEnd, "must be within claim duration");
@@ -257,7 +221,7 @@ contract LiBA is PullPayment{
         uint _auctionId,
         address[] memory _winners
     )
-        public
+        external
     {
         Auction storage auction = auctions[_auctionId];
         require(block.number > auction.claimEnd, "must be within challenge");
@@ -276,7 +240,7 @@ contract LiBA is PullPayment{
      * @notice Finalize the auction
      * @param _auctionId Id of the auction
      */
-    function finalizeAuction(uint _auctionId) public {
+    function finalizeAuction(uint _auctionId) external {
         Auction storage auction = auctions[_auctionId];
         require(block.number > auction.challengeEnd,  "must be within finalize duration");
         require(block.number <= auction.finalizeEnd,  "must be within finalize duration");
@@ -308,7 +272,7 @@ contract LiBA is PullPayment{
      * @notice Repay the auction
      * @param _auctionId Id of the auction
      */
-    function repayAuction(uint _auctionId) public payable {
+    function repayAuction(uint _auctionId) external payable {
         Auction storage auction = auctions[_auctionId];
         require(auction.finalized, "auction must be finalized");
 
@@ -335,7 +299,7 @@ contract LiBA is PullPayment{
      * or asker fails to finalize the auction before finalizeEnd
      * @param _auctionId Id of the auction
      */
-    function finalizeBid(uint _auctionId) public {
+    function finalizeBid(uint _auctionId) external {
         bool allowWithdraw = false;
         Auction storage auction = auctions[_auctionId];
 
@@ -354,6 +318,42 @@ contract LiBA is PullPayment{
         bid.rate = 0;
         bid.value = 0;
         celerToken.safeTransferFrom(address(this), msg.sender, celerValue);
+    }
+
+    /**
+     * @notice Get auction info
+     * @param _auctionId Id of the auction
+     */
+    function getAuction(
+        uint _auctionId
+    )
+        external
+        view
+        returns (
+            address asker,
+            uint value,
+            uint duration,
+            uint maxRate,
+            uint minValue,
+            uint bidEnd,
+            uint revealEnd,
+            uint claimEnd,
+            uint challengeEnd,
+            uint finalizeEnd
+        )
+    {
+        Auction storage auction = auctions[_auctionId];
+
+        asker = auction.asker;
+        value = auction.value;
+        duration = auction.duration;
+        maxRate = auction.maxRate;
+        minValue = auction.minValue;
+        bidEnd = auction.bidEnd;
+        revealEnd = auction.revealEnd;
+        claimEnd = auction.claimEnd;
+        challengeEnd = auction.challengeEnd;
+        finalizeEnd = auction.finalizeEnd;
     }
 
     /**
