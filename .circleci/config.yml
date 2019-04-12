@@ -17,13 +17,9 @@ jobs:
                   key: npm-cache-{{ checksum "package-lock.json" }}
             - run:
                   name: install node_modules if not exists
-                  environment:
-                      GANACHE_VER: 6.4.2
-                      TRUFFLE_VER: 5.0.12
                   command: |
                       if [ ! -d "node_modules" ]; then
-                        npm install ganache-cli@$GANACHE_VER truffle@$TRUFFLE_VER --no-shrinkwrap
-                        npm install --no-shrinkwrap
+                        npm ci
                       fi
             - run:
                   name: fetch abigen binary if not exists
