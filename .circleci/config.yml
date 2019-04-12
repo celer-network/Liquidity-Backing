@@ -1,0 +1,34 @@
+version: 2
+
+# try to checkout pr merge if it exists, no op if not a pr build
+checkout_pr_merge: &checkout_pr_merge
+    run:
+        name: try to checkout pr merge
+        command: git fetch origin "+refs/pull/${CIRCLE_PULL_REQUEST##*/}/merge" && git checkout -qf FETCH_HEAD || echo "not pr build"
+
+jobs:
+    build:
+        docker:
+            - image: circleci/node:11.13.0
+        steps:
+            - checkout
+            - <<: *checkout_pr_merge
+            - restore_cache:
+                  key: npm-cache-{{ checksum "package-lock.json" }}
+            - run:
+                  name: install node_modules if not exists
+                  command: |
+                      if [ ! -d "node_modules" ]; then
+                        npm ci
+                      fi
+            - run:
+                  name: run truffle test
+                  command: |
+                      node_modules/.bin/ganache-cli -l 8000000 2> /dev/null 1> /dev/null &
+                      GANACHE_PID=$!
+                      node_modules/.bin/truffle test
+                      kill -9 $GANACHE_PID
+            - save_cache:
+                  key: npm-cache-{{ checksum "package-lock.json" }}
+                  paths:
+                      - 'node_modules'
