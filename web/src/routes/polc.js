@@ -64,7 +64,7 @@ class PoLC extends React.Component {
             lockStart,
             lockEnd,
             availableValue,
-            lockedValue
+            lendingValue
         } = commitment.value;
 
         return (
@@ -100,14 +100,14 @@ class PoLC extends React.Component {
                         </Col>
                         <Col span={12}>
                             <Statistic
-                                title="Locked Value"
-                                value={formatEthValue(lockedValue)}
+                                title="Available Value"
+                                value={formatEthValue(availableValue)}
                             />
                         </Col>
                         <Col span={12}>
                             <Statistic
-                                title="Available Value"
-                                value={formatEthValue(availableValue)}
+                                title="Locked Value"
+                                value={formatEthValue(lendingValue)}
                             />
                         </Col>
                     </Row>
@@ -122,7 +122,7 @@ class PoLC extends React.Component {
 
         return (
             <List
-                grid={{ gutter: 16, column: 4 }}
+                grid={{ gutter: 16, column: 3 }}
                 dataSource={data}
                 renderItem={this.renderCommitment}
             />
@@ -162,6 +162,7 @@ PoLC.contextTypes = {
 function mapStateToProps(state) {
     const { contracts } = state;
 
+    console.log(contracts);
     return {
         PoLC: contracts.PoLC
     };

@@ -75,7 +75,10 @@ class LiBA extends React.Component {
                             />
                         </Col>
                         <Col span={12}>
-                            <Statistic title="Duration" value={duration} />
+                            <Statistic
+                                title="Duration"
+                                value={`${duration} Days`}
+                            />
                         </Col>
                     </Row>
                 </Card>
@@ -97,7 +100,7 @@ class LiBA extends React.Component {
 
         return (
             <List
-                grid={{ gutter: 16, column: 4 }}
+                grid={{ gutter: 16, column: 3 }}
                 dataSource={data}
                 renderItem={this.renderAuction}
             />

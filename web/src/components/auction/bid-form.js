@@ -4,7 +4,7 @@ import web3 from 'web3';
 import { Modal } from 'antd';
 
 import Form from '../form';
-import { etherFieldOptions } from '../../utils/form';
+import { etherFieldOptions, minValueRule } from '../../utils/form';
 
 class BidForm extends React.Component {
     constructor(props, context) {
@@ -26,7 +26,12 @@ class BidForm extends React.Component {
 
             this.contracts.LiBA.methods.placeBid.cacheSend(
                 auctionId,
-                web3.utils.soliditySha3(rate, value, celerValue, salt),
+                web3.utils.soliditySha3(
+                    rate,
+                    web3.utils.toWei(value.toString(), 'ether'),
+                    celerValue,
+                    salt
+                ),
                 celerValue
             );
             onClose();
@@ -41,6 +46,7 @@ class BidForm extends React.Component {
                 field: 'number',
                 fieldOptions: etherFieldOptions,
                 rules: [
+                    minValueRule(0),
                     {
                         message: 'Please enter a value!',
                         required: true
@@ -51,6 +57,7 @@ class BidForm extends React.Component {
                 name: 'rate',
                 field: 'number',
                 rules: [
+                    minValueRule(0),
                     {
                         message: 'Please enter a rate!',
                         required: true
@@ -62,6 +69,7 @@ class BidForm extends React.Component {
                 label: 'Celer Value',
                 field: 'number',
                 rules: [
+                    minValueRule(0),
                     {
                         message: 'Please enter a celer value!',
                         required: true
@@ -72,6 +80,7 @@ class BidForm extends React.Component {
                 name: 'salt',
                 field: 'number',
                 rules: [
+                    minValueRule(0),
                     {
                         message: 'Please enter a salt!',
                         required: true

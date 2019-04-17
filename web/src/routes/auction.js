@@ -101,7 +101,7 @@ class Auction extends React.Component {
 
     finalizeAuction = () => {
         const { auction } = this.state;
-        this.contracts.LiBA.methods.claimWinners.cacheSend(auction.args[0]);
+        this.contracts.LiBA.methods.finalizeAuction.cacheSend(auction.args[0]);
     };
 
     renderAction = () => {
@@ -133,7 +133,7 @@ class Auction extends React.Component {
         const { asker, value, duration, maxRate, minValue } = auction.value;
 
         return (
-            <Row>
+            <Row style={{ marginTop: '10px' }}>
                 <Col span={24}>
                     <Statistic title="Asker" value={asker} />
                 </Col>
@@ -216,6 +216,7 @@ Auction.contextTypes = {
 function mapStateToProps(state) {
     const { accounts, contracts, LiBA } = state;
 
+    console.log(contracts, LiBA);
     return {
         accounts,
         LiBA: { ...LiBA, ...contracts.LiBA }

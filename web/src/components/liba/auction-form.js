@@ -4,7 +4,11 @@ import web3 from 'web3';
 import { Modal } from 'antd';
 
 import Form from '../form';
-import { etherFieldOptions, dayFieldOptions } from '../../utils/form';
+import {
+    etherFieldOptions,
+    dayFieldOptions,
+    minValueRule
+} from '../../utils/form';
 
 class AuctionForm extends React.Component {
     constructor(props, context) {
@@ -43,7 +47,7 @@ class AuctionForm extends React.Component {
                 web3.utils.toWei(value.toString(), 'ether'),
                 duration,
                 maxRate,
-                minValue
+                web3.utils.toWei(minValue.toString(), 'ether')
             );
             onClose();
         });
@@ -57,6 +61,7 @@ class AuctionForm extends React.Component {
                 field: 'number',
                 fieldOptions: etherFieldOptions,
                 rules: [
+                    minValueRule(0),
                     {
                         message: 'Please enter a value!',
                         required: true
@@ -68,6 +73,7 @@ class AuctionForm extends React.Component {
                 field: 'number',
                 fieldOptions: dayFieldOptions,
                 rules: [
+                    minValueRule(0),
                     {
                         message: 'Please enter a duration!',
                         required: true
@@ -79,6 +85,7 @@ class AuctionForm extends React.Component {
                 label: 'Bid Duration',
                 field: 'number',
                 rules: [
+                    minValueRule(0),
                     {
                         message: 'Please enter a duration!',
                         required: true
@@ -90,6 +97,7 @@ class AuctionForm extends React.Component {
                 label: 'Reveal Duration',
                 field: 'number',
                 rules: [
+                    minValueRule(0),
                     {
                         message: 'Please enter a duration!',
                         required: true
@@ -101,6 +109,7 @@ class AuctionForm extends React.Component {
                 label: 'Claim Duration',
                 field: 'number',
                 rules: [
+                    minValueRule(0),
                     {
                         message: 'Please enter a duration!',
                         required: true
@@ -112,6 +121,7 @@ class AuctionForm extends React.Component {
                 label: 'Challenge Duration',
                 field: 'number',
                 rules: [
+                    minValueRule(0),
                     {
                         message: 'Please enter a duration!',
                         required: true
@@ -123,6 +133,7 @@ class AuctionForm extends React.Component {
                 label: 'Finalize Duration',
                 field: 'number',
                 rules: [
+                    minValueRule(0),
                     {
                         message: 'Please enter a duration!',
                         required: true
@@ -134,6 +145,7 @@ class AuctionForm extends React.Component {
                 label: 'Max Rate',
                 field: 'number',
                 rules: [
+                    minValueRule(0),
                     {
                         message: 'Please enter a max rate!',
                         required: true
@@ -144,7 +156,9 @@ class AuctionForm extends React.Component {
                 name: 'minValue',
                 label: 'Min Value',
                 field: 'number',
+                fieldOptions: etherFieldOptions,
                 rules: [
+                    minValueRule(0),
                     {
                         message: 'Please enter a min value!',
                         required: true
