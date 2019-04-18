@@ -22,10 +22,9 @@ class ClaimForm extends React.Component {
             }
 
             const { winners } = values;
-            this.contracts.LiBA.methods.claimWinners.cacheSend(
-                auctionId,
-                winners.split(',')
-            );
+            this.contracts.LiBA.methods
+                .claimWinners(auctionId, winners.split(','))
+                .send();
             onClose();
         });
     };

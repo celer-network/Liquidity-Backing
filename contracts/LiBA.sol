@@ -164,7 +164,7 @@ contract LiBA is PullPayment{
         Bid storage bid = bidsByUser[msg.sender][_auctionId];
         bytes32 hash = keccak256(abi.encodePacked(_rate, _value, _celerValue, _salt));
         require(hash == bid.hash, "hash must be same as the bid hash");
-        require(_celerValue > _value, "celer value must be larger than value");
+        require(_celerValue.mul(1 ether) >= _value, "celer value must be larger than value");
 
         uint celerRefund = bid.celerValue.sub(_celerValue);
         bid.celerValue = _celerValue;
@@ -184,7 +184,7 @@ contract LiBA is PullPayment{
             auction.maxBidRate = _rate;
         }
 
-        uint factor = _celerValue.div(_value);
+        uint factor = _celerValue.mul(1 ether).div(_value);
         if (factor > auction.maxBidFactor) {
             auction.maxBidFactor = factor;
         }
@@ -409,7 +409,7 @@ contract LiBA is PullPayment{
     {
         Auction storage auction = auctions[_auctionId];
         Bid storage bid = bidsByUser[_bidder][_auctionId];
-        uint valueFactor = bid.celerValue.div(bid.value).div(auction.maxBidFactor);
+        uint valueFactor = bid.celerValue.mul(1 ether).div(bid.value).div(auction.maxBidFactor);
         uint rateFactor = bid.rate.div(auction.maxBidRate);
 
         return valueFactor.sub(rateFactor);

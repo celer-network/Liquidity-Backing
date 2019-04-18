@@ -4,7 +4,11 @@ import web3 from 'web3';
 import { Modal } from 'antd';
 
 import Form from '../form';
-import { etherFieldOptions, dayFieldOptions } from '../../utils/form';
+import {
+    etherFieldOptions,
+    dayFieldOptions,
+    minValueRule
+} from '../../utils/form';
 
 class CommimentForm extends React.Component {
     constructor(props, context) {
@@ -26,6 +30,7 @@ class CommimentForm extends React.Component {
             this.contracts.PoLC.methods.commitFund.cacheSend(duration, {
                 value: web3.utils.toWei(value.toString(), 'ether')
             });
+            this.form.current.resetFields();
             onClose();
         });
     };
@@ -38,6 +43,7 @@ class CommimentForm extends React.Component {
                 field: 'number',
                 fieldOptions: etherFieldOptions,
                 rules: [
+                    minValueRule(0),
                     {
                         message: 'Please enter a value!',
                         required: true
@@ -49,6 +55,7 @@ class CommimentForm extends React.Component {
                 field: 'number',
                 fieldOptions: dayFieldOptions,
                 rules: [
+                    minValueRule(0),
                     {
                         message: 'Please enter a duration!',
                         required: true

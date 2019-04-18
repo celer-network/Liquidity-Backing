@@ -22,10 +22,10 @@ class ChallengeForm extends React.Component {
             }
 
             const { winners } = values;
-            this.contracts.LiBA.methods.challengeWinners.cacheSend(
-                auctionId,
-                winners.split(',')
-            );
+            this.contracts.LiBA.methods
+                .challengeWinners(auctionId, winners.split(','))
+                .send();
+
             onClose();
         });
     };
