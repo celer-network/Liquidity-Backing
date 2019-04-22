@@ -32,10 +32,8 @@ class App extends React.Component {
                     return;
                 }
 
-                dispatch({
-                    type: 'PoLC/fetchCommitment',
-                    payload: { ...event.returnValues, PoLC }
-                });
+                const { commitmentId, user } = event.returnValues;
+                PoLC.methods.commitmentsByUser.cacheCall(user, commitmentId);
             }
         );
 
@@ -54,6 +52,22 @@ class App extends React.Component {
                 });
             }
         );
+
+        // LiBA.events.RevealBid(
+        //     {
+        //         fromBlock: 0
+        //     },
+        //     (err, event) => {
+        //         if (err) {
+        //             return;
+        //         }
+
+        //         dispatch({
+        //             type: 'LiBA/fetchAuction',
+        //             payload: { ...event.returnValues, LiBA }
+        //         });
+        //     }
+        // );
 
         this.web3.eth.getBlock('latest').then(block => {
             dispatch({

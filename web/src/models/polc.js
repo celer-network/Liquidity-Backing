@@ -3,12 +3,7 @@ export default {
 
     state: {},
 
-    effects: {
-        *fetchCommitment({ payload }, { call, put }) {
-            const { commitmentId, user, PoLC } = payload;
-            PoLC.methods.commitmentsByUser.cacheCall(user, commitmentId);
-        }
-    },
+    effects: {},
 
     reducers: {
         save(state, action) {

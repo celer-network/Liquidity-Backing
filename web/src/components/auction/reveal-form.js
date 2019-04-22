@@ -1,12 +1,15 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import web3 from 'web3';
+import _ from 'lodash';
+import { drizzleConnect } from 'drizzle-react';
 import { Modal } from 'antd';
 
 import Form from '../form';
 import { etherFieldOptions, minValueRule } from '../../utils/form';
+import { formatEthValue } from '../../utils/unit';
 
-class BidForm extends React.Component {
+class RevealForm extends React.Component {
     constructor(props, context) {
         super(props);
 
@@ -24,7 +27,6 @@ class BidForm extends React.Component {
 
             const { celerValue, value, rate, salt, commitmentID } = values;
 
-            console.log(values);
             this.contracts.LiBA.methods.revealBid.cacheSend(
                 auctionId,
                 rate,
@@ -38,7 +40,16 @@ class BidForm extends React.Component {
     };
 
     render() {
-        const { visible, onClose } = this.props;
+        const { visible, PoLC, onClose } = this.props;
+        const commitmentOptions = _.map(PoLC.commitmentsByUser, commitment => {
+            const id = commitment.args[1];
+            const availableValue = formatEthValue(
+                commitment.value.availableValue
+            );
+
+            return [id, `ID: ${id}, Available Value: ${availableValue}`];
+        });
+
         const formItems = [
             {
                 name: 'value',
@@ -88,6 +99,10 @@ class BidForm extends React.Component {
             },
             {
                 name: 'commitmentID',
+                field: 'select',
+                fieldOptions: {
+                    options: commitmentOptions
+                },
                 rules: [
                     {
                         message: 'Please enter a commitmentID!',
@@ -110,14 +125,22 @@ class BidForm extends React.Component {
     }
 }
 
-BidForm.propTypes = {
+RevealForm.propTypes = {
     auctionId: PropTypes.string.isRequired,
     visible: PropTypes.bool.isRequired,
     onClose: PropTypes.func.isRequired
 };
 
-BidForm.contextTypes = {
+RevealForm.contextTypes = {
     drizzle: PropTypes.object
 };
 
-export default BidForm;
+function mapStateToProps(state) {
+    const { contracts } = state;
+
+    return {
+        PoLC: contracts.PoLC
+    };
+}
+
+export default drizzleConnect(RevealForm, mapStateToProps);
