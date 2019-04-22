@@ -2,6 +2,8 @@ import React from 'react';
 import _ from 'lodash';
 import { Button, DatePicker, Form, Input, InputNumber } from 'antd';
 
+import Select from './select';
+
 const FormItem = Form.Item;
 
 const defaultFormItemLayout = {
@@ -27,7 +29,8 @@ const FIELD_MAP = {
     date: DatePicker,
     input: Input,
     number: InputNumber,
-    text: Input.TextArea
+    text: Input.TextArea,
+    select: Select
 };
 
 class CustomizeForm extends React.Component {

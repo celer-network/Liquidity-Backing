@@ -4,6 +4,7 @@ import _ from 'lodash';
 import { drizzleConnect } from 'drizzle-react';
 import { Button, Card, Steps, Skeleton, Statistic, Row, Col } from 'antd';
 
+import BidTable from '../components/auction/bid-table';
 import BidForm from '../components/auction/bid-form';
 import RevealForm from '../components/auction/reveal-form';
 import ClaimForm from '../components/auction/claim-form';
@@ -36,6 +37,26 @@ class Auction extends React.Component {
             isClaimModalVisible: false,
             isChallengeModalVisible: false
         };
+
+        this.contracts.LiBA.events.RevealBid(
+            {
+                fromBlock: 0,
+                filter: {
+                    auctionId: parseInt(props.match.params.id)
+                }
+            },
+            (err, event) => {
+                if (err) {
+                    return;
+                }
+
+                const { auctionId, bidder } = event.returnValues;
+                this.contracts.LiBA.methods.bidsByUser.cacheCall(
+                    bidder,
+                    auctionId
+                );
+            }
+        );
     }
 
     static getDerivedStateFromProps(props) {
@@ -48,7 +69,7 @@ class Auction extends React.Component {
         );
 
         if (!auction) {
-            return;
+            return {};
         }
 
         const currentBlockNumber = LiBA.block.number;
@@ -151,6 +172,9 @@ class Auction extends React.Component {
                 </Col>
                 <Col span={12}>
                     <Statistic title="Max Rate" value={maxRate} />
+                </Col>
+                <Col span={24}>
+                    <BidTable />
                 </Col>
             </Row>
         );

@@ -49,7 +49,7 @@ contract LiBA is PullPayment{
     event NewAuction(uint auctionId, address asker);
     event NewBid(uint auctionId, address bidder);
     event UpdateBid(uint auctionId, address bidder);
-    event RevealBid(uint auctionId, address bidder);
+    event RevealBid(uint indexed auctionId, address bidder);
     event ClaimWinners(uint auctionId, address[] winners);
     event ChallengeWinners(uint auctionId, address challenger, address[] winners);
     event FinalizeAuction(uint auctionId);

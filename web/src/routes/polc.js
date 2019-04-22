@@ -162,7 +162,6 @@ PoLC.contextTypes = {
 function mapStateToProps(state) {
     const { contracts } = state;
 
-    console.log(contracts);
     return {
         PoLC: contracts.PoLC
     };
