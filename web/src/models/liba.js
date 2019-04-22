@@ -3,12 +3,7 @@ export default {
 
     state: {},
 
-    effects: {
-        *fetchAuction({ payload }, { call, put }) {
-            const { auctionId, LiBA } = payload;
-            LiBA.methods.getAuction.cacheCall(auctionId);
-        }
-    },
+    effects: {},
 
     reducers: {
         save(state, action) {

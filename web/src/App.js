@@ -46,28 +46,10 @@ class App extends React.Component {
                     return;
                 }
 
-                dispatch({
-                    type: 'LiBA/fetchAuction',
-                    payload: { ...event.returnValues, LiBA }
-                });
+                const { auctionId } = event.returnValues;
+                LiBA.methods.getAuction.cacheCall(auctionId);
             }
         );
-
-        // LiBA.events.RevealBid(
-        //     {
-        //         fromBlock: 0
-        //     },
-        //     (err, event) => {
-        //         if (err) {
-        //             return;
-        //         }
-
-        //         dispatch({
-        //             type: 'LiBA/fetchAuction',
-        //             payload: { ...event.returnValues, LiBA }
-        //         });
-        //     }
-        // );
 
         this.web3.eth.getBlock('latest').then(block => {
             dispatch({
