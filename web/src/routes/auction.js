@@ -2,16 +2,24 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import _ from 'lodash';
 import { drizzleConnect } from 'drizzle-react';
-import { Button, Card, Steps, Skeleton, Statistic, Row, Col } from 'antd';
+import {
+    Button,
+    Card,
+    Steps,
+    Skeleton,
+    Statistic,
+    Row,
+    Col,
+    notification
+} from 'antd';
 
 import BidTable from '../components/auction/bid-table';
 import BidForm from '../components/auction/bid-form';
 import RevealForm from '../components/auction/reveal-form';
-import ClaimForm from '../components/auction/claim-form';
-import ChallengeForm from '../components/auction/challenge-form';
 import { formatEthValue } from '../utils/unit';
 import {
     getCurrentPeriod,
+    getWinners,
     BID,
     REVEAL,
     CLAIM,
@@ -33,17 +41,15 @@ class Auction extends React.Component {
             currentStep: 0,
             currentPeriod: '',
             isBidModalVisible: false,
-            isRevealModalVisible: false,
-            isClaimModalVisible: false,
-            isChallengeModalVisible: false
+            isRevealModalVisible: false
         };
+
+        const auctionId = parseInt(props.match.params.id);
 
         this.contracts.LiBA.events.RevealBid(
             {
                 fromBlock: 0,
-                filter: {
-                    auctionId: parseInt(props.match.params.id)
-                }
+                filter: { auctionId }
             },
             (err, event) => {
                 if (err) {
@@ -55,6 +61,23 @@ class Auction extends React.Component {
                     bidder,
                     auctionId
                 );
+            }
+        );
+
+        this.contracts.LiBA.events.ClaimWinners(
+            {
+                fromBlock: 0,
+                filter: { auctionId }
+            },
+            (err, event) => {
+                if (err) {
+                    return;
+                }
+
+                const { winners } = event.returnValues;
+                this.setState({
+                    winners
+                });
             }
         );
     }
@@ -88,9 +111,9 @@ class Auction extends React.Component {
             case REVEAL:
                 return this.toggleRevealModal();
             case CLAIM:
-                return this.toggleClaimModal();
+                return this.claimWinners();
             case CHALLENGE:
-                return this.toggleChallengeModal();
+                return this.challengeWinners();
             case FINALIZE:
                 return this.finalizeAuction();
         }
@@ -108,16 +131,32 @@ class Auction extends React.Component {
         }));
     };
 
-    toggleClaimModal = () => {
-        this.setState(prevState => ({
-            isClaimModalVisible: !prevState.isClaimModalVisible
-        }));
+    claimWinners = () => {
+        const { auction } = this.state;
+        const { LiBA } = this.props;
+        const winners = getWinners(auction, _.values(LiBA.bidsByUser));
+        const auctionId = auction.args[0];
+
+        this.contracts.LiBA.methods.claimWinners(auctionId, winners).send();
     };
 
-    toggleChallengeModal = () => {
-        this.setState(prevState => ({
-            isChallengeModalVisible: !prevState.isChallengeModalVisible
-        }));
+    challengeWinners = () => {
+        const { auction, winners } = this.state;
+        const { LiBA } = this.props;
+        const calculatedWinners = getWinners(
+            auction,
+            _.values(LiBA.bidsByUser)
+        );
+
+        if (_.isEqual(winners, calculatedWinners)) {
+            notification.error({
+                message: 'There is no need to challenge winners'
+            });
+            return;
+        }
+
+        const auctionId = auction.args[0];
+        this.contracts.LiBA.methods.challengeWinners(auctionId, winners).send();
     };
 
     finalizeAuction = () => {
@@ -152,6 +191,7 @@ class Auction extends React.Component {
     renderAuctionDetail = () => {
         const { auction } = this.state;
         const { asker, value, duration, maxRate, minValue } = auction.value;
+        const auctionId = auction.args[0];
 
         return (
             <Row style={{ marginTop: '10px' }}>
@@ -174,7 +214,7 @@ class Auction extends React.Component {
                     <Statistic title="Max Rate" value={maxRate} />
                 </Col>
                 <Col span={24}>
-                    <BidTable />
+                    <BidTable auctionId={auctionId} />
                 </Col>
             </Row>
         );
@@ -186,7 +226,6 @@ class Auction extends React.Component {
             currentStep,
             isBidModalVisible,
             isRevealModalVisible,
-            isClaimModalVisible,
             isChallengeModalVisible
         } = this.state;
 
@@ -213,16 +252,6 @@ class Auction extends React.Component {
                     auctionId={auctionId}
                     visible={isRevealModalVisible}
                     onClose={this.toggleRevealModal}
-                />
-                <ClaimForm
-                    auctionId={auctionId}
-                    visible={isClaimModalVisible}
-                    onClose={this.toggleClaimModal}
-                />
-                <ChallengeForm
-                    auctionId={auctionId}
-                    visible={isChallengeModalVisible}
-                    onClose={this.toggleChallengeModal}
                 />
             </Card>
         );

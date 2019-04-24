@@ -27,8 +27,11 @@ const columns = [
 
 class BidTable extends React.Component {
     render() {
-        const { LiBA } = this.props;
-        const dataSource = _.map(LiBA.bidsByUser, bid => {
+        const { auctionId, LiBA } = this.props;
+        const dataSource = _.filter(
+            LiBA.bidsByUser,
+            bid => bid.args[1] === auctionId
+        ).map(bid => {
             const bidder = bid.args[0];
 
             return {
@@ -49,6 +52,7 @@ class BidTable extends React.Component {
 }
 
 BidTable.propTypes = {
+    auctionId: PropTypes.string.isRequired,
     LiBA: PropTypes.object.isRequired
 };
 

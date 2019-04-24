@@ -39,7 +39,7 @@ contract LiBA is PullPayment{
         uint finalizeEnd;
     }
 
-    IERC20 private celerToken;
+    IERC20 public celerToken;
     IPoLC private polc;
     uint private auctionDeposit;
     uint private auctionCount;
@@ -50,8 +50,8 @@ contract LiBA is PullPayment{
     event NewBid(uint auctionId, address bidder);
     event UpdateBid(uint auctionId, address bidder);
     event RevealBid(uint indexed auctionId, address bidder);
-    event ClaimWinners(uint auctionId, address[] winners);
-    event ChallengeWinners(uint auctionId, address challenger, address[] winners);
+    event ClaimWinners(uint indexed auctionId, address[] winners);
+    event ChallengeWinners(uint indexed auctionId, address challenger, address[] winners);
     event FinalizeAuction(uint auctionId);
     event RepayAuction(uint auctionId);
 
