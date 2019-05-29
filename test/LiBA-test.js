@@ -434,7 +434,12 @@ contract('LiBA', ([provider, bidder0, bidder1]) => {
                 MIN_VALUE
             );
         } catch (e) {
-            assert.isAbove(e.message.search('sender must be in whitelist'), -1);
+            assert.isAbove(
+                e.message.search(
+                    'WhitelistedRole: caller does not have the Whitelisted role'
+                ),
+                -1
+            );
             return;
         }
 
@@ -442,7 +447,7 @@ contract('LiBA', ([provider, bidder0, bidder1]) => {
     });
 
     it('should init auction successfully if in whitelist', async () => {
-        await liba.updateWhitelist(provider, true);
+        await liba.addWhitelisted(provider);
         await liba.initAuction(
             BID_DURATION,
             REVEAL_DURATION,

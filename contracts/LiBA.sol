@@ -5,9 +5,9 @@ import "openzeppelin-solidity/contracts/math/SafeMath.sol";
 import "openzeppelin-solidity/contracts/token/ERC20/IERC20.sol";
 import "openzeppelin-solidity/contracts/token/ERC20/SafeERC20.sol";
 import "openzeppelin-solidity/contracts/payment/PullPayment.sol";
-import "openzeppelin-solidity/contracts/ownership/Ownable.sol";
+import "openzeppelin-solidity/contracts/access/roles/WhitelistedRole.sol";
 
-contract LiBA is PullPayment, Ownable {
+contract LiBA is PullPayment, WhitelistedRole {
     using SafeERC20 for IERC20;
     using SafeMath for uint;
 
@@ -68,18 +68,14 @@ contract LiBA is PullPayment, Ownable {
     /**
      * @notice Check if the sender is in whitelist
      */
-    modifier inWhitelist() {
+    modifier onlyWhitelisted() {
         if (enableWhitelist) {
             require(
-                whitelist[msg.sender],
-                "sender must be in whitelist"
+                isWhitelisted(msg.sender),
+                "WhitelistedRole: caller does not have the Whitelisted role"
             );
         }
         _;
-    }
-
-    function updateWhitelist(address _user, bool _enable) public onlyOwner {
-        whitelist[_user] = _enable;
     }
 
     /**
@@ -105,7 +101,7 @@ contract LiBA is PullPayment, Ownable {
         uint _minValue
     )
         public
-        inWhitelist
+        onlyWhitelisted
     {
         Auction storage auction = auctions[auctionCount];
         auction.asker = msg.sender;
