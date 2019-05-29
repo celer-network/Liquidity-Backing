@@ -47,7 +47,6 @@ contract LiBA is PullPayment, WhitelistedRole {
     IERC20 public celerToken;
     mapping(uint => Auction) private auctions;
     mapping(address => mapping(uint => Bid)) public bidsByUser;
-    mapping(address => bool) private whitelist;
 
     event NewAuction(uint auctionId, address asker);
     event NewBid(uint auctionId, address bidder);
@@ -68,7 +67,7 @@ contract LiBA is PullPayment, WhitelistedRole {
     /**
      * @notice Check if the sender is in whitelist
      */
-    modifier onlyWhitelisted() {
+    modifier libaWhitelistCheck() {
         if (enableWhitelist) {
             require(
                 isWhitelisted(msg.sender),
@@ -101,7 +100,7 @@ contract LiBA is PullPayment, WhitelistedRole {
         uint _minValue
     )
         public
-        onlyWhitelisted
+        libaWhitelistCheck
     {
         Auction storage auction = auctions[auctionCount];
         auction.asker = msg.sender;
