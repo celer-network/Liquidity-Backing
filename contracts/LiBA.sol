@@ -5,8 +5,9 @@ import "openzeppelin-solidity/contracts/math/SafeMath.sol";
 import "openzeppelin-solidity/contracts/token/ERC20/IERC20.sol";
 import "openzeppelin-solidity/contracts/token/ERC20/SafeERC20.sol";
 import "openzeppelin-solidity/contracts/payment/PullPayment.sol";
+import "openzeppelin-solidity/contracts/ownership/Ownable.sol";
 
-contract LiBA is PullPayment{
+contract LiBA is PullPayment, Ownable {
     using SafeERC20 for IERC20;
     using SafeMath for uint;
 
@@ -39,12 +40,14 @@ contract LiBA is PullPayment{
         uint finalizeEnd;
     }
 
-    IERC20 public celerToken;
     IPoLC private polc;
     uint private auctionDeposit;
     uint private auctionCount;
+    bool private enableWhitelist;
+    IERC20 public celerToken;
     mapping(uint => Auction) private auctions;
     mapping(address => mapping(uint => Bid)) public bidsByUser;
+    mapping(address => bool) private whitelist;
 
     event NewAuction(uint auctionId, address asker);
     event NewBid(uint auctionId, address bidder);
@@ -55,10 +58,28 @@ contract LiBA is PullPayment{
     event FinalizeAuction(uint auctionId);
     event RepayAuction(uint auctionId);
 
-    constructor(address _celerTokenAddress, address _polcAddress, uint _auctionDeposit) public {
+    constructor(address _celerTokenAddress, address _polcAddress, uint _auctionDeposit, bool _enableWhitelist) public {
         celerToken = IERC20(_celerTokenAddress);
         polc = IPoLC(_polcAddress);
         auctionDeposit = _auctionDeposit;
+        enableWhitelist = _enableWhitelist;
+    }
+
+    /**
+     * @notice Check if the sender is in whitelist
+     */
+    modifier inWhitelist() {
+        if (enableWhitelist) {
+            require(
+                whitelist[msg.sender],
+                "sender must be in whitelist"
+            );
+        }
+        _;
+    }
+
+    function updateWhitelist(address _user, bool _enable) public onlyOwner {
+        whitelist[_user] = _enable;
     }
 
     /**
@@ -84,6 +105,7 @@ contract LiBA is PullPayment{
         uint _minValue
     )
         public
+        inWhitelist
     {
         Auction storage auction = auctions[auctionCount];
         auction.asker = msg.sender;
