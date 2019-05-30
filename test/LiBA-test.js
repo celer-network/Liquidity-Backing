@@ -53,7 +53,12 @@ contract('LiBA', ([provider, bidder0, bidder1]) => {
         ethPool = await EthPool.new();
         token = await ERC20ExampleToken.new();
         polc = await PoLC.new(token.address, 100);
-        liba = await LiBA.new(token.address, polc.address, AUCTION_DEPOSIT);
+        liba = await LiBA.new(
+            token.address,
+            polc.address,
+            AUCTION_DEPOSIT,
+            false
+        );
 
         await polc.setLibaAddress(liba.address);
         await polc.setEthPool(ethPool.address);
@@ -405,5 +410,54 @@ contract('LiBA', ([provider, bidder0, bidder1]) => {
         const { event, args } = receipt.logs[0];
         assert.equal(event, 'RepayAuction');
         assert.deepEqual(args.auctionId.toNumber(), auctionId);
+    });
+
+    it('should fail to init auction for missing from whitelist', async () => {
+        liba = await LiBA.new(
+            token.address,
+            polc.address,
+            AUCTION_DEPOSIT,
+            true
+        );
+        await token.approve(liba.address, AUCTION_DEPOSIT * 10);
+
+        try {
+            await liba.initAuction(
+                BID_DURATION,
+                REVEAL_DURATION,
+                CLAIM_DURATION,
+                CHALLENGE_DURATION,
+                FINALIZE_DURATION,
+                VALUE,
+                DURATION,
+                MAX_RATE,
+                MIN_VALUE
+            );
+        } catch (e) {
+            assert.isAbove(
+                e.message.search(
+                    'WhitelistedRole: caller does not have the Whitelisted role'
+                ),
+                -1
+            );
+            return;
+        }
+
+        assert.fail('should have thrown before');
+    });
+
+    it('should init auction successfully if in whitelist', async () => {
+        await liba.addWhitelisted(provider);
+        await liba.initAuction(
+            BID_DURATION,
+            REVEAL_DURATION,
+            CLAIM_DURATION,
+            CHALLENGE_DURATION,
+            FINALIZE_DURATION,
+            VALUE,
+            DURATION,
+            MAX_RATE,
+            MIN_VALUE
+        );
     });
 });

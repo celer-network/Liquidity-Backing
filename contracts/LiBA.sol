@@ -5,8 +5,9 @@ import "openzeppelin-solidity/contracts/math/SafeMath.sol";
 import "openzeppelin-solidity/contracts/token/ERC20/IERC20.sol";
 import "openzeppelin-solidity/contracts/token/ERC20/SafeERC20.sol";
 import "openzeppelin-solidity/contracts/payment/PullPayment.sol";
+import "openzeppelin-solidity/contracts/access/roles/WhitelistedRole.sol";
 
-contract LiBA is PullPayment{
+contract LiBA is PullPayment, WhitelistedRole {
     using SafeERC20 for IERC20;
     using SafeMath for uint;
 
@@ -39,10 +40,11 @@ contract LiBA is PullPayment{
         uint finalizeEnd;
     }
 
-    IERC20 public celerToken;
     IPoLC private polc;
     uint private auctionDeposit;
     uint private auctionCount;
+    bool private enableWhitelist;
+    IERC20 public celerToken;
     mapping(uint => Auction) private auctions;
     mapping(address => mapping(uint => Bid)) public bidsByUser;
 
@@ -55,10 +57,24 @@ contract LiBA is PullPayment{
     event FinalizeAuction(uint auctionId);
     event RepayAuction(uint auctionId);
 
-    constructor(address _celerTokenAddress, address _polcAddress, uint _auctionDeposit) public {
+    constructor(address _celerTokenAddress, address _polcAddress, uint _auctionDeposit, bool _enableWhitelist) public {
         celerToken = IERC20(_celerTokenAddress);
         polc = IPoLC(_polcAddress);
         auctionDeposit = _auctionDeposit;
+        enableWhitelist = _enableWhitelist;
+    }
+
+    /**
+     * @notice Check if the sender is in whitelist
+     */
+    modifier libaWhitelistCheck() {
+        if (enableWhitelist) {
+            require(
+                isWhitelisted(msg.sender),
+                "WhitelistedRole: caller does not have the Whitelisted role"
+            );
+        }
+        _;
     }
 
     /**
@@ -84,6 +100,7 @@ contract LiBA is PullPayment{
         uint _minValue
     )
         public
+        libaWhitelistCheck
     {
         Auction storage auction = auctions[auctionCount];
         auction.asker = msg.sender;
