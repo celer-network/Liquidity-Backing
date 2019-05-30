@@ -34,13 +34,13 @@
         "eslint-config-standard": "^12.0.0",
         "eslint-plugin-import": "^2.14.0",
         "eslint-plugin-node": "^8.0.1",
-        "eslint-plugin-promise": "^4.0.1",
         "eslint-plugin-prettier": "^3.0.1",
+        "eslint-plugin-promise": "^4.0.1",
         "eslint-plugin-standard": "^4.0.0",
         "ganache-cli": "^6.4.2",
         "prettier": "1.16.1",
         "solidity-coverage": "^0.5.11",
-        "solium": "^1.2.2",
+        "solium": "^1.2.4",
         "truffle": "^5.0.12"
     }
 }
