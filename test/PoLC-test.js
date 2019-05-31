@@ -18,18 +18,21 @@ const LOCK_DURATION = 10;
 
 contract('PoLC', ([owner, liba, borrower]) => {
     let ethPool;
-    let token;
     let polc;
+    let commitToken;
+    let celerToken;
     let commitmentId;
 
     before(async () => {
         ethPool = await EthPool.new();
-        token = await ERC20ExampleToken.new();
-        polc = await PoLC.new(token.address, BLOCK_REWARD);
+        commitToken = await ERC20ExampleToken.new();
+        celerToken = await ERC20ExampleToken.new();
+        polc = await PoLC.new(celerToken.address, BLOCK_REWARD);
 
         await polc.setLibaAddress(liba);
         await polc.setEthPool(ethPool.address);
-        await token.transfer(polc.address, BLOCK_REWARD * 1000);
+        await celerToken.transfer(polc.address, BLOCK_REWARD * 1000);
+        await commitToken.approve(polc.address, 1);
     });
 
     it('should fail to commit eth fund for non-zero amount', async () => {
@@ -137,12 +140,12 @@ contract('PoLC', ([owner, liba, borrower]) => {
         assert.fail('should have thrown before');
     });
 
-    it('should fail to commit erc fund for zero amount', async () => {
+    it('should fail to commit erc fund for unsupported token address', async () => {
         try {
-            await polc.commitFund(LOCK_DURATION, token.address, 0);
+            await polc.commitFund(LOCK_DURATION, commitToken.address, 1);
         } catch (e) {
             assert.isAbove(
-                e.message.search('amount must be larger than zero'),
+                e.message.search('token address must be supported'),
                 -1
             );
             return;
@@ -152,8 +155,9 @@ contract('PoLC', ([owner, liba, borrower]) => {
     });
 
     it('should fail to commit erc fund for non-zero value', async () => {
+        await polc.addSupportedToken(commitToken.address);
         try {
-            await polc.commitFund(LOCK_DURATION, token.address, 1, {
+            await polc.commitFund(LOCK_DURATION, commitToken.address, 1, {
                 value: '1'
             });
         } catch (e) {
@@ -165,7 +169,11 @@ contract('PoLC', ([owner, liba, borrower]) => {
     });
 
     it('should commit erc fund successfully', async () => {
-        const receipt = await polc.commitFund(LOCK_DURATION, token.address, 1);
+        const receipt = await polc.commitFund(
+            LOCK_DURATION,
+            commitToken.address,
+            1
+        );
         const { event, args } = receipt.logs[0];
         assert.equal(event, 'NewCommitment');
         commitmentId = args.commitmentId.toNumber();
@@ -181,7 +189,7 @@ contract('PoLC', ([owner, liba, borrower]) => {
         assert.equal(commitment.availableValue.toNumber(), 1);
         assert.equal(commitment.lendingValue.toNumber(), 0);
         assert.equal(commitment.withdrawedReward.toNumber(), 0);
-        assert.equal(commitment.tokenAddress, token.address);
+        assert.equal(commitment.tokenAddress, commitToken.address);
     });
 
     it('should withdraw erc fund successfully', async () => {

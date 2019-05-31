@@ -84,6 +84,7 @@ contract PoLC is Ownable, IPoLC, TokenUtil {
             value = msg.value;
         } else {
             value = _amount;
+            IERC20(_tokenAddress).safeTransferFrom(msg.sender, address(this), _amount);
         }
         Commitment storage commitment = commitmentsByUser[sender][currentTimestamp];
         require(
