@@ -2,16 +2,18 @@ pragma solidity ^0.5.0;
 
 import "./lib/IEthPool.sol";
 import "./lib/IPoLC.sol";
+import "./lib/TokenUtil.sol";
 import "openzeppelin-solidity/contracts/math/SafeMath.sol";
 import "openzeppelin-solidity/contracts/token/ERC20/IERC20.sol";
 import "openzeppelin-solidity/contracts/token/ERC20/SafeERC20.sol";
 import "openzeppelin-solidity/contracts/ownership/Ownable.sol";
 
-contract PoLC is Ownable, IPoLC {
+contract PoLC is Ownable, IPoLC, TokenUtil {
     using SafeERC20 for IERC20;
     using SafeMath for uint;
 
     struct Commitment {
+        address tokenAddress;
         uint lockStart;
         uint lockEnd;
         uint lockedValue;
@@ -26,7 +28,9 @@ contract PoLC is Ownable, IPoLC {
     // reward payout for each block
     uint private blockReward;
     // mapping mining power by day
-    mapping(uint => uint) private powerByTime;
+    mapping(
+        address => mapping(uint => uint)
+    ) private powerByTokenTime;
     // mapping user address to its commitments
     mapping(
         address => mapping (uint => Commitment)
@@ -35,6 +39,9 @@ contract PoLC is Ownable, IPoLC {
     constructor(address _celerTokenAddress, uint _blockReward) public {
         celerToken = IERC20(_celerTokenAddress);
         blockReward = _blockReward;
+
+        // Enable eth support by default
+        supportedTokens[address(0)] = true;
     }
 
     event NewCommitment(uint commitmentId, address indexed user);
@@ -62,15 +69,26 @@ contract PoLC is Ownable, IPoLC {
      * @notice Lock fund into the PoLC contract
      * @param _duration lock-in duration by days
      */
-    function commitFund(uint _duration) external payable {
+    function commitFund(uint _duration, address _tokenAddress, uint _amount)
+        external
+        payable
+        validateToken(_tokenAddress, _amount)
+    {
         require(
             _duration > 0 && _duration < 365,
             "duration must fall into the 0-365 range"
         );
 
-        uint value = msg.value;
         address sender = msg.sender;
         uint currentTimestamp = block.timestamp;
+        uint value;
+
+        if (_tokenAddress == address(0)) {
+            value = msg.value;
+        } else {
+            value = _amount;
+            IERC20(_tokenAddress).safeTransferFrom(msg.sender, address(this), _amount);
+        }
         Commitment storage commitment = commitmentsByUser[sender][currentTimestamp];
         require(
             commitment.lockEnd == 0,
@@ -83,7 +101,9 @@ contract PoLC is Ownable, IPoLC {
         commitment.lockEnd = lockEnd;
         commitment.lockedValue = value;
         commitment.availableValue = value;
+        commitment.tokenAddress = _tokenAddress;
 
+        mapping (uint => uint) storage powerByTime = powerByTokenTime[_tokenAddress];
         uint power = value.mul(_duration);
         for (uint i = lockStart; i < lockEnd; i++) {
             powerByTime[i] = powerByTime[i].add(power);
@@ -105,7 +125,7 @@ contract PoLC is Ownable, IPoLC {
         Commitment storage commitment = commitmentsByUser[msg.sender][_commitmentId];
         uint availableValue = commitment.availableValue;
         commitment.availableValue = 0;
-        msg.sender.transfer(availableValue);
+        _transfer(commitment.tokenAddress, msg.sender, availableValue);
 
         emit WithdrawFund(_commitmentId);
     }
@@ -125,6 +145,7 @@ contract PoLC is Ownable, IPoLC {
         uint power = commitment.lockedValue.mul(
             commitment.lockEnd.sub(commitment.lockStart)
         );
+        mapping (uint => uint) storage powerByTime = powerByTokenTime[commitment.tokenAddress];
         for (uint i = commitment.lockStart; i < commitment.lockEnd; i++) {
             totalReward = totalReward.add(
                 blockReward.mul(power).div(powerByTime[i])

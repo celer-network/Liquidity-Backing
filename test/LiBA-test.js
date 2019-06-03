@@ -276,10 +276,15 @@ contract('LiBA', ([provider, bidder0, bidder1]) => {
     });
 
     const commitFund = async (bid, bidder) => {
-        const receipt = await polc.commitFund(100, {
-            value: bid.value,
-            from: bidder
-        });
+        const receipt = await polc.commitFund(
+            100,
+            '0x0000000000000000000000000000000000000000',
+            0,
+            {
+                value: bid.value,
+                from: bidder
+            }
+        );
         const { args } = receipt.logs[0];
         bid.commitmentId = args.commitmentId.toNumber();
     };
