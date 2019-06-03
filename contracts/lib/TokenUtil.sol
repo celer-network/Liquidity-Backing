@@ -9,7 +9,7 @@ contract TokenUtil is Ownable {
     using Address for address;
     using SafeERC20 for IERC20;
 
-    mapping(address => bool) private supportedTokens;
+    mapping(address => bool) public supportedTokens;
 
    /**
      * @notice Validate if the token address and amount is valid
@@ -17,11 +17,11 @@ contract TokenUtil is Ownable {
      * @param _amount the amount to be transferred
      */
     modifier validateToken(address _tokenAddress, uint _amount) {
+        require(supportedTokens[_tokenAddress], "token address must be supported");
+
         if (_tokenAddress == address(0)) {
             require(_amount == 0, "amount must be zero");
         } else {
-            require(_tokenAddress.isContract(), "token address must be contract address");
-            require(supportedTokens[_tokenAddress], "token address must be supported");
             require(msg.value == 0, "msg value must be zero");
         }
 
@@ -29,12 +29,13 @@ contract TokenUtil is Ownable {
     }
 
     /**
-     * @notice Add a token to supported list
+     * @notice Update a token in supported list
      * @param _tokenAddress the token address
+     * @param _supported if the token is supported
      */
-    function addSupportedToken(address _tokenAddress) public onlyOwner {
+    function updateSupportedToken(address _tokenAddress, bool _supported) public onlyOwner {
         require(_tokenAddress.isContract(), "token address must be contract address");
-        supportedTokens[_tokenAddress] = true;
+        supportedTokens[_tokenAddress] = _supported;
     }
 
     /**

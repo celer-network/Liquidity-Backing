@@ -126,20 +126,6 @@ contract('PoLC', ([owner, liba, borrower]) => {
         );
     });
 
-    it('should fail to commit erc fund for invalid token address', async () => {
-        try {
-            await polc.commitFund(LOCK_DURATION, owner, 1);
-        } catch (e) {
-            assert.isAbove(
-                e.message.search('token address must be contract address'),
-                -1
-            );
-            return;
-        }
-
-        assert.fail('should have thrown before');
-    });
-
     it('should fail to commit erc fund for unsupported token address', async () => {
         try {
             await polc.commitFund(LOCK_DURATION, commitToken.address, 1);
@@ -155,7 +141,7 @@ contract('PoLC', ([owner, liba, borrower]) => {
     });
 
     it('should fail to commit erc fund for non-zero value', async () => {
-        await polc.addSupportedToken(commitToken.address);
+        await polc.updateSupportedToken(commitToken.address, true);
         try {
             await polc.commitFund(LOCK_DURATION, commitToken.address, 1, {
                 value: '1'

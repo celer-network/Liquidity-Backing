@@ -39,6 +39,9 @@ contract PoLC is Ownable, IPoLC, TokenUtil {
     constructor(address _celerTokenAddress, uint _blockReward) public {
         celerToken = IERC20(_celerTokenAddress);
         blockReward = _blockReward;
+
+        // Enable eth support by default
+        supportedTokens[address(0)] = true;
     }
 
     event NewCommitment(uint commitmentId, address indexed user);
