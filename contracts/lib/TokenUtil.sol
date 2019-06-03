@@ -11,6 +11,8 @@ contract TokenUtil is Ownable {
 
     mapping(address => bool) public supportedTokens;
 
+    event UpdateSupportedToken(address indexed tokenAddress, bool supported);
+
    /**
      * @notice Validate if the token address and amount is valid
      * @param _tokenAddress the token address
@@ -36,6 +38,7 @@ contract TokenUtil is Ownable {
     function updateSupportedToken(address _tokenAddress, bool _supported) public onlyOwner {
         require(_tokenAddress.isContract(), "token address must be contract address");
         supportedTokens[_tokenAddress] = _supported;
+        emit UpdateSupportedToken(_tokenAddress, _supported);
     }
 
     /**
