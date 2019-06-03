@@ -27,10 +27,13 @@ contract('PoLC', ([owner, liba, borrower]) => {
         ethPool = await EthPool.new();
         commitToken = await ERC20ExampleToken.new();
         celerToken = await ERC20ExampleToken.new();
-        polc = await PoLC.new(celerToken.address, BLOCK_REWARD);
+        polc = await PoLC.new(
+            celerToken.address,
+            ethPool.address,
+            BLOCK_REWARD
+        );
 
         await polc.setLibaAddress(liba);
-        await polc.setEthPool(ethPool.address);
         await celerToken.transfer(polc.address, BLOCK_REWARD * 1000);
         await commitToken.approve(polc.address, 1);
     });
@@ -206,20 +209,6 @@ contract('PoLC', ([owner, liba, borrower]) => {
         assert.fail('should have thrown before');
     });
 
-    it('should fail to set ethPool twice', async () => {
-        try {
-            await polc.setEthPool(owner);
-        } catch (e) {
-            assert.isAbove(
-                e.message.search('ethPool can only be set once'),
-                -1
-            );
-            return;
-        }
-
-        assert.fail('should have thrown before');
-    });
-
     it('should fail to lendCommitment for wrong sender', async () => {
         try {
             await polc.lendCommitment(owner, commitmentId, 1, borrower);
@@ -276,9 +265,7 @@ contract('PoLC', ([owner, liba, borrower]) => {
 
     it('should fail to repayCommitment for wrong sender', async () => {
         try {
-            await polc.repayCommitment(owner, commitmentId, {
-                value: 1
-            });
+            await polc.repayCommitment(owner, commitmentId, 1, { value: '1' });
         } catch (e) {
             assert.isAbove(
                 e.message.search('sender must be liba contract'),
@@ -291,9 +278,9 @@ contract('PoLC', ([owner, liba, borrower]) => {
     });
 
     it('should repayCommitment successfully', async () => {
-        await polc.repayCommitment(owner, commitmentId, {
+        await polc.repayCommitment(owner, commitmentId, 1, {
             from: liba,
-            value: 1
+            value: '1'
         });
         const commitment = await polc.commitmentsByUser.call(
             owner,

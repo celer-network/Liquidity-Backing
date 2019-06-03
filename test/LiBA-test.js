@@ -11,6 +11,7 @@ chai.use(chaiAsPromised);
 const assert = chai.assert;
 const web3 = new Web3(new Web3.providers.HttpProvider('http://localhost:8545'));
 
+const EMPTY_ADDRESS = '0x0000000000000000000000000000000000000000';
 const AUCTION_DEPOSIT = 100;
 const BID_DURATION = 8;
 const REVEAL_DURATION = 10;
@@ -52,7 +53,7 @@ contract('LiBA', ([provider, bidder0, bidder1]) => {
     before(async () => {
         ethPool = await EthPool.new();
         token = await ERC20ExampleToken.new();
-        polc = await PoLC.new(token.address, 100);
+        polc = await PoLC.new(token.address, ethPool.address, 100);
         liba = await LiBA.new(
             token.address,
             polc.address,
@@ -61,7 +62,6 @@ contract('LiBA', ([provider, bidder0, bidder1]) => {
         );
 
         await polc.setLibaAddress(liba.address);
-        await polc.setEthPool(ethPool.address);
         await token.transfer(provider, 10000);
         await token.transfer(bidder0, 10000);
         await token.transfer(bidder1, 10000);
@@ -70,6 +70,7 @@ contract('LiBA', ([provider, bidder0, bidder1]) => {
     it('should fail to init auction for missing auction deposit', async () => {
         try {
             await liba.initAuction(
+                EMPTY_ADDRESS,
                 BID_DURATION,
                 REVEAL_DURATION,
                 CLAIM_DURATION,
@@ -94,6 +95,7 @@ contract('LiBA', ([provider, bidder0, bidder1]) => {
     it('should init auction successfully', async () => {
         await token.approve(liba.address, AUCTION_DEPOSIT * 10);
         const receipt = await liba.initAuction(
+            EMPTY_ADDRESS,
             BID_DURATION,
             REVEAL_DURATION,
             CLAIM_DURATION,
@@ -276,15 +278,10 @@ contract('LiBA', ([provider, bidder0, bidder1]) => {
     });
 
     const commitFund = async (bid, bidder) => {
-        const receipt = await polc.commitFund(
-            100,
-            '0x0000000000000000000000000000000000000000',
-            0,
-            {
-                value: bid.value,
-                from: bidder
-            }
-        );
+        const receipt = await polc.commitFund(100, EMPTY_ADDRESS, 0, {
+            value: bid.value,
+            from: bidder
+        });
         const { args } = receipt.logs[0];
         bid.commitmentId = args.commitmentId.toNumber();
     };
@@ -428,6 +425,7 @@ contract('LiBA', ([provider, bidder0, bidder1]) => {
 
         try {
             await liba.initAuction(
+                EMPTY_ADDRESS,
                 BID_DURATION,
                 REVEAL_DURATION,
                 CLAIM_DURATION,
@@ -454,6 +452,7 @@ contract('LiBA', ([provider, bidder0, bidder1]) => {
     it('should init auction successfully if in whitelist', async () => {
         await liba.addWhitelisted(provider);
         await liba.initAuction(
+            EMPTY_ADDRESS,
             BID_DURATION,
             REVEAL_DURATION,
             CLAIM_DURATION,
