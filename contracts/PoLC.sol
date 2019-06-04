@@ -1,6 +1,5 @@
 pragma solidity ^0.5.0;
 
-import "./lib/IEthPool.sol";
 import "./lib/IPoLC.sol";
 import "./lib/TokenUtil.sol";
 import "openzeppelin-solidity/contracts/math/SafeMath.sol";
@@ -24,7 +23,6 @@ contract PoLC is Ownable, IPoLC, TokenUtil {
 
     address private libaAddress;
     IERC20 private celerToken;
-    IEthPool private ethPool;
     // reward payout for each block
     uint private blockReward;
     // mapping mining power by day
@@ -72,12 +70,18 @@ contract PoLC is Ownable, IPoLC, TokenUtil {
     function commitFund(uint _duration, address _tokenAddress, uint _amount)
         external
         payable
-        validateToken(_tokenAddress, _amount)
     {
         require(
             _duration > 0 && _duration < 365,
             "duration must fall into the 0-365 range"
         );
+        require(supportedTokens[_tokenAddress], "token address must be supported");
+
+        if (_tokenAddress == address(0)) {
+            require(_amount == 0, "amount must be zero");
+        } else {
+            require(msg.value == 0, "msg value must be zero");
+        }
 
         address sender = msg.sender;
         uint currentTimestamp = block.timestamp;
@@ -167,16 +171,6 @@ contract PoLC is Ownable, IPoLC, TokenUtil {
         libaAddress = _libaAddress;
     }
 
-   /**
-     * @notice Set eth pool address
-     * @param _ethPoolAddress ethPool address
-     */
-    function setEthPool(address _ethPoolAddress) external onlyOwner
-    {
-        require(address(ethPool) == address(0), "ethPool can only be set once");
-        ethPool = IEthPool(_ethPoolAddress);
-    }
-
     /**
      * @notice Get available value for specific commitment of a user
      * @param _user User address
@@ -188,10 +182,10 @@ contract PoLC is Ownable, IPoLC, TokenUtil {
     )
         external
         view
-        returns (uint)
+        returns (address, uint)
     {
         Commitment storage commitment = commitmentsByUser[_user][_commitmentId];
-        return commitment.availableValue;
+        return (commitment.tokenAddress, commitment.availableValue);
     }
 
     /**
@@ -205,7 +199,7 @@ contract PoLC is Ownable, IPoLC, TokenUtil {
         address _user,
         uint _commitmentId,
         uint _value,
-        address _borrower
+        address payable _borrower
     )
         external
     {
@@ -215,17 +209,19 @@ contract PoLC is Ownable, IPoLC, TokenUtil {
 
         commitment.availableValue = commitment.availableValue.sub(_value);
         commitment.lendingValue = commitment.lendingValue.add(_value);
-        ethPool.deposit.value(_value)(_borrower);
+        _transfer(commitment.tokenAddress, _borrower, _value);
     }
 
    /**
      * @notice Repay to the commitment
      * @param _user User address
      * @param _commitmentId ID of the commitment
+     * @param _value borrow value
      */
     function repayCommitment(
         address _user,
-        uint _commitmentId
+        uint _commitmentId,
+        uint _value
     )
         external
         payable
@@ -233,7 +229,13 @@ contract PoLC is Ownable, IPoLC, TokenUtil {
         require(msg.sender == libaAddress, "sender must be liba contract");
         Commitment storage commitment = commitmentsByUser[_user][_commitmentId];
 
-        commitment.lendingValue = commitment.lendingValue.sub(msg.value);
-        commitment.availableValue = commitment.availableValue.add(msg.value);
+        commitment.lendingValue = commitment.lendingValue.sub(_value);
+        commitment.availableValue = commitment.availableValue.add(_value);
+
+        if (commitment.tokenAddress == address(0)) {
+            require(msg.value == _value);
+        } else {
+            IERC20(commitment.tokenAddress).safeTransferFrom(tx.origin, address(this), _value);
+        }
     }
 }

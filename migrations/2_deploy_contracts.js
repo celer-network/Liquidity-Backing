@@ -1,11 +1,8 @@
 const ERC20ExampleToken = artifacts.require('ERC20ExampleToken');
 const PoLC = artifacts.require('PoLC');
 const LiBA = artifacts.require('LiBA');
-const EthPool = artifacts.require('EthPool');
 
 module.exports = function(deployer, network, accounts) {
-    deployer.deploy(EthPool);
-
     return deployer
         .deploy(ERC20ExampleToken)
         .then(() => {

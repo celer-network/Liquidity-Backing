@@ -1,13 +1,14 @@
 pragma solidity ^0.5.0;
 
 import "./lib/IPoLC.sol";
+import "./lib/TokenUtil.sol";
 import "openzeppelin-solidity/contracts/math/SafeMath.sol";
 import "openzeppelin-solidity/contracts/token/ERC20/IERC20.sol";
 import "openzeppelin-solidity/contracts/token/ERC20/SafeERC20.sol";
 import "openzeppelin-solidity/contracts/payment/PullPayment.sol";
 import "openzeppelin-solidity/contracts/access/roles/WhitelistedRole.sol";
 
-contract LiBA is PullPayment, WhitelistedRole {
+contract LiBA is TokenUtil, PullPayment, WhitelistedRole {
     using SafeERC20 for IERC20;
     using SafeMath for uint;
 
@@ -20,7 +21,8 @@ contract LiBA is PullPayment, WhitelistedRole {
     }
 
     struct Auction {
-        address asker;
+        address payable asker;
+        address tokenAddress;
         uint value;
         uint duration;
         uint maxRate;
@@ -62,6 +64,9 @@ contract LiBA is PullPayment, WhitelistedRole {
         polc = IPoLC(_polcAddress);
         auctionDeposit = _auctionDeposit;
         enableWhitelist = _enableWhitelist;
+
+        // Enable eth support by default
+        supportedTokens[address(0)] = true;
     }
 
     /**
@@ -79,16 +84,19 @@ contract LiBA is PullPayment, WhitelistedRole {
 
     /**
      * @notice Launch a new auction
+     * @param _tokenAddress token address for token to borrow
      * @param _bidDuration duration for bidding
      * @param _revealDuration duration for revealing
      * @param _claimDuration duration for claiming
      * @param _challengeDuration duration for challenging
+     * @param _finalizeDuration duration for finalizing
      * @param _value total value asked
      * @param _duration duration for the lending
      * @param _maxRate maximum rate accepted
      * @param _minValue minimum value accepted per bid
      */
     function initAuction(
+        address _tokenAddress,
         uint _bidDuration,
         uint _revealDuration,
         uint _claimDuration,
@@ -102,8 +110,18 @@ contract LiBA is PullPayment, WhitelistedRole {
         public
         libaWhitelistCheck
     {
+        require(supportedTokens[_tokenAddress], "token address must be supported");
+        require(_bidDuration > 0, "bid duration must be larger than zero");
+        require(_revealDuration > 0, "reveal duration must be larger than zero");
+        require(_claimDuration > 0, "claim duration must be larger than zero");
+        require(_challengeDuration > 0, "challenge duration must be larger than zero");
+        require(_finalizeDuration > 0, "finalize duration must be larger than zero");
+        require(_value > 0, "value must be larger than zero");
+        require(_duration > 0, "duration must be larger than zero");
+
         Auction storage auction = auctions[auctionCount];
         auction.asker = msg.sender;
+        auction.tokenAddress = _tokenAddress;
         auction.challengeDuration = _challengeDuration;
         auction.finalizeDuration = _finalizeDuration;
         auction.value = _value;
@@ -189,7 +207,10 @@ contract LiBA is PullPayment, WhitelistedRole {
             celerToken.safeTransfer(msg.sender, celerRefund);
         }
 
-        uint availableValue = polc.getCommitmentAvailableValue(msg.sender, _commitmentId);
+        address tokenAddress;
+        uint availableValue;
+        (tokenAddress, availableValue) = polc.getCommitmentAvailableValue(msg.sender, _commitmentId);
+        require(tokenAddress == auction.tokenAddress, "tokenAddress of commitment must match tokenAddress of auction");
         require(availableValue >= _value, "must have enough value in commitment");
 
         bid.commitmentId = _commitmentId;
@@ -265,7 +286,7 @@ contract LiBA is PullPayment, WhitelistedRole {
 
         auction.finalized = true;
         // If there is no challenger, refund the deposit to asker
-        if (auction.challenger == address(0x0)) {
+        if (auction.challenger == address(0)) {
             celerToken.safeTransfer(auction.asker, auctionDeposit);
         } else {
             celerToken.safeTransfer(auction.challenger, auctionDeposit);
@@ -293,20 +314,26 @@ contract LiBA is PullPayment, WhitelistedRole {
         Auction storage auction = auctions[_auctionId];
         require(auction.finalized, "auction must be finalized");
 
+        bool isEth = auction.tokenAddress == address(0);
+        IERC20 token = IERC20(auction.tokenAddress);
         uint value = msg.value;
-        address[] storage winners = auction.winners;
 
+        address[] storage winners = auction.winners;
         for (uint i = 0; i < winners.length; i++) {
             address winner = winners[i];
             Bid storage winnerBid = bidsByUser[winner][_auctionId];
             uint bidValue = winnerBid.value;
-            winnerBid.value = 0;
-            value = value.sub(bidValue);
-            polc.repayCommitment.value(bidValue)(winner, winnerBid.commitmentId);
-
             uint interest = bidValue.mul(winnerBid.rate).div(100);
-            value = value.sub(interest);
-            _asyncTransfer(winner, interest);
+            winnerBid.value = 0;
+
+            if (isEth) {
+                value = value.sub(bidValue).sub(interest);
+                polc.repayCommitment.value(bidValue)(winner, winnerBid.commitmentId, bidValue);
+                _asyncTransfer(winner, interest);
+            } else {
+                token.safeTransferFrom(msg.sender, winner, interest);
+                polc.repayCommitment(winner, winnerBid.commitmentId, bidValue);
+            }
         }
         emit RepayAuction(_auctionId);
     }

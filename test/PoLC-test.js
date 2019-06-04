@@ -5,7 +5,6 @@ const utils = require('./utils');
 
 const ERC20ExampleToken = artifacts.require('ERC20ExampleToken');
 const PoLC = artifacts.require('PoLC');
-const EthPool = artifacts.require('EthPool');
 
 chai.use(chaiAsPromised);
 const assert = chai.assert;
@@ -17,20 +16,17 @@ const BLOCK_REWARD = 100;
 const LOCK_DURATION = 10;
 
 contract('PoLC', ([owner, liba, borrower]) => {
-    let ethPool;
     let polc;
     let commitToken;
     let celerToken;
     let commitmentId;
 
     before(async () => {
-        ethPool = await EthPool.new();
         commitToken = await ERC20ExampleToken.new();
         celerToken = await ERC20ExampleToken.new();
         polc = await PoLC.new(celerToken.address, BLOCK_REWARD);
 
         await polc.setLibaAddress(liba);
-        await polc.setEthPool(ethPool.address);
         await celerToken.transfer(polc.address, BLOCK_REWARD * 1000);
         await commitToken.approve(polc.address, 1);
     });
@@ -126,7 +122,7 @@ contract('PoLC', ([owner, liba, borrower]) => {
         );
     });
 
-    it('should fail to commit erc fund for unsupported token address', async () => {
+    it('should fail to commit ERC20 fund for unsupported token address', async () => {
         try {
             await polc.commitFund(LOCK_DURATION, commitToken.address, 1);
         } catch (e) {
@@ -140,7 +136,7 @@ contract('PoLC', ([owner, liba, borrower]) => {
         assert.fail('should have thrown before');
     });
 
-    it('should fail to commit erc fund for non-zero value', async () => {
+    it('should fail to commit ERC20 fund for non-zero value', async () => {
         await polc.updateSupportedToken(commitToken.address, true);
         try {
             await polc.commitFund(LOCK_DURATION, commitToken.address, 1, {
@@ -154,7 +150,7 @@ contract('PoLC', ([owner, liba, borrower]) => {
         assert.fail('should have thrown before');
     });
 
-    it('should commit erc fund successfully', async () => {
+    it('should commit ERC20 fund successfully', async () => {
         const receipt = await polc.commitFund(
             LOCK_DURATION,
             commitToken.address,
@@ -178,7 +174,7 @@ contract('PoLC', ([owner, liba, borrower]) => {
         assert.equal(commitment.tokenAddress, commitToken.address);
     });
 
-    it('should withdraw erc fund successfully', async () => {
+    it('should withdraw ERC20 fund successfully', async () => {
         await utils.updateTimestamp((LOCK_DURATION + 2) * DAY);
 
         const receipt = await polc.withdrawFund(commitmentId);
@@ -198,20 +194,6 @@ contract('PoLC', ([owner, liba, borrower]) => {
         } catch (e) {
             assert.isAbove(
                 e.message.search('libaAddress can only be set once'),
-                -1
-            );
-            return;
-        }
-
-        assert.fail('should have thrown before');
-    });
-
-    it('should fail to set ethPool twice', async () => {
-        try {
-            await polc.setEthPool(owner);
-        } catch (e) {
-            assert.isAbove(
-                e.message.search('ethPool can only be set once'),
                 -1
             );
             return;
@@ -260,6 +242,8 @@ contract('PoLC', ([owner, liba, borrower]) => {
     });
 
     it('should lendCommitment successfully', async () => {
+        const balance0 = await web3.eth.getBalance(borrower);
+
         await polc.lendCommitment(owner, commitmentId, 1, borrower, {
             from: liba
         });
@@ -270,15 +254,13 @@ contract('PoLC', ([owner, liba, borrower]) => {
         assert.equal(commitment.availableValue.toNumber(), 0);
         assert.equal(commitment.lendingValue.toNumber(), 1);
 
-        const balance = await ethPool.balanceOf(borrower);
-        assert.equal(balance.toNumber(), 1);
+        const balance1 = await web3.eth.getBalance(borrower);
+        assert.equal(balance1.slice(-2) - balance0.slice(-2), 1);
     });
 
     it('should fail to repayCommitment for wrong sender', async () => {
         try {
-            await polc.repayCommitment(owner, commitmentId, {
-                value: 1
-            });
+            await polc.repayCommitment(owner, commitmentId, 1, { value: '1' });
         } catch (e) {
             assert.isAbove(
                 e.message.search('sender must be liba contract'),
@@ -291,9 +273,9 @@ contract('PoLC', ([owner, liba, borrower]) => {
     });
 
     it('should repayCommitment successfully', async () => {
-        await polc.repayCommitment(owner, commitmentId, {
+        await polc.repayCommitment(owner, commitmentId, 1, {
             from: liba,
-            value: 1
+            value: '1'
         });
         const commitment = await polc.commitmentsByUser.call(
             owner,
