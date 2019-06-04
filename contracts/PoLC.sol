@@ -1,6 +1,5 @@
 pragma solidity ^0.5.0;
 
-import "./lib/IEthPool.sol";
 import "./lib/IPoLC.sol";
 import "./lib/TokenUtil.sol";
 import "openzeppelin-solidity/contracts/math/SafeMath.sol";
@@ -24,7 +23,6 @@ contract PoLC is Ownable, IPoLC, TokenUtil {
 
     address private libaAddress;
     IERC20 private celerToken;
-    IEthPool private ethPool;
     // reward payout for each block
     uint private blockReward;
     // mapping mining power by day
@@ -36,9 +34,8 @@ contract PoLC is Ownable, IPoLC, TokenUtil {
         address => mapping (uint => Commitment)
     ) public commitmentsByUser;
 
-    constructor(address _celerTokenAddress, address _ethPoolAddress, uint _blockReward) public {
+    constructor(address _celerTokenAddress, uint _blockReward) public {
         celerToken = IERC20(_celerTokenAddress);
-        ethPool = IEthPool(_ethPoolAddress);
         blockReward = _blockReward;
 
         // Enable eth support by default
@@ -202,7 +199,7 @@ contract PoLC is Ownable, IPoLC, TokenUtil {
         address _user,
         uint _commitmentId,
         uint _value,
-        address _borrower
+        address payable _borrower
     )
         external
     {
@@ -212,12 +209,7 @@ contract PoLC is Ownable, IPoLC, TokenUtil {
 
         commitment.availableValue = commitment.availableValue.sub(_value);
         commitment.lendingValue = commitment.lendingValue.add(_value);
-
-        if (commitment.tokenAddress == address(0)) {
-            ethPool.deposit.value(_value)(_borrower);
-        } else {
-            IERC20(commitment.tokenAddress).safeTransfer(_borrower, _value);
-        }
+        _transfer(commitment.tokenAddress, _borrower, _value);
     }
 
    /**

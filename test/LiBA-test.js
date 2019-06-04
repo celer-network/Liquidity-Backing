@@ -3,7 +3,6 @@ const chaiAsPromised = require('chai-as-promised');
 const Web3 = require('web3');
 
 const ERC20ExampleToken = artifacts.require('ERC20ExampleToken');
-const EthPool = artifacts.require('EthPool');
 const LiBA = artifacts.require('LiBA');
 const PoLC = artifacts.require('PoLC');
 
@@ -44,16 +43,14 @@ calculateBidHash(BID0);
 calculateBidHash(BID1);
 
 contract('LiBA', ([provider, bidder0, bidder1]) => {
-    let ethPool;
     let token;
     let liba;
     let polc;
     let auctionId;
 
     before(async () => {
-        ethPool = await EthPool.new();
         token = await ERC20ExampleToken.new();
-        polc = await PoLC.new(token.address, ethPool.address, 100);
+        polc = await PoLC.new(token.address, 100);
         liba = await LiBA.new(
             token.address,
             polc.address,
@@ -401,9 +398,6 @@ contract('LiBA', ([provider, bidder0, bidder1]) => {
         const { event, args } = receipt.logs[0];
         assert.equal(event, 'FinalizeAuction');
         assert.deepEqual(args.auctionId.toNumber(), auctionId);
-
-        const balance = await ethPool.balanceOf(provider);
-        assert.equal(balance.toNumber(), BID1.value);
     });
 
     it('should repay auction successfully', async () => {

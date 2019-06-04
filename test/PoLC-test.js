@@ -5,7 +5,6 @@ const utils = require('./utils');
 
 const ERC20ExampleToken = artifacts.require('ERC20ExampleToken');
 const PoLC = artifacts.require('PoLC');
-const EthPool = artifacts.require('EthPool');
 
 chai.use(chaiAsPromised);
 const assert = chai.assert;
@@ -17,21 +16,15 @@ const BLOCK_REWARD = 100;
 const LOCK_DURATION = 10;
 
 contract('PoLC', ([owner, liba, borrower]) => {
-    let ethPool;
     let polc;
     let commitToken;
     let celerToken;
     let commitmentId;
 
     before(async () => {
-        ethPool = await EthPool.new();
         commitToken = await ERC20ExampleToken.new();
         celerToken = await ERC20ExampleToken.new();
-        polc = await PoLC.new(
-            celerToken.address,
-            ethPool.address,
-            BLOCK_REWARD
-        );
+        polc = await PoLC.new(celerToken.address, BLOCK_REWARD);
 
         await polc.setLibaAddress(liba);
         await celerToken.transfer(polc.address, BLOCK_REWARD * 1000);
@@ -249,6 +242,8 @@ contract('PoLC', ([owner, liba, borrower]) => {
     });
 
     it('should lendCommitment successfully', async () => {
+        const balance0 = await web3.eth.getBalance(borrower);
+
         await polc.lendCommitment(owner, commitmentId, 1, borrower, {
             from: liba
         });
@@ -259,8 +254,8 @@ contract('PoLC', ([owner, liba, borrower]) => {
         assert.equal(commitment.availableValue.toNumber(), 0);
         assert.equal(commitment.lendingValue.toNumber(), 1);
 
-        const balance = await ethPool.balanceOf(borrower);
-        assert.equal(balance.toNumber(), 1);
+        const balance1 = await web3.eth.getBalance(borrower);
+        assert.equal(balance1.slice(-2) - balance0.slice(-2), 1);
     });
 
     it('should fail to repayCommitment for wrong sender', async () => {

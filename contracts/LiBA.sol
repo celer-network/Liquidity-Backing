@@ -21,7 +21,7 @@ contract LiBA is TokenUtil, PullPayment, WhitelistedRole {
     }
 
     struct Auction {
-        address asker;
+        address payable asker;
         address tokenAddress;
         uint value;
         uint duration;
