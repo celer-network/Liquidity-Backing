@@ -122,7 +122,7 @@ contract('PoLC', ([owner, liba, borrower]) => {
         );
     });
 
-    it('should fail to commit erc fund for unsupported token address', async () => {
+    it('should fail to commit ERC20 fund for unsupported token address', async () => {
         try {
             await polc.commitFund(LOCK_DURATION, commitToken.address, 1);
         } catch (e) {
@@ -136,7 +136,7 @@ contract('PoLC', ([owner, liba, borrower]) => {
         assert.fail('should have thrown before');
     });
 
-    it('should fail to commit erc fund for non-zero value', async () => {
+    it('should fail to commit ERC20 fund for non-zero value', async () => {
         await polc.updateSupportedToken(commitToken.address, true);
         try {
             await polc.commitFund(LOCK_DURATION, commitToken.address, 1, {
@@ -150,7 +150,7 @@ contract('PoLC', ([owner, liba, borrower]) => {
         assert.fail('should have thrown before');
     });
 
-    it('should commit erc fund successfully', async () => {
+    it('should commit ERC20 fund successfully', async () => {
         const receipt = await polc.commitFund(
             LOCK_DURATION,
             commitToken.address,
@@ -174,7 +174,7 @@ contract('PoLC', ([owner, liba, borrower]) => {
         assert.equal(commitment.tokenAddress, commitToken.address);
     });
 
-    it('should withdraw erc fund successfully', async () => {
+    it('should withdraw ERC20 fund successfully', async () => {
         await utils.updateTimestamp((LOCK_DURATION + 2) * DAY);
 
         const receipt = await polc.withdrawFund(commitmentId);

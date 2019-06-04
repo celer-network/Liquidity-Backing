@@ -30,8 +30,7 @@ const BID0 = {
 };
 const BID1 = {
     ...BID0,
-    rate: 4,
-    commitmentId: 0
+    rate: 4
 };
 
 const calculateBidHash = bid => {
@@ -42,26 +41,94 @@ const calculateBidHash = bid => {
 calculateBidHash(BID0);
 calculateBidHash(BID1);
 
-contract('LiBA', ([provider, bidder0, bidder1]) => {
-    let token;
+contract('LiBA', ([provider, bidder0, bidder1, bidder2]) => {
+    let celerToken;
+    let borrowToken;
     let liba;
     let polc;
     let auctionId;
 
+    const placeBid = async (bid, bidder, eventName) => {
+        await celerToken.approve(liba.address, bid.celerValue, {
+            from: bidder
+        });
+        const receipt = await liba.placeBid(
+            auctionId,
+            bid.hash,
+            bid.celerValue,
+            {
+                from: bidder
+            }
+        );
+        const { event, args } = receipt.logs[0];
+        assert.equal(event, eventName);
+        assert.equal(args.auctionId.toNumber(), auctionId);
+        assert.equal(args.bidder, bidder);
+
+        const userBid = await liba.bidsByUser.call(bidder, auctionId);
+        assert.equal(userBid.hash, bid.hash);
+        assert.equal(userBid.celerValue.toNumber(), bid.celerValue);
+    };
+
+    const commitFund = async (bid, bidder, tokenAddress = EMPTY_ADDRESS) => {
+        const isEmptyAddress = tokenAddress === EMPTY_ADDRESS;
+        const receipt = await polc.commitFund(
+            100,
+            tokenAddress,
+            isEmptyAddress ? 0 : bid.value,
+            {
+                value: isEmptyAddress ? bid.value : 0,
+                from: bidder
+            }
+        );
+        const { args } = receipt.logs[0];
+        bid.commitmentId = args.commitmentId.toNumber();
+    };
+
+    const revealBid = async (bid, bidder) => {
+        const { rate, value, celerValue, salt, commitmentId } = bid;
+        const receipt = await liba.revealBid(
+            auctionId,
+            rate,
+            value,
+            celerValue,
+            salt,
+            commitmentId,
+            {
+                from: bidder
+            }
+        );
+        const { event, args } = receipt.logs[0];
+        assert.equal(event, 'RevealBid');
+        assert.equal(args.auctionId.toNumber(), auctionId);
+        assert.equal(args.bidder, bidder);
+
+        const userBid = await liba.bidsByUser.call(bidder, auctionId);
+        assert.equal(
+            userBid.hash,
+            '0x0000000000000000000000000000000000000000000000000000000000000000'
+        );
+        assert.equal(userBid.rate.toNumber(), rate);
+        assert.equal(userBid.value.toNumber(), value);
+        assert.equal(userBid.celerValue.toNumber(), celerValue);
+    };
+
     before(async () => {
-        token = await ERC20ExampleToken.new();
-        polc = await PoLC.new(token.address, 100);
+        celerToken = await ERC20ExampleToken.new();
+        borrowToken = await ERC20ExampleToken.new();
+        polc = await PoLC.new(celerToken.address, 100);
         liba = await LiBA.new(
-            token.address,
+            celerToken.address,
             polc.address,
             AUCTION_DEPOSIT,
             false
         );
 
         await polc.setLibaAddress(liba.address);
-        await token.transfer(provider, 10000);
-        await token.transfer(bidder0, 10000);
-        await token.transfer(bidder1, 10000);
+        await celerToken.transfer(provider, 10000);
+        await celerToken.transfer(bidder0, 10000);
+        await celerToken.transfer(bidder1, 10000);
+        await celerToken.transfer(bidder2, 10000);
     });
 
     it('should fail to init auction for missing auction deposit', async () => {
@@ -90,7 +157,7 @@ contract('LiBA', ([provider, bidder0, bidder1]) => {
     });
 
     it('should init auction successfully', async () => {
-        await token.approve(liba.address, AUCTION_DEPOSIT * 10);
+        await celerToken.approve(liba.address, AUCTION_DEPOSIT * 10);
         const receipt = await liba.initAuction(
             EMPTY_ADDRESS,
             BID_DURATION,
@@ -150,26 +217,6 @@ contract('LiBA', ([provider, bidder0, bidder1]) => {
         assert.fail('should have thrown before');
     });
 
-    const placeBid = async (bid, bidder, eventName) => {
-        await token.approve(liba.address, bid.celerValue, { from: bidder });
-        const receipt = await liba.placeBid(
-            auctionId,
-            bid.hash,
-            bid.celerValue,
-            {
-                from: bidder
-            }
-        );
-        const { event, args } = receipt.logs[0];
-        assert.equal(event, eventName);
-        assert.equal(args.auctionId.toNumber(), auctionId);
-        assert.equal(args.bidder, bidder);
-
-        const userBid = await liba.bidsByUser.call(bidder, auctionId);
-        assert.equal(userBid.hash, bid.hash);
-        assert.equal(userBid.celerValue.toNumber(), bid.celerValue);
-    };
-
     it('should bid auction correctly', async () => {
         await placeBid(BID0, bidder0, 'NewBid');
         await placeBid(BID1, bidder1, 'NewBid');
@@ -189,34 +236,6 @@ contract('LiBA', ([provider, bidder0, bidder1]) => {
 
         assert.fail('should have thrown before');
     });
-
-    const revealBid = async (bid, bidder) => {
-        const { rate, value, celerValue, salt, commitmentId } = bid;
-        const receipt = await liba.revealBid(
-            auctionId,
-            rate,
-            value,
-            celerValue,
-            salt,
-            commitmentId,
-            {
-                from: bidder
-            }
-        );
-        const { event, args } = receipt.logs[0];
-        assert.equal(event, 'RevealBid');
-        assert.equal(args.auctionId.toNumber(), auctionId);
-        assert.equal(args.bidder, bidder);
-
-        const userBid = await liba.bidsByUser.call(bidder, auctionId);
-        assert.equal(
-            userBid.hash,
-            '0x0000000000000000000000000000000000000000000000000000000000000000'
-        );
-        assert.equal(userBid.rate.toNumber(), rate);
-        assert.equal(userBid.value.toNumber(), value);
-        assert.equal(userBid.celerValue.toNumber(), celerValue);
-    };
 
     it('should fail to reveal auction for large rate', async () => {
         try {
@@ -273,15 +292,6 @@ contract('LiBA', ([provider, bidder0, bidder1]) => {
 
         assert.fail('should have thrown before');
     });
-
-    const commitFund = async (bid, bidder) => {
-        const receipt = await polc.commitFund(100, EMPTY_ADDRESS, 0, {
-            value: bid.value,
-            from: bidder
-        });
-        const { args } = receipt.logs[0];
-        bid.commitmentId = args.commitmentId.toNumber();
-    };
 
     it('should reveal auction correctly', async () => {
         await commitFund(BID0, bidder0);
@@ -408,14 +418,52 @@ contract('LiBA', ([provider, bidder0, bidder1]) => {
         assert.deepEqual(args.auctionId.toNumber(), auctionId);
     });
 
+    it('should init ERC20 auction successfully', async () => {
+        await borrowToken.transfer(bidder2, 10000);
+        await borrowToken.approve(polc.address, 10000, {
+            from: bidder2
+        });
+        await liba.updateSupportedToken(borrowToken.address, true);
+        await polc.updateSupportedToken(borrowToken.address, true);
+        const receipt = await liba.initAuction(
+            borrowToken.address,
+            2,
+            2,
+            1,
+            1,
+            1,
+            VALUE,
+            DURATION,
+            MAX_RATE,
+            MIN_VALUE
+        );
+        const { args } = receipt.logs[0];
+        auctionId = args.auctionId.toNumber();
+
+        await placeBid(BID0, bidder2, 'NewBid');
+        await commitFund(BID0, bidder2, borrowToken.address);
+        await revealBid(BID0, bidder2);
+        await liba.claimWinners(auctionId, [bidder2]);
+        await borrowToken.approve(liba.address, 10000, {
+            from: provider
+        });
+        await liba.finalizeAuction(auctionId);
+        const balance = await borrowToken.balanceOf(provider);
+        assert.equal(balance.toNumber(), 290100);
+        await borrowToken.approve(polc.address, 10000, {
+            from: provider
+        });
+        await liba.repayAuction(auctionId);
+    });
+
     it('should fail to init auction for missing from whitelist', async () => {
         liba = await LiBA.new(
-            token.address,
+            celerToken.address,
             polc.address,
             AUCTION_DEPOSIT,
             true
         );
-        await token.approve(liba.address, AUCTION_DEPOSIT * 10);
+        await celerToken.approve(liba.address, AUCTION_DEPOSIT * 10);
 
         try {
             await liba.initAuction(
