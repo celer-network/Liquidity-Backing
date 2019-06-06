@@ -31,16 +31,19 @@ contract('PoLC', ([owner, liba, borrower]) => {
         await commitToken.approve(polc.address, 1);
     });
 
-    it('should fail to commit eth fund for non-zero amount', async () => {
+    it('should fail to commit eth fund for unequal value', async () => {
         try {
             await polc.commitFund(
                 LOCK_DURATION,
                 '0x0000000000000000000000000000000000000000',
-                1,
+                2,
                 { value: '1' }
             );
         } catch (e) {
-            assert.isAbove(e.message.search('amount must be zero'), -1);
+            assert.isAbove(
+                e.message.search('value must be equal msg value'),
+                -1
+            );
             return;
         }
 
@@ -51,7 +54,7 @@ contract('PoLC', ([owner, liba, borrower]) => {
         const receipt = await polc.commitFund(
             LOCK_DURATION,
             '0x0000000000000000000000000000000000000000',
-            0,
+            1,
             { value: '1' }
         );
         const { event, args } = receipt.logs[0];
@@ -220,7 +223,7 @@ contract('PoLC', ([owner, liba, borrower]) => {
         const receipt = await polc.commitFund(
             LOCK_DURATION,
             '0x0000000000000000000000000000000000000000',
-            0,
+            1,
             { value: '1' }
         );
         const { args } = receipt.logs[0];

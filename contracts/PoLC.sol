@@ -66,33 +66,27 @@ contract PoLC is Ownable, IPoLC, TokenUtil {
     /**
      * @notice Lock fund into the PoLC contract
      * @param _duration lock-in duration by days
+     * @param _tokenAddress token address
+     * @param _value committed value
      */
-    function commitFund(uint _duration, address _tokenAddress, uint _amount)
+    function commitFund(uint _duration, address _tokenAddress, uint _value)
         external
         payable
+        validateToken(_tokenAddress, _value)
     {
         require(
             _duration > 0 && _duration < 365,
             "duration must fall into the 0-365 range"
         );
-        require(supportedTokens[_tokenAddress], "token address must be supported");
-
-        if (_tokenAddress == address(0)) {
-            require(_amount == 0, "amount must be zero");
-        } else {
-            require(msg.value == 0, "msg value must be zero");
-        }
 
         address sender = msg.sender;
         uint currentTimestamp = block.timestamp;
-        uint value;
+        uint value = _value;
 
-        if (_tokenAddress == address(0)) {
-            value = msg.value;
-        } else {
-            value = _amount;
-            IERC20(_tokenAddress).safeTransferFrom(msg.sender, address(this), _amount);
+        if (_tokenAddress != address(0)) {
+            IERC20(_tokenAddress).safeTransferFrom(msg.sender, address(this), _value);
         }
+
         Commitment storage commitment = commitmentsByUser[sender][currentTimestamp];
         require(
             commitment.lockEnd == 0,

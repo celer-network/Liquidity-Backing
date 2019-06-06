@@ -23,6 +23,8 @@ contract LiBA is TokenUtil, PullPayment, WhitelistedRole {
     struct Auction {
         address payable asker;
         address tokenAddress;
+        address collateralAddress;
+        uint collateraValue;
         uint value;
         uint duration;
         uint maxRate;
@@ -58,6 +60,7 @@ contract LiBA is TokenUtil, PullPayment, WhitelistedRole {
     event ChallengeWinners(uint indexed auctionId, address challenger, address[] winners);
     event FinalizeAuction(uint auctionId);
     event RepayAuction(uint auctionId);
+    event CollectCollateral(uint auctionId, address winner);
 
     constructor(address _celerTokenAddress, address _polcAddress, uint _auctionDeposit, bool _enableWhitelist) public {
         celerToken = IERC20(_celerTokenAddress);
@@ -105,10 +108,14 @@ contract LiBA is TokenUtil, PullPayment, WhitelistedRole {
         uint _value,
         uint _duration,
         uint _maxRate,
-        uint _minValue
+        uint _minValue,
+        address _collateralAddress,
+        uint _collateralValue
     )
         public
+        payable
         libaWhitelistCheck
+        validateToken(_collateralAddress, _collateralValue)
     {
         require(supportedTokens[_tokenAddress], "token address must be supported");
         require(_bidDuration > 0, "bid duration must be larger than zero");
@@ -119,9 +126,15 @@ contract LiBA is TokenUtil, PullPayment, WhitelistedRole {
         require(_value > 0, "value must be larger than zero");
         require(_duration > 0, "duration must be larger than zero");
 
+        if (_collateralAddress != address(0)) {
+            IERC20(_collateralAddress).safeTransferFrom(msg.sender, address(this), _value);
+        }
+
         Auction storage auction = auctions[auctionCount];
         auction.asker = msg.sender;
         auction.tokenAddress = _tokenAddress;
+        auction.collateralAddress = _collateralAddress;
+        auction.collateraValue = _collateralValue;
         auction.challengeDuration = _challengeDuration;
         auction.finalizeDuration = _finalizeDuration;
         auction.value = _value;
@@ -312,6 +325,7 @@ contract LiBA is TokenUtil, PullPayment, WhitelistedRole {
      */
     function repayAuction(uint _auctionId) external payable {
         Auction storage auction = auctions[_auctionId];
+        require(block.number <= auction.finalizeEnd + auction.duration,  "must be within auction lending duration");
         require(auction.finalized, "auction must be finalized");
 
         bool isEth = auction.tokenAddress == address(0);
@@ -335,6 +349,8 @@ contract LiBA is TokenUtil, PullPayment, WhitelistedRole {
                 polc.repayCommitment(winner, winnerBid.commitmentId, bidValue);
             }
         }
+
+        _transfer(auction.collateralAddress, auction.asker, auction.collateraValue);
         emit RepayAuction(_auctionId);
     }
 
@@ -362,6 +378,24 @@ contract LiBA is TokenUtil, PullPayment, WhitelistedRole {
         bid.rate = 0;
         bid.value = 0;
         celerToken.safeTransferFrom(address(this), msg.sender, celerValue);
+    }
+
+    /**
+     * @notice collect the collateral of the auction if it is not paid
+     * @param _auctionId Id of the auction
+     */
+    function collectCollateral(uint _auctionId) external {
+        Auction storage auction = auctions[_auctionId];
+        require(block.number > auction.finalizeEnd + auction.duration,  "must be pass auction lending duration");
+        require(_checkWinner(_auctionId, msg.sender), "sender must be a winner");
+
+        Bid storage winnerBid = bidsByUser[msg.sender][_auctionId];
+        require(winnerBid.value > 0, "bid value must be larger than zero");
+
+        uint collateralReward = auction.collateraValue.mul(winnerBid.value).div(auction.value);
+        winnerBid.value = 0;
+        _transfer(auction.collateralAddress, msg.sender, collateralReward);
+        emit CollectCollateral(_auctionId, msg.sender);
     }
 
     /**
