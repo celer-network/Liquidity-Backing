@@ -18,7 +18,7 @@ const CLAIM_DURATION = 2;
 const CHALLENGE_DURATION = 2;
 const FINALIZE_DURATION = 2;
 const VALUE = 100;
-const DURATION = 1;
+const DURATION = 2;
 const MAX_RATE = 10;
 const MIN_VALUE = 2;
 const BID0 = {
@@ -72,15 +72,10 @@ contract('LiBA', ([provider, bidder0, bidder1, bidder2]) => {
 
     const commitFund = async (bid, bidder, tokenAddress = EMPTY_ADDRESS) => {
         const isEmptyAddress = tokenAddress === EMPTY_ADDRESS;
-        const receipt = await polc.commitFund(
-            100,
-            tokenAddress,
-            isEmptyAddress ? 0 : bid.value,
-            {
-                value: isEmptyAddress ? bid.value : 0,
-                from: bidder
-            }
-        );
+        const receipt = await polc.commitFund(100, tokenAddress, bid.value, {
+            value: isEmptyAddress ? bid.value : 0,
+            from: bidder
+        });
         const { args } = receipt.logs[0];
         bid.commitmentId = args.commitmentId.toNumber();
     };
@@ -125,6 +120,8 @@ contract('LiBA', ([provider, bidder0, bidder1, bidder2]) => {
         );
 
         await polc.setLibaAddress(liba.address);
+        await liba.updateSupportedToken(borrowToken.address, true);
+        await polc.updateSupportedToken(borrowToken.address, true);
         await celerToken.transfer(provider, 10000);
         await celerToken.transfer(bidder0, 10000);
         await celerToken.transfer(bidder1, 10000);
@@ -143,7 +140,9 @@ contract('LiBA', ([provider, bidder0, bidder1, bidder2]) => {
                 VALUE,
                 DURATION,
                 MAX_RATE,
-                MIN_VALUE
+                MIN_VALUE,
+                EMPTY_ADDRESS,
+                0
             );
         } catch (e) {
             assert.isAbove(
@@ -157,7 +156,8 @@ contract('LiBA', ([provider, bidder0, bidder1, bidder2]) => {
     });
 
     it('should init auction successfully', async () => {
-        await celerToken.approve(liba.address, AUCTION_DEPOSIT * 10);
+        await celerToken.approve(liba.address, AUCTION_DEPOSIT);
+        await borrowToken.approve(liba.address, VALUE);
         const receipt = await liba.initAuction(
             EMPTY_ADDRESS,
             BID_DURATION,
@@ -168,7 +168,9 @@ contract('LiBA', ([provider, bidder0, bidder1, bidder2]) => {
             VALUE,
             DURATION,
             MAX_RATE,
-            MIN_VALUE
+            MIN_VALUE,
+            borrowToken.address,
+            VALUE
         );
 
         const { event, args } = receipt.logs[0];
@@ -416,15 +418,16 @@ contract('LiBA', ([provider, bidder0, bidder1, bidder2]) => {
         const { event, args } = receipt.logs[0];
         assert.equal(event, 'RepayAuction');
         assert.deepEqual(args.auctionId.toNumber(), auctionId);
+        const balance = await borrowToken.balanceOf(provider);
+        assert.equal(balance.toNumber(), 300000);
     });
 
     it('should init ERC20 auction successfully', async () => {
+        await celerToken.approve(liba.address, AUCTION_DEPOSIT);
         await borrowToken.transfer(bidder2, 10000);
         await borrowToken.approve(polc.address, 10000, {
             from: bidder2
         });
-        await liba.updateSupportedToken(borrowToken.address, true);
-        await polc.updateSupportedToken(borrowToken.address, true);
         const receipt = await liba.initAuction(
             borrowToken.address,
             2,
@@ -435,7 +438,9 @@ contract('LiBA', ([provider, bidder0, bidder1, bidder2]) => {
             VALUE,
             DURATION,
             MAX_RATE,
-            MIN_VALUE
+            MIN_VALUE,
+            EMPTY_ADDRESS,
+            0
         );
         const { args } = receipt.logs[0];
         auctionId = args.auctionId.toNumber();
@@ -444,16 +449,92 @@ contract('LiBA', ([provider, bidder0, bidder1, bidder2]) => {
         await commitFund(BID0, bidder2, borrowToken.address);
         await revealBid(BID0, bidder2);
         await liba.claimWinners(auctionId, [bidder2]);
-        await borrowToken.approve(liba.address, 10000, {
-            from: provider
-        });
+        await borrowToken.approve(liba.address, 10000);
         await liba.finalizeAuction(auctionId);
         const balance = await borrowToken.balanceOf(provider);
         assert.equal(balance.toNumber(), 290100);
-        await borrowToken.approve(polc.address, 10000, {
-            from: provider
-        });
+        await borrowToken.approve(polc.address, 10000);
         await liba.repayAuction(auctionId);
+    });
+
+    it('should fail to collect collateral for not ended lending duration', async () => {
+        await celerToken.approve(liba.address, AUCTION_DEPOSIT);
+
+        const receipt = await liba.initAuction(
+            EMPTY_ADDRESS,
+            2,
+            2,
+            1,
+            1,
+            1,
+            VALUE,
+            1,
+            MAX_RATE,
+            MIN_VALUE,
+            borrowToken.address,
+            VALUE
+        );
+        const { args } = receipt.logs[0];
+        auctionId = args.auctionId.toNumber();
+
+        await placeBid(BID0, bidder1, 'NewBid');
+        await commitFund(BID0, bidder1);
+        await revealBid(BID0, bidder1);
+        await liba.claimWinners(auctionId, [bidder1]);
+        await borrowToken.approve(liba.address, 10000);
+        await liba.finalizeAuction(auctionId);
+
+        try {
+            await liba.collectCollateral(auctionId, {
+                from: bidder1
+            });
+        } catch (e) {
+            assert.isAbove(
+                e.message.search('must be pass auction lending duration'),
+                -1
+            );
+            return;
+        }
+
+        assert.fail('should have thrown before');
+    });
+
+    it('should fail to collect collateral for non winner', async () => {
+        try {
+            await liba.collectCollateral(auctionId, {
+                from: bidder2
+            });
+        } catch (e) {
+            assert.isAbove(e.message.search('sender must be a winner'), -1);
+            return;
+        }
+
+        assert.fail('should have thrown before');
+    });
+
+    it('should collect collateral successfully', async () => {
+        const receipt = await liba.collectCollateral(auctionId, {
+            from: bidder1
+        });
+        const { event, args } = receipt.logs[0];
+        assert.equal(event, 'CollectCollateral');
+        assert.equal(args.winner, bidder1);
+    });
+
+    it('should fail to collect collateral for repeated collect', async () => {
+        try {
+            await liba.collectCollateral(auctionId, {
+                from: bidder1
+            });
+        } catch (e) {
+            assert.isAbove(
+                e.message.search('bid value must be larger than zero'),
+                -1
+            );
+            return;
+        }
+
+        assert.fail('should have thrown before');
     });
 
     it('should fail to init auction for missing from whitelist', async () => {
@@ -463,7 +544,7 @@ contract('LiBA', ([provider, bidder0, bidder1, bidder2]) => {
             AUCTION_DEPOSIT,
             true
         );
-        await celerToken.approve(liba.address, AUCTION_DEPOSIT * 10);
+        await celerToken.approve(liba.address, AUCTION_DEPOSIT);
 
         try {
             await liba.initAuction(
@@ -476,7 +557,9 @@ contract('LiBA', ([provider, bidder0, bidder1, bidder2]) => {
                 VALUE,
                 DURATION,
                 MAX_RATE,
-                MIN_VALUE
+                MIN_VALUE,
+                EMPTY_ADDRESS,
+                0
             );
         } catch (e) {
             assert.isAbove(
@@ -503,7 +586,9 @@ contract('LiBA', ([provider, bidder0, bidder1, bidder2]) => {
             VALUE,
             DURATION,
             MAX_RATE,
-            MIN_VALUE
+            MIN_VALUE,
+            EMPTY_ADDRESS,
+            0
         );
     });
 });

@@ -13,6 +13,23 @@ contract TokenUtil is Ownable {
 
     event UpdateSupportedToken(address indexed tokenAddress, bool supported);
 
+   /**
+     * @notice Validate if the token address and amount is valid
+     * @param _tokenAddress the token address
+     * @param _value the amount to be transferred
+     */
+    modifier validateToken(address _tokenAddress, uint _value) {
+        require(supportedTokens[_tokenAddress], "token address must be supported");
+
+         if (_tokenAddress == address(0)) {
+            require(_value == msg.value, "value must be equal msg value");
+        } else {
+            require(msg.value == 0, "msg value must be zero");
+        }
+
+         _;
+    }
+
     /**
      * @notice Update a token in supported list
      * @param _tokenAddress the token address
