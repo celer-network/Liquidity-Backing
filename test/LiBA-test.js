@@ -591,4 +591,52 @@ contract('LiBA', ([provider, bidder0, bidder1, bidder2]) => {
             0
         );
     });
+
+    it('should fail to initAuction for pauced contract', async () => {
+        await liba.pause();
+        await celerToken.approve(liba.address, AUCTION_DEPOSIT);
+
+        try {
+            await liba.initAuction(
+                EMPTY_ADDRESS,
+                BID_DURATION,
+                REVEAL_DURATION,
+                CLAIM_DURATION,
+                CHALLENGE_DURATION,
+                FINALIZE_DURATION,
+                VALUE,
+                DURATION,
+                MAX_RATE,
+                MIN_VALUE,
+                EMPTY_ADDRESS,
+                0
+            );
+        } catch (e) {
+            assert.isAbove(
+                e.message.search('VM Exception while processing transaction'),
+                -1
+            );
+            return;
+        }
+
+        assert.fail('should have thrown before');
+    });
+
+    it('should initAuction successfully for unpauced contract', async () => {
+        await liba.unpause();
+        await liba.initAuction(
+            EMPTY_ADDRESS,
+            BID_DURATION,
+            REVEAL_DURATION,
+            CLAIM_DURATION,
+            CHALLENGE_DURATION,
+            FINALIZE_DURATION,
+            VALUE,
+            DURATION,
+            MAX_RATE,
+            MIN_VALUE,
+            EMPTY_ADDRESS,
+            0
+        );
+    });
 });

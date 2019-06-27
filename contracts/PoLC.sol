@@ -6,8 +6,9 @@ import "openzeppelin-solidity/contracts/math/SafeMath.sol";
 import "openzeppelin-solidity/contracts/token/ERC20/IERC20.sol";
 import "openzeppelin-solidity/contracts/token/ERC20/SafeERC20.sol";
 import "openzeppelin-solidity/contracts/ownership/Ownable.sol";
+import "openzeppelin-solidity/contracts/lifecycle/Pausable.sol";
 
-contract PoLC is Ownable, IPoLC, TokenUtil {
+contract PoLC is Ownable, IPoLC, TokenUtil, Pausable {
     using SafeERC20 for IERC20;
     using SafeMath for uint;
 
@@ -45,6 +46,7 @@ contract PoLC is Ownable, IPoLC, TokenUtil {
     event NewCommitment(uint commitmentId, address indexed user);
     event WithdrawFund(uint commitmentId);
     event WithdrawReward(uint commitmentId);
+    event DrainToken(address tokenAddress, uint amount);
 
     /**
      * @notice Check if the commitment lock has expired
@@ -72,6 +74,7 @@ contract PoLC is Ownable, IPoLC, TokenUtil {
     function commitFund(uint _duration, address _tokenAddress, uint _value)
         external
         payable
+        whenNotPaused
         validateToken(_tokenAddress, _value)
     {
         require(
@@ -118,6 +121,7 @@ contract PoLC is Ownable, IPoLC, TokenUtil {
         uint _commitmentId
     )
         external
+        whenNotPaused
         lockExpired(_commitmentId)
     {
         Commitment storage commitment = commitmentsByUser[msg.sender][_commitmentId];
@@ -136,6 +140,7 @@ contract PoLC is Ownable, IPoLC, TokenUtil {
         uint _commitmentId
     )
         external
+        whenNotPaused
         lockExpired(_commitmentId)
     {
         Commitment storage commitment = commitmentsByUser[msg.sender][_commitmentId];
@@ -153,6 +158,24 @@ contract PoLC is Ownable, IPoLC, TokenUtil {
         commitment.withdrawedReward = totalReward;
         celerToken.safeTransfer(msg.sender, totalReward);
         emit WithdrawReward(_commitmentId);
+    }
+
+    /**
+     * @notice Onwer drains one type of tokens when paused
+     * @dev This is for emergency situations.
+     * @param _tokenAddress address of token to drain
+     * @param _amount drained token amount
+     */
+    function drainToken(
+        address _tokenAddress,
+        uint _amount
+    )
+        public
+        whenPaused
+        onlyOwner
+    {
+        _transfer(_tokenAddress, msg.sender, _amount);
+        emit DrainToken(_tokenAddress, _amount);
     }
 
     /**
@@ -196,6 +219,7 @@ contract PoLC is Ownable, IPoLC, TokenUtil {
         address payable _borrower
     )
         external
+        whenNotPaused
     {
         require(msg.sender == libaAddress, "sender must be liba contract");
         Commitment storage commitment = commitmentsByUser[_user][_commitmentId];
