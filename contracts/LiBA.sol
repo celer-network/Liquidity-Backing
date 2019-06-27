@@ -7,8 +7,9 @@ import "openzeppelin-solidity/contracts/token/ERC20/IERC20.sol";
 import "openzeppelin-solidity/contracts/token/ERC20/SafeERC20.sol";
 import "openzeppelin-solidity/contracts/payment/PullPayment.sol";
 import "openzeppelin-solidity/contracts/access/roles/WhitelistedRole.sol";
+import "openzeppelin-solidity/contracts/lifecycle/Pausable.sol";
 
-contract LiBA is TokenUtil, PullPayment, WhitelistedRole {
+contract LiBA is TokenUtil, PullPayment, WhitelistedRole, Pausable {
     using SafeERC20 for IERC20;
     using SafeMath for uint;
 
@@ -114,6 +115,7 @@ contract LiBA is TokenUtil, PullPayment, WhitelistedRole {
     )
         public
         payable
+        whenNotPaused
         libaWhitelistCheck
         validateToken(_collateralAddress, _collateralValue)
     {
@@ -164,6 +166,7 @@ contract LiBA is TokenUtil, PullPayment, WhitelistedRole {
         uint _celerValue
     )
         external
+        whenNotPaused
     {
         Auction storage auction = auctions[_auctionId];
         require(block.number <= auction.bidEnd, "must be within bid duration");
@@ -202,6 +205,7 @@ contract LiBA is TokenUtil, PullPayment, WhitelistedRole {
         uint _commitmentId
     )
         external
+        whenNotPaused
     {
         Auction storage auction = auctions[_auctionId];
         require(block.number > auction.bidEnd, "must be within reveal duration");
@@ -253,6 +257,7 @@ contract LiBA is TokenUtil, PullPayment, WhitelistedRole {
         address[] calldata _winners
     )
         external
+        whenNotPaused
     {
         Auction storage auction = auctions[_auctionId];
         require(block.number > auction.revealEnd, "must be within claim duration");
@@ -273,6 +278,7 @@ contract LiBA is TokenUtil, PullPayment, WhitelistedRole {
         address[] calldata _winners
     )
         external
+        whenNotPaused
     {
         Auction storage auction = auctions[_auctionId];
         require(block.number > auction.claimEnd, "must be within challenge");
@@ -291,7 +297,7 @@ contract LiBA is TokenUtil, PullPayment, WhitelistedRole {
      * @notice Finalize the auction
      * @param _auctionId Id of the auction
      */
-    function finalizeAuction(uint _auctionId) external {
+    function finalizeAuction(uint _auctionId) external whenNotPaused {
         Auction storage auction = auctions[_auctionId];
         require(block.number > auction.challengeEnd,  "must be within finalize duration");
         require(block.number <= auction.finalizeEnd,  "must be within finalize duration");
@@ -323,7 +329,7 @@ contract LiBA is TokenUtil, PullPayment, WhitelistedRole {
      * @notice Repay the auction
      * @param _auctionId Id of the auction
      */
-    function repayAuction(uint _auctionId) external payable {
+    function repayAuction(uint _auctionId) external payable whenNotPaused {
         Auction storage auction = auctions[_auctionId];
         require(block.number <= auction.finalizeEnd + auction.duration,  "must be within auction lending duration");
         require(auction.finalized, "auction must be finalized");
@@ -359,7 +365,7 @@ contract LiBA is TokenUtil, PullPayment, WhitelistedRole {
      * or asker fails to finalize the auction before finalizeEnd
      * @param _auctionId Id of the auction
      */
-    function finalizeBid(uint _auctionId) external {
+    function finalizeBid(uint _auctionId) external whenNotPaused {
         bool allowWithdraw = false;
         Auction storage auction = auctions[_auctionId];
 
@@ -384,7 +390,7 @@ contract LiBA is TokenUtil, PullPayment, WhitelistedRole {
      * @notice collect the collateral of the auction if it is not paid
      * @param _auctionId Id of the auction
      */
-    function collectCollateral(uint _auctionId) external {
+    function collectCollateral(uint _auctionId) external whenNotPaused {
         Auction storage auction = auctions[_auctionId];
         require(block.number > auction.finalizeEnd + auction.duration,  "must be pass auction lending duration");
         require(_checkWinner(_auctionId, msg.sender), "sender must be a winner");

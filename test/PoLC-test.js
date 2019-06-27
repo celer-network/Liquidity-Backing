@@ -11,6 +11,7 @@ const assert = chai.assert;
 
 const web3 = new Web3(new Web3.providers.HttpProvider('http://localhost:8545'));
 
+const EMPTY_ADDRESS = '0x0000000000000000000000000000000000000000';
 const DAY = 60 * 60 * 24;
 const BLOCK_REWARD = 100;
 const LOCK_DURATION = 10;
@@ -33,12 +34,9 @@ contract('PoLC', ([owner, liba, borrower]) => {
 
     it('should fail to commit eth fund for unequal value', async () => {
         try {
-            await polc.commitFund(
-                LOCK_DURATION,
-                '0x0000000000000000000000000000000000000000',
-                2,
-                { value: '1' }
-            );
+            await polc.commitFund(LOCK_DURATION, EMPTY_ADDRESS, 2, {
+                value: '1'
+            });
         } catch (e) {
             assert.isAbove(
                 e.message.search('value must be equal msg value'),
@@ -51,12 +49,9 @@ contract('PoLC', ([owner, liba, borrower]) => {
     });
 
     it('should commit eth fund successfully', async () => {
-        const receipt = await polc.commitFund(
-            LOCK_DURATION,
-            '0x0000000000000000000000000000000000000000',
-            1,
-            { value: '1' }
-        );
+        const receipt = await polc.commitFund(LOCK_DURATION, EMPTY_ADDRESS, 1, {
+            value: '1'
+        });
         const { event, args } = receipt.logs[0];
         assert.equal(event, 'NewCommitment');
         commitmentId = args.commitmentId.toNumber();
@@ -220,12 +215,9 @@ contract('PoLC', ([owner, liba, borrower]) => {
     });
 
     it('should fail to lendCommitment for exceeding available value', async () => {
-        const receipt = await polc.commitFund(
-            LOCK_DURATION,
-            '0x0000000000000000000000000000000000000000',
-            1,
-            { value: '1' }
-        );
+        const receipt = await polc.commitFund(LOCK_DURATION, EMPTY_ADDRESS, 1, {
+            value: '1'
+        });
         const { args } = receipt.logs[0];
         commitmentId = args.commitmentId.toNumber();
 
@@ -286,5 +278,79 @@ contract('PoLC', ([owner, liba, borrower]) => {
         );
         assert.equal(commitment.availableValue.toNumber(), 1);
         assert.equal(commitment.lendingValue.toNumber(), 0);
+    });
+
+    it('should fail to commitFund for pauced contract', async () => {
+        await polc.pause();
+
+        try {
+            await polc.commitFund(LOCK_DURATION, EMPTY_ADDRESS, 1, {
+                value: '1'
+            });
+        } catch (e) {
+            assert.isAbove(
+                e.message.search('VM Exception while processing transaction'),
+                -1
+            );
+            return;
+        }
+
+        assert.fail('should have thrown before');
+    });
+
+    it('should fail to withdrawFund for pauced contract', async () => {
+        try {
+            await polc.withdrawFund(commitmentId);
+        } catch (e) {
+            assert.isAbove(
+                e.message.search('VM Exception while processing transaction'),
+                -1
+            );
+            return;
+        }
+
+        assert.fail('should have thrown before');
+    });
+
+    it('should fail to withdrawReward for pauced contract', async () => {
+        try {
+            await polc.withdrawReward(commitmentId);
+        } catch (e) {
+            assert.isAbove(
+                e.message.search('VM Exception while processing transaction'),
+                -1
+            );
+            return;
+        }
+
+        assert.fail('should have thrown before');
+    });
+
+    it('should drainToken successfully after pauce contract', async () => {
+        const receipt = await polc.drainToken(EMPTY_ADDRESS, 1);
+        const { event, args } = receipt.logs[0];
+        assert.equal(event, 'DrainToken');
+        assert.equal(args.tokenAddress, EMPTY_ADDRESS);
+        assert.equal(args.amount.toNumber(), 1);
+    });
+
+    it('should commitFund successfully again after unpauce contract', async () => {
+        await polc.unpause();
+        await utils.updateTimestamp(1);
+        await polc.commitFund(LOCK_DURATION, EMPTY_ADDRESS, 1, { value: '1' });
+    });
+
+    it('should fail to drainToken for unpauced contract', async () => {
+        try {
+            await polc.drainToken(EMPTY_ADDRESS, 1);
+        } catch (e) {
+            assert.isAbove(
+                e.message.search('VM Exception while processing transaction'),
+                -1
+            );
+            return;
+        }
+
+        assert.fail('should have thrown before');
     });
 });
