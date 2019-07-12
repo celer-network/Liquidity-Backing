@@ -72,7 +72,7 @@ contract('LiBA', ([provider, bidder0, bidder1, bidder2]) => {
 
     const commitFund = async (bid, bidder, tokenAddress = EMPTY_ADDRESS) => {
         const isEmptyAddress = tokenAddress === EMPTY_ADDRESS;
-        const receipt = await polc.commitFund(100, tokenAddress, bid.value, {
+        const receipt = await polc.commitFund(tokenAddress, 100, bid.value, {
             value: isEmptyAddress ? bid.value : 0,
             from: bidder
         });

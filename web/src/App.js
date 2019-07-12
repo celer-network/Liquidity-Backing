@@ -6,6 +6,7 @@ import { Card, Layout, Menu } from 'antd';
 import { AccountData } from 'drizzle-react-components';
 
 import { subscribeEvent, subscribeChainInfo } from './utils/subscribe';
+import { getNetworkConfig } from './utils/network';
 
 import './App.css';
 
@@ -22,6 +23,11 @@ class App extends React.Component {
         const { accounts, dispatch } = this.props;
         subscribeEvent(accounts[0], this.contracts);
         subscribeChainInfo(this.web3, dispatch);
+
+        dispatch({
+            type: 'network/save',
+            payload: getNetworkConfig(this.web3.currentProvider.networkVersion)
+        });
     }
 
     render() {

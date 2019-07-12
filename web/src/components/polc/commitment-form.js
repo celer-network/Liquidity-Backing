@@ -4,11 +4,8 @@ import web3 from 'web3';
 import { Modal } from 'antd';
 
 import Form from '../form';
-import {
-    etherFieldOptions,
-    dayFieldOptions,
-    minValueRule
-} from '../../utils/form';
+import { EMPTY_ADDRESS } from '../../utils/constant';
+import { dayFieldOptions, minValueRule } from '../../utils/form';
 
 class CommimentForm extends React.Component {
     constructor(props, context) {
@@ -26,22 +23,49 @@ class CommimentForm extends React.Component {
                 return;
             }
 
-            const { duration, value } = values;
-            this.contracts.PoLC.methods.commitFund.cacheSend(duration, {
-                value: web3.utils.toWei(value.toString(), 'ether')
-            });
+            const { token, duration, value } = values;
+            const formatedValue = web3.utils.toWei(value.toString(), 'ether');
+            const sendOption = {};
+            if (token === EMPTY_ADDRESS) {
+                sendOption.value = formatedValue;
+            }
+
+            this.contracts.PoLC.methods.commitFund.cacheSend(
+                token,
+                duration,
+                formatedValue,
+                sendOption
+            );
             this.form.current.resetFields();
             onClose();
         });
     };
 
     render() {
-        const { visible, onClose } = this.props;
+        const { network, visible, onClose } = this.props;
+        const supportedTokenOptions = network.supportedTokens.map(
+            supportedToken => [
+                supportedToken.address,
+                `${supportedToken.symbol} (${supportedToken.address})`
+            ]
+        );
         const formItems = [
+            {
+                name: 'token',
+                field: 'select',
+                fieldOptions: {
+                    options: supportedTokenOptions
+                },
+                rules: [
+                    {
+                        message: 'Please select a token!',
+                        required: true
+                    }
+                ]
+            },
             {
                 name: 'value',
                 field: 'number',
-                fieldOptions: etherFieldOptions,
                 rules: [
                     minValueRule(0),
                     {
