@@ -11,8 +11,9 @@ import { message } from 'antd';
 import contractOptions from './utils/contracts';
 import PoLCModel from './models/polc';
 import LiBAModel from './models/liba';
+import NetworkModel from './models/network';
 
-function * rootSaga() {
+function*rootSaga() {
     yield all(drizzleSagas.map(saga => fork(saga)));
 }
 
@@ -47,6 +48,7 @@ app.use(
 // Moved to router.js
 app.model(PoLCModel);
 app.model(LiBAModel);
+app.model(NetworkModel);
 
 // 4. Router
 app.router(require('./router.js').default);

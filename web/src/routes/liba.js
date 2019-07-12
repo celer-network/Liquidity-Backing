@@ -43,7 +43,7 @@ class LiBA extends React.Component {
     };
 
     renderAuction = auction => {
-        const { LiBA } = this.props;
+        const { network } = this.props;
         const { asker, value, duration } = auction.value;
 
         return (
@@ -63,7 +63,7 @@ class LiBA extends React.Component {
                             <Statistic
                                 title="Period"
                                 value={getCurrentPeriod(
-                                    LiBA.block.number,
+                                    network.block.number,
                                     auction
                                 )}
                             />
@@ -141,10 +141,11 @@ LiBA.contextTypes = {
 };
 
 function mapStateToProps(state) {
-    const { contracts, accounts, LiBA } = state;
+    const { contracts, accounts, LiBA, network } = state;
 
     return {
         accounts,
+        network,
         LiBA: { ...LiBA, ...contracts.LiBA }
     };
 }

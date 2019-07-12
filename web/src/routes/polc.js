@@ -131,6 +131,7 @@ class PoLC extends React.Component {
 
     render() {
         const { isModalVisible } = this.state;
+        const { network } = this.props;
 
         return (
             <Card
@@ -143,6 +144,7 @@ class PoLC extends React.Component {
             >
                 {this.renderCommiments()}
                 <CommimentForm
+                    network={network}
                     visible={isModalVisible}
                     onClose={this.toggleModal}
                 />
@@ -160,9 +162,9 @@ PoLC.contextTypes = {
 };
 
 function mapStateToProps(state) {
-    const { contracts } = state;
-
+    const { contracts, network } = state;
     return {
+        network,
         PoLC: contracts.PoLC
     };
 }

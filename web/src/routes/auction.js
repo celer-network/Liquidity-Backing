@@ -83,7 +83,7 @@ class Auction extends React.Component {
     }
 
     static getDerivedStateFromProps(props) {
-        const { match, LiBA = {} } = props;
+        const { match, LiBA = {}, network } = props;
 
         const auctions = _.values(LiBA.getAuction);
         const auction = _.find(
@@ -95,7 +95,7 @@ class Auction extends React.Component {
             return {};
         }
 
-        const currentBlockNumber = LiBA.block.number;
+        const currentBlockNumber = network.block.number;
         const currentPeriod = getCurrentPeriod(currentBlockNumber, auction);
         const currentStep = _.indexOf(steps, currentPeriod);
 
@@ -225,8 +225,7 @@ class Auction extends React.Component {
             auction,
             currentStep,
             isBidModalVisible,
-            isRevealModalVisible,
-            isChallengeModalVisible
+            isRevealModalVisible
         } = this.state;
 
         if (!auction) {
@@ -267,11 +266,12 @@ Auction.contextTypes = {
 };
 
 function mapStateToProps(state) {
-    const { accounts, contracts, LiBA } = state;
+    const { accounts, contracts, LiBA, network } = state;
 
     console.log(contracts, LiBA);
     return {
         accounts,
+        network,
         LiBA: { ...LiBA, ...contracts.LiBA }
     };
 }

@@ -67,11 +67,11 @@ contract PoLC is Ownable, IPoLC, TokenUtil, Pausable {
 
     /**
      * @notice Lock fund into the PoLC contract
-     * @param _duration lock-in duration by days
      * @param _tokenAddress token address
+     * @param _duration lock-in duration by days
      * @param _value committed value
      */
-    function commitFund(uint _duration, address _tokenAddress, uint _value)
+    function commitFund(address _tokenAddress, uint _duration, uint _value)
         external
         payable
         whenNotPaused

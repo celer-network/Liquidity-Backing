@@ -34,7 +34,7 @@ contract('PoLC', ([owner, liba, borrower]) => {
 
     it('should fail to commit eth fund for unequal value', async () => {
         try {
-            await polc.commitFund(LOCK_DURATION, EMPTY_ADDRESS, 2, {
+            await polc.commitFund(EMPTY_ADDRESS, LOCK_DURATION, 2, {
                 value: '1'
             });
         } catch (e) {
@@ -49,7 +49,7 @@ contract('PoLC', ([owner, liba, borrower]) => {
     });
 
     it('should commit eth fund successfully', async () => {
-        const receipt = await polc.commitFund(LOCK_DURATION, EMPTY_ADDRESS, 1, {
+        const receipt = await polc.commitFund(EMPTY_ADDRESS, LOCK_DURATION, 1, {
             value: '1'
         });
         const { event, args } = receipt.logs[0];
@@ -122,7 +122,7 @@ contract('PoLC', ([owner, liba, borrower]) => {
 
     it('should fail to commit ERC20 fund for unsupported token address', async () => {
         try {
-            await polc.commitFund(LOCK_DURATION, commitToken.address, 1);
+            await polc.commitFund(commitToken.address, LOCK_DURATION, 1);
         } catch (e) {
             assert.isAbove(
                 e.message.search('token address must be supported'),
@@ -137,7 +137,7 @@ contract('PoLC', ([owner, liba, borrower]) => {
     it('should fail to commit ERC20 fund for non-zero value', async () => {
         await polc.updateSupportedToken(commitToken.address, true);
         try {
-            await polc.commitFund(LOCK_DURATION, commitToken.address, 1, {
+            await polc.commitFund(commitToken.address, LOCK_DURATION, 1, {
                 value: '1'
             });
         } catch (e) {
@@ -150,8 +150,8 @@ contract('PoLC', ([owner, liba, borrower]) => {
 
     it('should commit ERC20 fund successfully', async () => {
         const receipt = await polc.commitFund(
-            LOCK_DURATION,
             commitToken.address,
+            LOCK_DURATION,
             1
         );
         const { event, args } = receipt.logs[0];
@@ -215,7 +215,7 @@ contract('PoLC', ([owner, liba, borrower]) => {
     });
 
     it('should fail to lendCommitment for exceeding available value', async () => {
-        const receipt = await polc.commitFund(LOCK_DURATION, EMPTY_ADDRESS, 1, {
+        const receipt = await polc.commitFund(EMPTY_ADDRESS, LOCK_DURATION, 1, {
             value: '1'
         });
         const { args } = receipt.logs[0];
@@ -284,7 +284,7 @@ contract('PoLC', ([owner, liba, borrower]) => {
         await polc.pause();
 
         try {
-            await polc.commitFund(LOCK_DURATION, EMPTY_ADDRESS, 1, {
+            await polc.commitFund(EMPTY_ADDRESS, LOCK_DURATION, 1, {
                 value: '1'
             });
         } catch (e) {
@@ -337,7 +337,7 @@ contract('PoLC', ([owner, liba, borrower]) => {
     it('should commitFund successfully again after unpauce contract', async () => {
         await polc.unpause();
         await utils.updateTimestamp(1);
-        await polc.commitFund(LOCK_DURATION, EMPTY_ADDRESS, 1, { value: '1' });
+        await polc.commitFund(EMPTY_ADDRESS, LOCK_DURATION, 1, { value: '1' });
     });
 
     it('should fail to drainToken for unpauced contract', async () => {
