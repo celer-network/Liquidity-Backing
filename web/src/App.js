@@ -5,6 +5,9 @@ import { withRouter, Link } from 'dva/router';
 import { Card, Layout, Menu } from 'antd';
 import { AccountData } from 'drizzle-react-components';
 
+import { subscribeEvent, subscribeChainInfo } from './utils/subscribe';
+import { getNetworkConfig } from './utils/network';
+
 import './App.css';
 
 const { Sider, Content, Footer } = Layout;
@@ -18,50 +21,19 @@ class App extends React.Component {
 
     componentWillMount() {
         const { accounts, dispatch } = this.props;
-        const { PoLC, LiBA } = this.contracts;
+        subscribeEvent(accounts[0], this.contracts);
+        subscribeChainInfo(this.web3, dispatch);
 
-        PoLC.events.NewCommitment(
-            {
-                fromBlock: 0,
-                filter: {
-                    user: accounts[0]
-                }
-            },
-            (err, event) => {
-                if (err) {
-                    return;
-                }
-
-                const { commitmentId, user } = event.returnValues;
-                PoLC.methods.commitmentsByUser.cacheCall(user, commitmentId);
-            }
-        );
-
-        LiBA.events.NewAuction(
-            {
-                fromBlock: 0
-            },
-            (err, event) => {
-                if (err) {
-                    return;
-                }
-
-                const { auctionId } = event.returnValues;
-                LiBA.methods.getAuction.cacheCall(auctionId);
-            }
-        );
-
-        this.web3.eth.getBlock('latest').then(block => {
-            dispatch({
-                type: 'LiBA/save',
-                payload: { block }
-            });
+        dispatch({
+            type: 'network/save',
+            payload: getNetworkConfig(this.web3.currentProvider.networkVersion)
         });
     }
 
     render() {
         const { children, location } = this.props;
         const { pathname } = location;
+        console.log(this.props.accounts);
         return (
             <Layout>
                 <Sider>
