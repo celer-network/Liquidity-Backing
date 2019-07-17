@@ -483,7 +483,6 @@ contract LiBA is TokenUtil, PullPayment, WhitelistedRole, Pausable {
         view
         returns(bool)
     {
-        Auction storage auction = auctions[_auctionId];
         Bid storage bid0 = bidsByUser[_bidder0][_auctionId];
         Bid storage bid1 = bidsByUser[_bidder1][_auctionId];
 

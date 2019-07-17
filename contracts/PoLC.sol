@@ -72,8 +72,8 @@ contract PoLC is Ownable, IPoLC, TokenUtil, Pausable {
      * @param _value committed value
      */
     function commitFund(
-        uint _duration,
         address _tokenAddress,
+        uint _duration,
         uint _value
     )
         external
