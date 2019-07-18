@@ -33,7 +33,7 @@ class App extends React.Component {
     render() {
         const { children, location } = this.props;
         const { pathname } = location;
-        console.log(this.props.accounts);
+
         return (
             <Layout>
                 <Sider>

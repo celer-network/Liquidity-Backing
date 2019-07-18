@@ -36,14 +36,9 @@ export const subscribeEvent = (account, contracts) => {
 };
 
 export const subscribeChainInfo = (web3, dispatch) => {
-    const account = web3.currentProvider.selectedAddress;
     let blockNumber;
 
     setInterval(() => {
-        if (account !== web3.currentProvider.selectedAddress) {
-            window.location.reload();
-        }
-
         return web3.eth.getBlock('latest').then(block => {
             if (block && blockNumber !== block.number) {
                 dispatch({
