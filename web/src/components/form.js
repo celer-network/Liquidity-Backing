@@ -115,4 +115,8 @@ CustomizeForm.defaultProps = {
     submitText: 'Save'
 };
 
-export default Form.create()(CustomizeForm);
+export default Form.create({
+    onValuesChange(props, changedValues) {
+        props.onValuesChange(changedValues);
+    }
+})(CustomizeForm);

@@ -3,6 +3,11 @@ export const etherFieldOptions = {
     parser: value => value.replace(/[a-z]/g, '')
 };
 
+export const currencyFieldOptions = unit => ({
+    formatter: value => (value ? `${value}${unit}` : ''),
+    parser: value => value.replace(/[A-Z]/g, '')
+});
+
 export const dayFieldOptions = {
     formatter: value => (value ? `${value}day` : ''),
     parser: value => value.replace(/[a-z]/g, '')

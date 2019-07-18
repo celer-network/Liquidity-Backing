@@ -5,15 +5,23 @@ import { Modal } from 'antd';
 
 import Form from '../form';
 import { EMPTY_ADDRESS } from '../../utils/constant';
-import { dayFieldOptions, minValueRule } from '../../utils/form';
+import { getUnitByAddress } from '../../utils/unit';
+import {
+    currencyFieldOptions,
+    dayFieldOptions,
+    minValueRule
+} from '../../utils/form';
 
 class CommimentForm extends React.Component {
     constructor(props, context) {
         super(props);
 
+        this.state = {};
         this.form = React.createRef();
         this.contracts = context.drizzle.contracts;
     }
+
+    handleValueChange = changedValue => this.setState(changedValue);
 
     handleCommitFund = () => {
         const { onClose } = this.props;
@@ -49,6 +57,7 @@ class CommimentForm extends React.Component {
                 `${supportedToken.symbol} (${supportedToken.address})`
             ]
         );
+
         const formItems = [
             {
                 name: 'token',
@@ -66,6 +75,9 @@ class CommimentForm extends React.Component {
             {
                 name: 'value',
                 field: 'number',
+                fieldOptions: currencyFieldOptions(
+                    getUnitByAddress(network.supportedTokens, this.state.token)
+                ),
                 rules: [
                     minValueRule(0),
                     {
@@ -95,7 +107,11 @@ class CommimentForm extends React.Component {
                 onOk={this.handleCommitFund}
                 onCancel={onClose}
             >
-                <Form ref={this.form} items={formItems} />
+                <Form
+                    ref={this.form}
+                    items={formItems}
+                    onValuesChange={this.handleValueChange}
+                />
             </Modal>
         );
     }
