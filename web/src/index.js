@@ -9,6 +9,7 @@ import {
 import { message } from 'antd';
 
 import contractOptions from './utils/contracts';
+import { checkNetworkCompatbility } from './utils/network';
 import PoLCModel from './models/polc';
 import LiBAModel from './models/liba';
 import NetworkModel from './models/network';
@@ -16,6 +17,8 @@ import NetworkModel from './models/network';
 function*rootSaga() {
     yield all(drizzleSagas.map(saga => fork(saga)));
 }
+
+checkNetworkCompatbility();
 
 // 1. Initialize
 const app = dva({

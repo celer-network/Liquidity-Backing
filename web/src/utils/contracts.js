@@ -10,7 +10,11 @@ const contractOptions = {
             url: 'ws://localhost:8545'
         }
     },
-    contracts: [PoLC, LiBA]
+    contracts: [PoLC, LiBA],
+    polls: {
+        accounts: 1000,
+        blocks: 1000
+    }
 };
 
 export default contractOptions;
