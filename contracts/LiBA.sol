@@ -153,7 +153,7 @@ contract LiBA is TokenUtil, PullPayment, WhitelistedRole, Pausable {
         uint borrowFee = polc.calculateBorrowFee(auction.tokenAddress, _value, _duration);
         celerToken.safeTransferFrom(msg.sender, address(polc), borrowFee);
         emit NewAuction(auctionCount, auction.asker);
-        auctionCount += 1;
+        auctionCount = auctionCount.add(1);
     }
 
     /**
@@ -296,9 +296,17 @@ contract LiBA is TokenUtil, PullPayment, WhitelistedRole, Pausable {
 
         auction.finalized = true;
         address[] storage winners = auction.winners;
-        for (uint i = 0; i < winners.length; i++) {
+        uint value = auction.value;
+        for (uint i = 0; i < winners.length && value > 0; i++) {
             address winner = winners[i];
             Bid storage winnerBid = bidsByUser[winner][_auctionId];
+
+            if (value > winnerBid.value) {
+                value = value.sub(winnerBid.value);
+            } else {
+                winnerBid.value = value;
+                value = 0;
+            }
             polc.lendCommitment(
                 winner,
                 winnerBid.commitmentId,
@@ -437,53 +445,57 @@ contract LiBA is TokenUtil, PullPayment, WhitelistedRole, Pausable {
         view
         returns(bool)
     {
-        bool higherRank = false;
         Auction storage auction = auctions[_auctionId];
         address[] storage winners = auction.winners;
+        Bid storage challengerBid = bidsByUser[_challenger][_auctionId];
+        bool isHigherRank = false;
+        uint totalValue = 0;
 
         for (uint i = 0; i < winners.length; i++) {
             address winner = winners[i];
+            Bid storage winnerBid = bidsByUser[winner][_auctionId];
+
             if (winner == _challenger) {
                 return false;
             }
 
-            if (!higherRank) {
-                if (_hasHigherRank(_auctionId, _challenger, winner)) {
-                    higherRank = true;
+            if (totalValue >= auction.value && i < winners.length) {
+                return true;
+            }
+            totalValue = totalValue.add(winnerBid.value);
+
+            if (!isHigherRank) {
+                if (_hasHigherRank(challengerBid, winnerBid)) {
+                    isHigherRank = true;
                 }
             }
         }
 
-        return higherRank;
+        return isHigherRank;
     }
 
     /**
      * @notice Compare bids of corresponding bidders, return true if bidder0 has higher rank
-     * @param _auctionId Id of the auction
-     * @param _bidder0 a bidder address
-     * @param _bidder1 a bidder address
+     * @param _bid0  A bid
+     * @param _bid1 A bid
      */
     function _hasHigherRank(
-        uint _auctionId,
-        address _bidder0,
-        address _bidder1
+        Bid storage _bid0,
+        Bid storage _bid1
     )
         private
         view
         returns(bool)
     {
-        Bid storage bid0 = bidsByUser[_bidder0][_auctionId];
-        Bid storage bid1 = bidsByUser[_bidder1][_auctionId];
-
-        if (bid0.rate > bid1.rate) {
+        if (_bid0.rate > _bid1.rate) {
             return false;
         }
 
-        if (bid0.rate < bid1.rate) {
+        if (_bid0.rate < _bid1.rate) {
             return true;
         }
 
-        return bid0.celerValue > bid1.celerValue;
+        return _bid0.celerValue > _bid1.celerValue;
     }
 
     /**

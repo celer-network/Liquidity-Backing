@@ -212,7 +212,7 @@ contract PoLC is Ownable, IPoLC, TokenUtil, Pausable {
         uint totalPower = 0;
 
         for (uint i = borrowStart; i < borrowEnd; i++) {
-            totalPower = totalPower + powerByTime[i];
+            totalPower = totalPower.add(powerByTime[i]);
         }
 
         if (totalPower == 0) {
