@@ -30,8 +30,6 @@ contract LiBA is TokenUtil, PullPayment, WhitelistedRole, Pausable {
         uint duration;
         uint maxRate;
         uint minValue;
-        uint maxBidRate;
-        uint maxBidFactor;
         bool finalized;
         address[] bidders;
         address[] winners;
@@ -63,7 +61,14 @@ contract LiBA is TokenUtil, PullPayment, WhitelistedRole, Pausable {
     event RepayAuction(uint auctionId);
     event CollectCollateral(uint auctionId, address winner);
 
-    constructor(address _celerTokenAddress, address _polcAddress, uint _auctionDeposit, bool _enableWhitelist) public {
+    constructor(
+        address _celerTokenAddress,
+        address _polcAddress,
+        uint _auctionDeposit,
+        bool _enableWhitelist
+    )
+        public
+    {
         celerToken = IERC20(_celerTokenAddress);
         polc = IPoLC(_polcAddress);
         auctionDeposit = _auctionDeposit;
@@ -113,7 +118,7 @@ contract LiBA is TokenUtil, PullPayment, WhitelistedRole, Pausable {
         address _collateralAddress,
         uint _collateralValue
     )
-        public
+        external
         payable
         whenNotPaused
         libaWhitelistCheck
@@ -186,7 +191,6 @@ contract LiBA is TokenUtil, PullPayment, WhitelistedRole, Pausable {
         celerToken.safeTransferFrom(msg.sender, address(this), _celerValue);
     }
 
-    // TODO: verify _commitmentsIds having enough fund
     /**
      * @notice Reveal the bid of current user for an auction
      * @param _auctionId Id of the auction
@@ -234,15 +238,6 @@ contract LiBA is TokenUtil, PullPayment, WhitelistedRole, Pausable {
         bid.rate = _rate;
         bid.value = _value;
         bid.hash = bytes32(0);
-
-        if (_rate > auction.maxBidRate) {
-            auction.maxBidRate = _rate;
-        }
-
-        uint factor = _celerValue.mul(1 ether).div(_value);
-        if (factor > auction.maxBidFactor) {
-            auction.maxBidFactor = factor;
-        }
 
         emit RevealBid(_auctionId, msg.sender);
     }
@@ -453,50 +448,53 @@ contract LiBA is TokenUtil, PullPayment, WhitelistedRole, Pausable {
         view
         returns(bool)
     {
-        bool exist = false;
-        bool higherScore = false;
+        bool higherRank = false;
         Auction storage auction = auctions[_auctionId];
         address[] storage winners = auction.winners;
-        uint challengerScore = _calculateScore(_auctionId, _challenger);
 
         for (uint i = 0; i < winners.length; i++) {
             address winner = winners[i];
             if (winner == _challenger) {
-                exist = true;
-                break;
+                return false;
             }
 
-            if (!higherScore) {
-                uint winnerScore = _calculateScore(_auctionId, winner);
-
-                if (challengerScore > winnerScore) {
-                    higherScore = true;
+            if (!higherRank) {
+                if (_hasHigherRank(_auctionId, _challenger, winner)) {
+                    higherRank = true;
                 }
             }
         }
 
-        return !exist && higherScore;
+        return higherRank;
     }
 
     /**
-     * @notice Calcuate ranking score
+     * @notice Compare bids of corresponding bidders, return true if bidder0 has higher rank
      * @param _auctionId Id of the auction
-     * @param _bidder a bidder address
+     * @param _bidder0 a bidder address
+     * @param _bidder1 a bidder address
      */
-    function _calculateScore(
+    function _hasHigherRank(
         uint _auctionId,
-        address _bidder
+        address _bidder0,
+        address _bidder1
     )
         private
         view
-        returns(uint)
+        returns(bool)
     {
-        Auction storage auction = auctions[_auctionId];
-        Bid storage bid = bidsByUser[_bidder][_auctionId];
-        uint valueFactor = bid.celerValue.mul(1 ether).div(bid.value).div(auction.maxBidFactor);
-        uint rateFactor = bid.rate.div(auction.maxBidRate);
+        Bid storage bid0 = bidsByUser[_bidder0][_auctionId];
+        Bid storage bid1 = bidsByUser[_bidder1][_auctionId];
 
-        return valueFactor.sub(rateFactor);
+        if (bid0.rate > bid1.rate) {
+            return false;
+        }
+
+        if (bid0.rate < bid1.rate) {
+            return true;
+        }
+
+        return bid0.celerValue > bid1.celerValue;
     }
 
     /**

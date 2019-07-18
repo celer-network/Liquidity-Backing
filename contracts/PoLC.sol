@@ -71,7 +71,11 @@ contract PoLC is Ownable, IPoLC, TokenUtil, Pausable {
      * @param _duration lock-in duration by days
      * @param _value committed value
      */
-    function commitFund(address _tokenAddress, uint _duration, uint _value)
+    function commitFund(
+        address _tokenAddress,
+        uint _duration,
+        uint _value
+    )
         external
         payable
         whenNotPaused
@@ -161,24 +165,6 @@ contract PoLC is Ownable, IPoLC, TokenUtil, Pausable {
     }
 
     /**
-     * @notice Onwer drains one type of tokens when paused
-     * @dev This is for emergency situations.
-     * @param _tokenAddress address of token to drain
-     * @param _amount drained token amount
-     */
-    function drainToken(
-        address _tokenAddress,
-        uint _amount
-    )
-        public
-        whenPaused
-        onlyOwner
-    {
-        _transfer(_tokenAddress, msg.sender, _amount);
-        emit DrainToken(_tokenAddress, _amount);
-    }
-
-    /**
      * @notice Set libaAddress state variable
      * @param _libaAddress Liba address
      */
@@ -251,9 +237,27 @@ contract PoLC is Ownable, IPoLC, TokenUtil, Pausable {
         commitment.availableValue = commitment.availableValue.add(_value);
 
         if (commitment.tokenAddress == address(0)) {
-            require(msg.value == _value);
+            require(msg.value == _value, "value must match msg value");
         } else {
             IERC20(commitment.tokenAddress).safeTransferFrom(tx.origin, address(this), _value);
         }
+    }
+
+    /**
+     * @notice Onwer drains one type of tokens when paused
+     * @dev This is for emergency situations.
+     * @param _tokenAddress address of token to drain
+     * @param _amount drained token amount
+     */
+    function drainToken(
+        address _tokenAddress,
+        uint _amount
+    )
+        external
+        whenPaused
+        onlyOwner
+    {
+        _transfer(_tokenAddress, msg.sender, _amount);
+        emit DrainToken(_tokenAddress, _amount);
     }
 }
