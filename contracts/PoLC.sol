@@ -192,6 +192,37 @@ contract PoLC is Ownable, IPoLC, TokenUtil, Pausable {
     }
 
     /**
+     * @notice Calculate the fee required to launch an auction
+     * @param _tokenAddress token address
+     * @param _value Value to borrow
+     * @param _duration Duration for the borrowing
+     */
+    function calculateBorrowFee(
+        address _tokenAddress,
+        uint _value,
+        uint _duration
+    )
+        external
+        view
+        returns (uint)
+    {
+        mapping (uint => uint) storage powerByTime = powerByTokenTime[_tokenAddress];
+        uint borrowStart = block.timestamp.div(1 days).add(1);
+        uint borrowEnd = borrowStart.add(_duration);
+        uint totalPower = 0;
+
+        for (uint i = borrowStart; i < borrowEnd; i++) {
+            totalPower = totalPower + powerByTime[i];
+        }
+
+        if (totalPower == 0) {
+            return blockReward.mul(_duration);
+        }
+
+        return _value.mul(_duration).mul(_duration).mul(blockReward).div(totalPower);
+    }
+
+    /**
      * @notice Lend borrower a specific value
      * @param _user User address
      * @param _commitmentId ID of the commitment

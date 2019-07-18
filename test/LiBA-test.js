@@ -111,13 +111,8 @@ contract('LiBA', ([provider, bidder0, bidder1, bidder2]) => {
     before(async () => {
         celerToken = await ERC20ExampleToken.new();
         borrowToken = await ERC20ExampleToken.new();
-        polc = await PoLC.new(celerToken.address, 100);
-        liba = await LiBA.new(
-            celerToken.address,
-            polc.address,
-            AUCTION_DEPOSIT,
-            false
-        );
+        polc = await PoLC.new(celerToken.address, AUCTION_DEPOSIT / 2);
+        liba = await LiBA.new(celerToken.address, polc.address, false);
 
         await polc.setLibaAddress(liba.address);
         await liba.updateSupportedToken(borrowToken.address, true);
@@ -538,12 +533,7 @@ contract('LiBA', ([provider, bidder0, bidder1, bidder2]) => {
     });
 
     it('should fail to init auction for missing from whitelist', async () => {
-        liba = await LiBA.new(
-            celerToken.address,
-            polc.address,
-            AUCTION_DEPOSIT,
-            true
-        );
+        liba = await LiBA.new(celerToken.address, polc.address, true);
         await celerToken.approve(liba.address, AUCTION_DEPOSIT);
 
         try {

@@ -33,7 +33,6 @@ contract LiBA is TokenUtil, PullPayment, WhitelistedRole, Pausable {
         bool finalized;
         address[] bidders;
         address[] winners;
-        address challenger;
         uint challengeDuration;
         uint finalizeDuration;
         uint bidEnd;
@@ -44,7 +43,6 @@ contract LiBA is TokenUtil, PullPayment, WhitelistedRole, Pausable {
     }
 
     IPoLC private polc;
-    uint private auctionDeposit;
     uint private auctionCount;
     bool private enableWhitelist;
     IERC20 public celerToken;
@@ -64,14 +62,12 @@ contract LiBA is TokenUtil, PullPayment, WhitelistedRole, Pausable {
     constructor(
         address _celerTokenAddress,
         address _polcAddress,
-        uint _auctionDeposit,
         bool _enableWhitelist
     )
         public
     {
         celerToken = IERC20(_celerTokenAddress);
         polc = IPoLC(_polcAddress);
-        auctionDeposit = _auctionDeposit;
         enableWhitelist = _enableWhitelist;
 
         // Enable eth support by default
@@ -154,7 +150,8 @@ contract LiBA is TokenUtil, PullPayment, WhitelistedRole, Pausable {
         auction.challengeEnd = auction.claimEnd.add(_challengeDuration);
         auction.finalizeEnd = auction.challengeEnd.add(_finalizeDuration);
 
-        celerToken.safeTransferFrom(msg.sender, address(this), auctionDeposit);
+        uint borrowFee = polc.calculateBorrowFee(auction.tokenAddress, _value, _duration);
+        celerToken.safeTransferFrom(msg.sender, address(polc), borrowFee);
         emit NewAuction(auctionCount, auction.asker);
         auctionCount += 1;
     }
@@ -281,7 +278,6 @@ contract LiBA is TokenUtil, PullPayment, WhitelistedRole, Pausable {
         require(_validateChallenger(_auctionId, msg.sender), "must be valid challenger");
 
         auction.winners = _winners;
-        auction.challenger = msg.sender;
         auction.challengeEnd = auction.challengeEnd.add(auction.challengeDuration);
         auction.finalizeEnd = auction.challengeEnd.add(auction.finalizeDuration);
 
@@ -299,13 +295,6 @@ contract LiBA is TokenUtil, PullPayment, WhitelistedRole, Pausable {
         require(!auction.finalized, "auction must not be finalized");
 
         auction.finalized = true;
-        // If there is no challenger, refund the deposit to asker
-        if (auction.challenger == address(0)) {
-            celerToken.safeTransfer(auction.asker, auctionDeposit);
-        } else {
-            celerToken.safeTransfer(auction.challenger, auctionDeposit);
-        }
-
         address[] storage winners = auction.winners;
         for (uint i = 0; i < winners.length; i++) {
             address winner = winners[i];
