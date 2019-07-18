@@ -5,7 +5,7 @@ import { drizzleConnect } from 'drizzle-react';
 import { Button, Card, List, Statistic, Row, Col, Icon, message } from 'antd';
 
 import CommimentForm from '../components/polc/commitment-form';
-import { formatEthValue } from '../utils/unit';
+import { getUnitByAddress, formatCurrencyValue } from '../utils/unit';
 
 const DAY = 24 * 60 * 60 * 1000;
 
@@ -60,12 +60,15 @@ class PoLC extends React.Component {
     };
 
     renderCommitment = (commitment, index) => {
+        const { network } = this.props;
         const {
+            tokenAddress,
             lockStart,
             lockEnd,
             availableValue,
             lendingValue
         } = commitment.value;
+        const unit = getUnitByAddress(network.supportedTokens, tokenAddress);
 
         return (
             <List.Item>
@@ -101,13 +104,16 @@ class PoLC extends React.Component {
                         <Col span={12}>
                             <Statistic
                                 title="Available Value"
-                                value={formatEthValue(availableValue)}
+                                value={formatCurrencyValue(
+                                    availableValue,
+                                    unit
+                                )}
                             />
                         </Col>
                         <Col span={12}>
                             <Statistic
                                 title="Locked Value"
-                                value={formatEthValue(lendingValue)}
+                                value={formatCurrencyValue(lendingValue, unit)}
                             />
                         </Col>
                     </Row>
