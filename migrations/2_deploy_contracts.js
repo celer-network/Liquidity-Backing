@@ -19,7 +19,6 @@ module.exports = function(deployer, network, accounts) {
                         LiBA,
                         ERC20ExampleToken.address,
                         PoLC.address,
-                        100,
                         false
                     );
                 });
