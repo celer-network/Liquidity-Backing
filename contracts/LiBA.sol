@@ -275,7 +275,7 @@ contract LiBA is TokenUtil, PullPayment, WhitelistedRole, Pausable {
         Auction storage auction = auctions[_auctionId];
         require(block.number > auction.claimEnd, "must be within challenge");
         require(block.number <= auction.challengeEnd, "must be within challenge duration");
-        require(_validateChallenger(_auctionId, msg.sender), "must be valid challenger");
+        require(_validateChallenger(_auctionId, msg.sender), "must be a valid challenger");
 
         auction.winners = _winners;
         auction.challengeEnd = auction.challengeEnd.add(auction.challengeDuration);
@@ -384,7 +384,7 @@ contract LiBA is TokenUtil, PullPayment, WhitelistedRole, Pausable {
      */
     function collectCollateral(uint _auctionId) external whenNotPaused {
         Auction storage auction = auctions[_auctionId];
-        require(block.number > auction.finalizeEnd + auction.duration,  "must be pass auction lending duration");
+        require(block.number > auction.finalizeEnd + auction.duration,  "must pass auction lending duration");
         require(_checkWinner(_auctionId, msg.sender), "sender must be a winner");
 
         Bid storage winnerBid = bidsByUser[msg.sender][_auctionId];
@@ -445,9 +445,11 @@ contract LiBA is TokenUtil, PullPayment, WhitelistedRole, Pausable {
         view
         returns(bool)
     {
+        Bid storage challengerBid = bidsByUser[_challenger][_auctionId];
+        require(challengerBid.value > 0, "must be valid bid");
+
         Auction storage auction = auctions[_auctionId];
         address[] storage winners = auction.winners;
-        Bid storage challengerBid = bidsByUser[_challenger][_auctionId];
         bool isHigherRank = false;
         uint totalValue = 0;
 
