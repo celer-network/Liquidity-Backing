@@ -8,15 +8,20 @@ import "openzeppelin-solidity/contracts/token/ERC20/SafeERC20.sol";
 import "openzeppelin-solidity/contracts/ownership/Ownable.sol";
 import "openzeppelin-solidity/contracts/lifecycle/Pausable.sol";
 
-contract PoLC is Ownable, IPoLC, TokenUtil, Pausable {
+/**
+ * @title PoLC
+ * @notice Contract allows user to lock fund and collect reward.
+ */
+contract PoLC is Ownable, Pausable, IPoLC, TokenUtil {
     using SafeERC20 for IERC20;
     using SafeMath for uint;
 
     struct Commitment {
         address tokenAddress;
+        bool locked;
         uint lockStart;
         uint lockEnd;
-        uint lockedValue;
+        uint committedValue;
         uint availableValue;
         uint lendingValue;
         uint withdrawedReward;
@@ -46,16 +51,15 @@ contract PoLC is Ownable, IPoLC, TokenUtil, Pausable {
     event NewCommitment(uint commitmentId, address indexed user);
     event WithdrawFund(uint commitmentId);
     event WithdrawReward(uint commitmentId);
-    event DrainToken(address tokenAddress, uint amount);
 
     /**
-     * @notice Check if the commitment lock has expired
+     * @notice Check if the commitment exists and its lock has expired
      * @param _commitmentId ID of the commitment
      */
     modifier lockExpired(uint _commitmentId) {
         Commitment memory commitment = commitmentsByUser[msg.sender][_commitmentId];
         require(
-            commitment.lockEnd != 0,
+            commitment.committedValue != 0,
             "commitment must exist"
         );
         require(
@@ -66,10 +70,13 @@ contract PoLC is Ownable, IPoLC, TokenUtil, Pausable {
     }
 
     /**
-     * @notice Lock fund into the PoLC contract
-     * @param _tokenAddress token address
+     * @notice Lock fund into the PoLC contract for a specific duration.
+     * The longer the duration and larger locked token value, more rewards will be earned.
+     * Once, the fund is locked, it can only be drawn when the lock expired.
+     * If duration is set to 0, fund will be lockfree, but there will be no reward.
+     * @param _tokenAddress Address of the locked token. For ETH, it will be 0
      * @param _duration lock-in duration by days
-     * @param _value committed value
+     * @param _value committed token value
      */
     function commitFund(
         address _tokenAddress,
@@ -82,9 +89,10 @@ contract PoLC is Ownable, IPoLC, TokenUtil, Pausable {
         validateToken(_tokenAddress, _value)
     {
         require(
-            _duration > 0 && _duration < 365,
+            _duration >= 0 && _duration < 365,
             "duration must fall into the 0-365 range"
         );
+        require(_value > 0, "value must be larger than 0");
 
         address sender = msg.sender;
         uint currentTimestamp = block.timestamp;
@@ -96,29 +104,33 @@ contract PoLC is Ownable, IPoLC, TokenUtil, Pausable {
 
         Commitment storage commitment = commitmentsByUser[sender][currentTimestamp];
         require(
-            commitment.lockEnd == 0,
+            commitment.committedValue == 0,
             "one timestamp can only have one commitment"
         );
 
-        uint lockStart = currentTimestamp.div(1 days).add(1);
-        uint lockEnd = lockStart.add(_duration);
-        commitment.lockStart = lockStart;
-        commitment.lockEnd = lockEnd;
-        commitment.lockedValue = value;
-        commitment.availableValue = value;
         commitment.tokenAddress = _tokenAddress;
+        commitment.locked = false;
+        commitment.committedValue = value;
+        commitment.availableValue = value;
 
-        mapping (uint => uint) storage powerByTime = powerByTokenTime[_tokenAddress];
-        uint power = value.mul(_duration);
-        for (uint i = lockStart; i < lockEnd; i++) {
-            powerByTime[i] = powerByTime[i].add(power);
+        if (_duration > 0) {
+            uint lockStart = currentTimestamp.div(1 days).add(1);
+            uint lockEnd = lockStart.add(_duration);
+            commitment.locked = true;
+            commitment.lockStart = lockStart;
+            commitment.lockEnd = lockEnd;
+            mapping (uint => uint) storage powerByTime = powerByTokenTime[_tokenAddress];
+            uint power = value.mul(_duration);
+            for (uint i = lockStart; i < lockEnd; i++) {
+                powerByTime[i] = powerByTime[i].add(power);
+            }
         }
 
         emit NewCommitment(currentTimestamp, sender);
     }
 
     /**
-     * @notice Withdraw all available fund in a commitment
+     * @notice Withdraw all available fund in a commitment if lock has expired
      * @param _commitmentId ID of the commitment
      */
     function withdrawFund(
@@ -137,7 +149,7 @@ contract PoLC is Ownable, IPoLC, TokenUtil, Pausable {
     }
 
     /**
-     * @notice Withdraw all available reward in a commitment
+     * @notice Withdraw all available reward in a commitment if lock has expired
      * @param _commitmentId ID of the commitment
      */
     function withdrawReward(
@@ -148,8 +160,9 @@ contract PoLC is Ownable, IPoLC, TokenUtil, Pausable {
         lockExpired(_commitmentId)
     {
         Commitment storage commitment = commitmentsByUser[msg.sender][_commitmentId];
+        require(commitment.locked, "commiment must be locked to get reward");
         uint totalReward = 0;
-        uint power = commitment.lockedValue.mul(
+        uint power = commitment.committedValue.mul(
             commitment.lockEnd.sub(commitment.lockStart)
         );
         mapping (uint => uint) storage powerByTime = powerByTokenTime[commitment.tokenAddress];
@@ -175,7 +188,7 @@ contract PoLC is Ownable, IPoLC, TokenUtil, Pausable {
     }
 
     /**
-     * @notice Get available value for specific commitment of a user
+     * @notice Get token address and available value for a specific commitment of a user
      * @param _user User address
      * @param _commitmentId ID of the commitment
      */
@@ -192,8 +205,8 @@ contract PoLC is Ownable, IPoLC, TokenUtil, Pausable {
     }
 
     /**
-     * @notice Calculate the fee required to launch an auction
-     * @param _tokenAddress token address
+     * @notice Calculate the fee required to launch an auction in LiBA
+     * @param _tokenAddress Token address
      * @param _value Value to borrow
      * @param _duration Duration for the borrowing
      */
@@ -223,11 +236,11 @@ contract PoLC is Ownable, IPoLC, TokenUtil, Pausable {
     }
 
     /**
-     * @notice Lend borrower a specific value
+     * @notice Lend borrower a specific value. Can only be called from LiBA
      * @param _user User address
      * @param _commitmentId ID of the commitment
-     * @param _value value to lend
-     * @param _borrower borrower address
+     * @param _value Value to lend
+     * @param _borrower Borrower address
      */
     function lendCommitment(
         address _user,
@@ -248,10 +261,10 @@ contract PoLC is Ownable, IPoLC, TokenUtil, Pausable {
     }
 
    /**
-     * @notice Repay to the commitment
+     * @notice Repay to the commitment when borrower returns money through LiBA
      * @param _user User address
      * @param _commitmentId ID of the commitment
-     * @param _value borrow value
+     * @param _value value to repay
      */
     function repayCommitment(
         address _user,
@@ -272,23 +285,5 @@ contract PoLC is Ownable, IPoLC, TokenUtil, Pausable {
         } else {
             IERC20(commitment.tokenAddress).safeTransferFrom(tx.origin, address(this), _value);
         }
-    }
-
-    /**
-     * @notice Onwer drains one type of tokens when paused
-     * @dev This is for emergency situations.
-     * @param _tokenAddress address of token to drain
-     * @param _amount drained token amount
-     */
-    function drainToken(
-        address _tokenAddress,
-        uint _amount
-    )
-        external
-        whenPaused
-        onlyOwner
-    {
-        _transfer(_tokenAddress, msg.sender, _amount);
-        emit DrainToken(_tokenAddress, _amount);
     }
 }

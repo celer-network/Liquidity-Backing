@@ -9,7 +9,7 @@ import "openzeppelin-solidity/contracts/payment/PullPayment.sol";
 import "openzeppelin-solidity/contracts/access/roles/WhitelistedRole.sol";
 import "openzeppelin-solidity/contracts/lifecycle/Pausable.sol";
 
-contract LiBA is TokenUtil, PullPayment, WhitelistedRole, Pausable {
+contract LiBA is Pausable, TokenUtil, PullPayment, WhitelistedRole {
     using SafeERC20 for IERC20;
     using SafeMath for uint;
 
