@@ -9,6 +9,10 @@ import "openzeppelin-solidity/contracts/payment/PullPayment.sol";
 import "openzeppelin-solidity/contracts/access/roles/WhitelistedRole.sol";
 import "openzeppelin-solidity/contracts/lifecycle/Pausable.sol";
 
+/**
+ * @title LiBA
+ * @notice Contract allows service providers to send assets stored in PoLC through auction.
+ */
 contract LiBA is Pausable, TokenUtil, PullPayment, WhitelistedRole {
     using SafeERC20 for IERC20;
     using SafeMath for uint;
@@ -152,16 +156,16 @@ contract LiBA is Pausable, TokenUtil, PullPayment, WhitelistedRole {
         auction.challengeEnd = auction.claimEnd.add(_challengeDuration);
         auction.finalizeEnd = auction.challengeEnd.add(_finalizeDuration);
 
-        uint borrowFee = polc.calculateBorrowFee(auction.tokenAddress, _value, _duration);
+        uint borrowFee = polc.calculateAuctionFee(auction.tokenAddress, _value, _duration);
         celerToken.safeTransferFrom(msg.sender, address(polc), borrowFee);
         emit NewAuction(auctionCount, auction.asker);
         auctionCount = auctionCount.add(1);
     }
 
     /**
-     * @notice Bid for an auction during bidding period. If called more than once,
-     * it will update existing bid for the sender. However, when the bid is updated,
-     * previous celer value will be forfeited
+     * @notice Bid for an auction during the bidding period. If called more than once,
+     * it will update the existing bid for the sender. However, when the bid is updated,
+     * the previous Celer value will be forfeited
      * @param _auctionId Id of the auction
      * @param _hash Hash calculated from desired rate, value, celerValue and salt
      * @param _celerValue Potential celer value for bidding, it can be larger than actual celer value
@@ -193,8 +197,8 @@ contract LiBA is Pausable, TokenUtil, PullPayment, WhitelistedRole {
     }
 
     /**
-     * @notice Reveal the bid of current user for an auction during revealing period.
-     * It will calculate hash based on rate, value, celerValue and salt,
+     * @notice Reveal the bid of current user for an auction during the revealing period.
+     * It will calculate hash based on rate, value, celer value, and salt,
      * and check if it is same as the hash provided in the bidding period.
      * It will also check if commitment in PoLC has enough fund
      * @param _auctionId Id of the auction
@@ -247,7 +251,7 @@ contract LiBA is Pausable, TokenUtil, PullPayment, WhitelistedRole {
     }
 
     /**
-     * @notice The auction asker claims winners for the auction during claim period
+     * @notice The auction asker claims winners for the auction during the claim period
      * @param _auctionId Id of the auction
      * @param _winners A list of winner addresses
      */
@@ -268,8 +272,8 @@ contract LiBA is Pausable, TokenUtil, PullPayment, WhitelistedRole {
     }
 
     /**
-     * @notice A potential winner, who is not claimed as one of winners,
-     * is able to challenge the auction during challenge period
+     * @notice A potential winner, who is not claimed as one of the winners,
+     * is able to challenge the auction during the challenge period
      * @param _auctionId Id of the auction
      * @param _winners A list of winner addresses
      */
@@ -293,7 +297,7 @@ contract LiBA is Pausable, TokenUtil, PullPayment, WhitelistedRole {
     }
 
     /**
-     * @notice Finalize the auction by withdrawing money from PoLC commiments during finalize period
+     * @notice Finalize the auction by withdrawing money from PoLC commitments during finalize period
      * @param _auctionId Id of the auction
      */
     function finalizeAuction(uint _auctionId) external whenNotPaused {
@@ -323,6 +327,32 @@ contract LiBA is Pausable, TokenUtil, PullPayment, WhitelistedRole {
             );
         }
         emit FinalizeAuction(_auctionId);
+    }
+
+    /**
+     * @notice Finalize the bid for bidders, who are not selected as winners,
+     * or the asker fails to finalize the auction before finalize period
+     * @param _auctionId Id of the auction
+     */
+    function finalizeBid(uint _auctionId) external whenNotPaused {
+        bool allowWithdraw = false;
+        Auction storage auction = auctions[_auctionId];
+
+        if (auction.finalized) {
+            allowWithdraw = !_checkWinner(_auctionId, msg.sender);
+        } else {
+            allowWithdraw = block.number > auction.finalizeEnd;
+        }
+        require(allowWithdraw, "you are not allowed to withdraw currently");
+
+        Bid storage bid = bidsByUser[msg.sender][_auctionId];
+        require(bid.celerValue > 0, "you do not have valid bid");
+
+        uint celerValue = bid.celerValue;
+        bid.celerValue = 0;
+        bid.rate = 0;
+        bid.value = 0;
+        celerToken.safeTransferFrom(address(this), msg.sender, celerValue);
     }
 
     /**
@@ -359,32 +389,6 @@ contract LiBA is Pausable, TokenUtil, PullPayment, WhitelistedRole {
 
         _transfer(auction.collateralAddress, auction.asker, auction.collateraValue);
         emit RepayAuction(_auctionId);
-    }
-
-    /**
-     * @notice Finalize the bid for bidders, who are not selected as winners,
-     * or the asker fails to finalize the auction before finalizeEnd period
-     * @param _auctionId Id of the auction
-     */
-    function finalizeBid(uint _auctionId) external whenNotPaused {
-        bool allowWithdraw = false;
-        Auction storage auction = auctions[_auctionId];
-
-        if (auction.finalized) {
-            allowWithdraw = !_checkWinner(_auctionId, msg.sender);
-        } else {
-            allowWithdraw = block.number > auction.finalizeEnd;
-        }
-        require(allowWithdraw, "you are not allowed to withdraw currently");
-
-        Bid storage bid = bidsByUser[msg.sender][_auctionId];
-        require(bid.celerValue > 0, "you do not have valid bid");
-
-        uint celerValue = bid.celerValue;
-        bid.celerValue = 0;
-        bid.rate = 0;
-        bid.value = 0;
-        celerToken.safeTransferFrom(address(this), msg.sender, celerValue);
     }
 
     /**
@@ -486,7 +490,7 @@ contract LiBA is Pausable, TokenUtil, PullPayment, WhitelistedRole {
     }
 
     /**
-     * @notice Compare bids of corresponding bidders, return true if bidder0 has higher rank
+     * @notice Compare bids of corresponding bidders, return true if bidder0 has a higher rank
      * @param _bid0  A bid
      * @param _bid1 A bid
      */
