@@ -9,7 +9,7 @@ import "openzeppelin-solidity/contracts/payment/PullPayment.sol";
 import "openzeppelin-solidity/contracts/access/roles/WhitelistedRole.sol";
 import "openzeppelin-solidity/contracts/lifecycle/Pausable.sol";
 
-contract LiBA is TokenUtil, PullPayment, WhitelistedRole, Pausable {
+contract LiBA is Pausable, TokenUtil, PullPayment, WhitelistedRole {
     using SafeERC20 for IERC20;
     using SafeMath for uint;
 
@@ -75,7 +75,7 @@ contract LiBA is TokenUtil, PullPayment, WhitelistedRole, Pausable {
     }
 
     /**
-     * @notice Check if the sender is in whitelist
+     * @notice Check if the sender is in the whitelist
      */
     modifier libaWhitelistCheck() {
         if (enableWhitelist) {
@@ -89,16 +89,18 @@ contract LiBA is TokenUtil, PullPayment, WhitelistedRole, Pausable {
 
     /**
      * @notice Launch a new auction
-     * @param _tokenAddress token address for token to borrow
-     * @param _bidDuration duration for bidding
-     * @param _revealDuration duration for revealing
-     * @param _claimDuration duration for claiming
-     * @param _challengeDuration duration for challenging
-     * @param _finalizeDuration duration for finalizing
-     * @param _value total value asked
-     * @param _duration duration for the lending
-     * @param _maxRate maximum rate accepted
-     * @param _minValue minimum value accepted per bid
+     * @param _tokenAddress Token address to borrow
+     * @param _bidDuration Duration for bidding
+     * @param _revealDuration Duration for revealing
+     * @param _claimDuration Duration for claiming
+     * @param _challengeDuration Duration for challenging
+     * @param _finalizeDuration Duration for finalizing
+     * @param _value Total value asked
+     * @param _duration Duration for the lending
+     * @param _maxRate Maximum rate accepted
+     * @param _minValue Minimum value accepted
+     * @param _collateralAddress Collateral token address
+     * @param _collateralValue Collateral value
      */
     function initAuction(
         address _tokenAddress,
@@ -157,10 +159,12 @@ contract LiBA is TokenUtil, PullPayment, WhitelistedRole, Pausable {
     }
 
     /**
-     * @notice Bid for an auction
+     * @notice Bid for an auction during bidding period. If called more than once,
+     * it will update existing bid for the sender. However, when the bid is updated,
+     * previous celer value will be forfeited
      * @param _auctionId Id of the auction
-     * @param _hash hash based on desired rate, value, celerValue and salt
-     * @param _celerValue potential celer value for bidding, it can be larger than actual celer value
+     * @param _hash Hash calculated from desired rate, value, celerValue and salt
+     * @param _celerValue Potential celer value for bidding, it can be larger than actual celer value
      */
     function placeBid(
         uint _auctionId,
@@ -189,13 +193,16 @@ contract LiBA is TokenUtil, PullPayment, WhitelistedRole, Pausable {
     }
 
     /**
-     * @notice Reveal the bid of current user for an auction
+     * @notice Reveal the bid of current user for an auction during revealing period.
+     * It will calculate hash based on rate, value, celerValue and salt,
+     * and check if it is same as the hash provided in the bidding period.
+     * It will also check if commitment in PoLC has enough fund
      * @param _auctionId Id of the auction
-     * @param _rate interest rate for bidding
-     * @param _value value for bidding
-     * @param _celerValue celer value for bidding
-     * @param _salt a random value used for hash
-     * @param _commitmentId commitment Id
+     * @param _rate Interest rate for bidding
+     * @param _value Value for bidding
+     * @param _celerValue Celer value for bidding
+     * @param _salt A random value used for hash
+     * @param _commitmentId Commitment Id in PoLC belong to the sender
      */
     function revealBid(
         uint _auctionId,
@@ -240,9 +247,9 @@ contract LiBA is TokenUtil, PullPayment, WhitelistedRole, Pausable {
     }
 
     /**
-     * @notice The auction asker claims winners for the auction
+     * @notice The auction asker claims winners for the auction during claim period
      * @param _auctionId Id of the auction
-     * @param _winners a list of winner addresses
+     * @param _winners A list of winner addresses
      */
     function claimWinners(
         uint _auctionId,
@@ -261,9 +268,10 @@ contract LiBA is TokenUtil, PullPayment, WhitelistedRole, Pausable {
     }
 
     /**
-     * @notice A potential winner, who is not claimed as one of winners, is able to challenge the auction
+     * @notice A potential winner, who is not claimed as one of winners,
+     * is able to challenge the auction during challenge period
      * @param _auctionId Id of the auction
-     * @param _winners a list of winner addresses
+     * @param _winners A list of winner addresses
      */
     function challengeWinners(
         uint _auctionId,
@@ -275,7 +283,7 @@ contract LiBA is TokenUtil, PullPayment, WhitelistedRole, Pausable {
         Auction storage auction = auctions[_auctionId];
         require(block.number > auction.claimEnd, "must be within challenge");
         require(block.number <= auction.challengeEnd, "must be within challenge duration");
-        require(_validateChallenger(_auctionId, msg.sender), "must be valid challenger");
+        require(_validateChallenger(_auctionId, msg.sender), "must be a valid challenger");
 
         auction.winners = _winners;
         auction.challengeEnd = auction.challengeEnd.add(auction.challengeDuration);
@@ -285,7 +293,7 @@ contract LiBA is TokenUtil, PullPayment, WhitelistedRole, Pausable {
     }
 
     /**
-     * @notice Finalize the auction
+     * @notice Finalize the auction by withdrawing money from PoLC commiments during finalize period
      * @param _auctionId Id of the auction
      */
     function finalizeAuction(uint _auctionId) external whenNotPaused {
@@ -318,7 +326,8 @@ contract LiBA is TokenUtil, PullPayment, WhitelistedRole, Pausable {
     }
 
     /**
-     * @notice Repay the auction
+     * @notice Repay the auction with original assets and interests after lending ends
+     * It will send collateral back to asker if there is any
      * @param _auctionId Id of the auction
      */
     function repayAuction(uint _auctionId) external payable whenNotPaused {
@@ -353,8 +362,8 @@ contract LiBA is TokenUtil, PullPayment, WhitelistedRole, Pausable {
     }
 
     /**
-     * @notice Finalize the bid for the acution for bidders, who are not winning the auction,
-     * or asker fails to finalize the auction before finalizeEnd
+     * @notice Finalize the bid for bidders, who are not selected as winners,
+     * or the asker fails to finalize the auction before finalizeEnd period
      * @param _auctionId Id of the auction
      */
     function finalizeBid(uint _auctionId) external whenNotPaused {
@@ -379,12 +388,12 @@ contract LiBA is TokenUtil, PullPayment, WhitelistedRole, Pausable {
     }
 
     /**
-     * @notice collect the collateral of the auction if it is not paid
+     * @notice Collect the collateral of the auction if lending is not repaid
      * @param _auctionId Id of the auction
      */
     function collectCollateral(uint _auctionId) external whenNotPaused {
         Auction storage auction = auctions[_auctionId];
-        require(block.number > auction.finalizeEnd + auction.duration,  "must be pass auction lending duration");
+        require(block.number > auction.finalizeEnd + auction.duration,  "must pass auction lending duration");
         require(_checkWinner(_auctionId, msg.sender), "sender must be a winner");
 
         Bid storage winnerBid = bidsByUser[msg.sender][_auctionId];
@@ -435,7 +444,7 @@ contract LiBA is TokenUtil, PullPayment, WhitelistedRole, Pausable {
     /**
      * @notice Validate if challenger is valid one
      * @param _auctionId Id of the auction
-     * @param _challenger address for challenger, who may have higher score than current winners
+     * @param _challenger Address for challenger, who may have higher score than current winners
      */
     function _validateChallenger(
         uint _auctionId,
@@ -445,9 +454,11 @@ contract LiBA is TokenUtil, PullPayment, WhitelistedRole, Pausable {
         view
         returns(bool)
     {
+        Bid storage challengerBid = bidsByUser[_challenger][_auctionId];
+        require(challengerBid.value > 0, "must be valid bid");
+
         Auction storage auction = auctions[_auctionId];
         address[] storage winners = auction.winners;
-        Bid storage challengerBid = bidsByUser[_challenger][_auctionId];
         bool isHigherRank = false;
         uint totalValue = 0;
 
@@ -455,14 +466,14 @@ contract LiBA is TokenUtil, PullPayment, WhitelistedRole, Pausable {
             address winner = winners[i];
             Bid storage winnerBid = bidsByUser[winner][_auctionId];
 
-            if (winner == _challenger) {
-                return false;
-            }
-
             if (totalValue >= auction.value && i < winners.length) {
                 return true;
             }
             totalValue = totalValue.add(winnerBid.value);
+
+            if (winner == _challenger) {
+                return false;
+            }
 
             if (!isHigherRank) {
                 if (_hasHigherRank(challengerBid, winnerBid)) {

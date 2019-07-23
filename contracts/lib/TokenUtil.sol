@@ -4,14 +4,20 @@ import "openzeppelin-solidity/contracts/utils/Address.sol";
 import "openzeppelin-solidity/contracts/token/ERC20/IERC20.sol";
 import "openzeppelin-solidity/contracts/token/ERC20/SafeERC20.sol";
 import "openzeppelin-solidity/contracts/ownership/Ownable.sol";
+import "openzeppelin-solidity/contracts/lifecycle/Pausable.sol";
 
-contract TokenUtil is Ownable {
+/**
+ * @title TokenUtil
+ * @notice Abstract contract handles basic token related operation.
+ */
+contract TokenUtil is Ownable, Pausable {
     using Address for address;
     using SafeERC20 for IERC20;
 
     mapping(address => bool) public supportedTokens;
 
     event UpdateSupportedToken(address indexed tokenAddress, bool supported);
+    event DrainToken(address tokenAddress, uint amount);
 
    /**
      * @notice Validate if the token address and amount is valid
@@ -31,9 +37,9 @@ contract TokenUtil is Ownable {
     }
 
     /**
-     * @notice Update a token in supported list
-     * @param _tokenAddress the token address
-     * @param _supported if the token is supported
+     * @notice Update a token in the supported list
+     * @param _tokenAddress Token address
+     * @param _supported If the token is supported
      */
     function updateSupportedToken(address _tokenAddress, bool _supported) public onlyOwner {
         require(_tokenAddress.isContract(), "token address must be contract address");
@@ -42,10 +48,10 @@ contract TokenUtil is Ownable {
     }
 
     /**
-     * @notice Internally uniform function to transfer contract's funds out
-     * @param _tokenAddress the token address
-     * @param _to the address to transfer to
-     * @param _amount the amount to be transferred
+     * @notice Internal uniform function to transfer contract's funds out
+     * @param _tokenAddress Token address
+     * @param _to Address to transfer to
+     * @param _amount Amount to be transferred
      */
     function _transfer(address _tokenAddress, address payable _to, uint _amount) internal {
         require(_to != address(0), "transfer to address must not be zero");
@@ -56,5 +62,23 @@ contract TokenUtil is Ownable {
         } else {
             IERC20(_tokenAddress).safeTransfer(_to, _amount);
         }
+    }
+
+    /**
+     * @notice Onwer drains one type of tokens when the contract is paused
+     * @dev This is for emergency situations.
+     * @param _tokenAddress address of token to drain
+     * @param _amount drained token amount
+     */
+    function drainToken(
+        address _tokenAddress,
+        uint _amount
+    )
+        external
+        whenPaused
+        onlyOwner
+    {
+        _transfer(_tokenAddress, msg.sender, _amount);
+        emit DrainToken(_tokenAddress, _amount);
     }
 }

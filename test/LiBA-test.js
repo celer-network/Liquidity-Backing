@@ -364,7 +364,7 @@ contract('LiBA', ([provider, bidder0, bidder1, bidder2]) => {
                 from: bidder0
             });
         } catch (e) {
-            assert.isAbove(e.message.search('must be valid challenger'), -1);
+            assert.isAbove(e.message.search('must be a valid challenger'), -1);
             return;
         }
 
@@ -485,7 +485,7 @@ contract('LiBA', ([provider, bidder0, bidder1, bidder2]) => {
             });
         } catch (e) {
             assert.isAbove(
-                e.message.search('must be pass auction lending duration'),
+                e.message.search('must pass auction lending duration'),
                 -1
             );
             return;

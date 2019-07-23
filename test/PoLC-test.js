@@ -63,7 +63,7 @@ contract('PoLC', ([owner, liba, borrower]) => {
         const lockStart = Math.ceil(commitmentId / DAY);
         assert.equal(commitment.lockStart.toNumber(), lockStart);
         assert.equal(commitment.lockEnd.toNumber(), lockStart + LOCK_DURATION);
-        assert.equal(commitment.lockedValue.toNumber(), 1);
+        assert.equal(commitment.committedValue.toNumber(), 1);
         assert.equal(commitment.availableValue.toNumber(), 1);
         assert.equal(commitment.lendingValue.toNumber(), 0);
         assert.equal(commitment.withdrawedReward.toNumber(), 0);
@@ -165,7 +165,7 @@ contract('PoLC', ([owner, liba, borrower]) => {
         const lockStart = Math.ceil(commitmentId / DAY);
         assert.equal(commitment.lockStart.toNumber(), lockStart);
         assert.equal(commitment.lockEnd.toNumber(), lockStart + LOCK_DURATION);
-        assert.equal(commitment.lockedValue.toNumber(), 1);
+        assert.equal(commitment.committedValue.toNumber(), 1);
         assert.equal(commitment.availableValue.toNumber(), 1);
         assert.equal(commitment.lendingValue.toNumber(), 0);
         assert.equal(commitment.withdrawedReward.toNumber(), 0);
