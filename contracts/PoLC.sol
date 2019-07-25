@@ -73,7 +73,7 @@ contract PoLC is Ownable, Pausable, IPoLC, TokenUtil {
      * @notice Lock fund into the PoLC contract for a specific duration.
      * The longer the duration and larger locked token value, more rewards will be earned.
      * Once, the fund is locked, it can only be drawn when the lock expired.
-     * If duration is set to 0, fund will be lockfree, but there will be no reward.
+     * If the duration is set to 0, the fund will be lock-free, but there will be no reward.
      * @param _tokenAddress Address of the locked token. For ETH, it will be 0
      * @param _duration lock-in duration by days
      * @param _value committed token value
@@ -130,7 +130,7 @@ contract PoLC is Ownable, Pausable, IPoLC, TokenUtil {
     }
 
     /**
-     * @notice Withdraw all available fund in a commitment if lock has expired
+     * @notice Withdraw all available fund in a commitment if its lock has expired
      * @param _commitmentId ID of the commitment
      */
     function withdrawFund(
@@ -149,7 +149,7 @@ contract PoLC is Ownable, Pausable, IPoLC, TokenUtil {
     }
 
     /**
-     * @notice Withdraw all available reward in a commitment if lock has expired
+     * @notice Withdraw all available reward in a commitment if the lock has expired
      * @param _commitmentId ID of the commitment
      */
     function withdrawReward(
@@ -210,7 +210,7 @@ contract PoLC is Ownable, Pausable, IPoLC, TokenUtil {
      * @param _value Value to borrow
      * @param _duration Duration for the borrowing
      */
-    function calculateBorrowFee(
+    function calculateAuctionFee(
         address _tokenAddress,
         uint _value,
         uint _duration
