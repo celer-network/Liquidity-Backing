@@ -97,7 +97,7 @@ For more details about cEcnonomy and Celer Network, please refer to [Celer Netwo
 
 ### PoLC Reward Calculation
 
-The mining power associated with a commitment is proportional to the asset value and lock duration. i.e. mining power will be the product of asset value and lock duration. For each block, it has a fixed reward. The reward for for a commitment by a given block will be the percent of its mining power to the total mining power by the given block.
+The mining power associated with a commitment is proportional to the asset value and lock duration. i.e. mining power will be the product of asset value and lock duration. For each block, it has a fixed reward. The reward for a commitment by a given block will be the percent of its mining power to the total mining power by the given block.
 
 -   Mi = Vi \* Ti
 -   TMB = sum of Mining power of all commitments, which are locked in the current block
