@@ -188,23 +188,6 @@ contract PoLC is Ownable, Pausable, IPoLC, TokenUtil {
     }
 
     /**
-     * @notice Get token address and available value for a specific commitment of a user
-     * @param _user User address
-     * @param _commitmentId ID of the commitment
-     */
-    function getCommitmentAvailableValue(
-        address _user,
-        uint _commitmentId
-    )
-        external
-        view
-        returns (address, uint)
-    {
-        Commitment storage commitment = commitmentsByUser[_user][_commitmentId];
-        return (commitment.tokenAddress, commitment.availableValue);
-    }
-
-    /**
      * @notice Calculate the fee required to launch an auction in LiBA
      * @param _tokenAddress Token address
      * @param _value Value to borrow
@@ -236,28 +219,28 @@ contract PoLC is Ownable, Pausable, IPoLC, TokenUtil {
     }
 
     /**
-     * @notice Lend borrower a specific value. Can only be called from LiBA
+     * @notice Send a specific value to Liba for lending. Can only be called from LiBA
      * @param _user User address
      * @param _commitmentId ID of the commitment
+     * @param _tokenAddress Address of token intended to lend
      * @param _value Value to lend
-     * @param _borrower Borrower address
      */
     function lendCommitment(
         address _user,
         uint _commitmentId,
+        address _tokenAddress,
         uint _value,
-        address payable _borrower
     )
         external
         whenNotPaused
     {
         require(msg.sender == libaAddress, "sender must be liba contract");
         Commitment storage commitment = commitmentsByUser[_user][_commitmentId];
-        require(_value <= commitment.availableValue, "value must be smaller than available value");
+        require(commiment.tokenAddress == _tokenAddress, "commiment tokenAddress must match _tokenAddress");
 
         commitment.availableValue = commitment.availableValue.sub(_value);
         commitment.lendingValue = commitment.lendingValue.add(_value);
-        _transfer(commitment.tokenAddress, _borrower, _value);
+        _transfer(commitment.tokenAddress, libaAddress, _value);
     }
 
    /**
