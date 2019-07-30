@@ -16,7 +16,7 @@ const DAY = 60 * 60 * 24;
 const BLOCK_REWARD = 100;
 const LOCK_DURATION = 10;
 
-contract('PoLC', ([owner, liba, borrower]) => {
+contract('PoLC', ([owner, liba]) => {
     let polc;
     let commitToken;
     let celerToken;
@@ -202,7 +202,7 @@ contract('PoLC', ([owner, liba, borrower]) => {
 
     it('should fail to lendCommitment for wrong sender', async () => {
         try {
-            await polc.lendCommitment(owner, commitmentId, 1, borrower);
+            await polc.lendCommitment(owner, commitmentId, EMPTY_ADDRESS, 1);
         } catch (e) {
             assert.isAbove(
                 e.message.search('sender must be liba contract'),
@@ -214,7 +214,7 @@ contract('PoLC', ([owner, liba, borrower]) => {
         assert.fail('should have thrown before');
     });
 
-    it('should fail to lendCommitment for exceeding available value', async () => {
+    it('should fail to lendCommitment for wrong token address', async () => {
         const receipt = await polc.commitFund(EMPTY_ADDRESS, LOCK_DURATION, 1, {
             value: '1'
         });
@@ -222,12 +222,20 @@ contract('PoLC', ([owner, liba, borrower]) => {
         commitmentId = args.commitmentId.toNumber();
 
         try {
-            await polc.lendCommitment(owner, commitmentId, 2, borrower, {
-                from: liba
-            });
+            await polc.lendCommitment(
+                owner,
+                commitmentId,
+                celerToken.address,
+                2,
+                {
+                    from: liba
+                }
+            );
         } catch (e) {
             assert.isAbove(
-                e.message.search('value must be smaller than available value'),
+                e.message.search(
+                    'commiment tokenAddress must match _tokenAddress'
+                ),
                 -1
             );
             return;
@@ -237,9 +245,9 @@ contract('PoLC', ([owner, liba, borrower]) => {
     });
 
     it('should lendCommitment successfully', async () => {
-        const balance0 = await web3.eth.getBalance(borrower);
+        const balance0 = await web3.eth.getBalance(liba);
 
-        await polc.lendCommitment(owner, commitmentId, 1, borrower, {
+        await polc.lendCommitment(owner, commitmentId, EMPTY_ADDRESS, 1, {
             from: liba
         });
         const commitment = await polc.commitmentsByUser.call(
@@ -249,7 +257,7 @@ contract('PoLC', ([owner, liba, borrower]) => {
         assert.equal(commitment.availableValue.toNumber(), 0);
         assert.equal(commitment.lendingValue.toNumber(), 1);
 
-        const balance1 = await web3.eth.getBalance(borrower);
+        const balance1 = await web3.eth.getBalance(liba);
         assert.equal(balance1.slice(-2) - balance0.slice(-2), 1);
     });
 

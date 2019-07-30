@@ -13,7 +13,7 @@ const web3 = new Web3(new Web3.providers.HttpProvider('http://localhost:8545'));
 const EMPTY_ADDRESS = '0x0000000000000000000000000000000000000000';
 const AUCTION_DEPOSIT = 100;
 const BID_DURATION = 8;
-const REVEAL_DURATION = 10;
+const REVEAL_DURATION = 9;
 const CLAIM_DURATION = 2;
 const CHALLENGE_DURATION = 2;
 const FINALIZE_DURATION = 2;
@@ -121,33 +121,6 @@ contract('LiBA', ([provider, bidder0, bidder1, bidder2]) => {
         await celerToken.transfer(bidder0, 10000);
         await celerToken.transfer(bidder1, 10000);
         await celerToken.transfer(bidder2, 10000);
-    });
-
-    it('should fail to init auction for missing auction deposit', async () => {
-        try {
-            await liba.initAuction(
-                EMPTY_ADDRESS,
-                BID_DURATION,
-                REVEAL_DURATION,
-                CLAIM_DURATION,
-                CHALLENGE_DURATION,
-                FINALIZE_DURATION,
-                VALUE,
-                DURATION,
-                MAX_RATE,
-                MIN_VALUE,
-                EMPTY_ADDRESS,
-                0
-            );
-        } catch (e) {
-            assert.isAbove(
-                e.message.search('VM Exception while processing transaction'),
-                -1
-            );
-            return;
-        }
-
-        assert.fail('should have thrown before');
     });
 
     it('should init auction successfully', async () => {
@@ -268,20 +241,6 @@ contract('LiBA', ([provider, bidder0, bidder1, bidder2]) => {
         } catch (e) {
             assert.isAbove(
                 e.message.search('hash must be same as the bid hash'),
-                -1
-            );
-            return;
-        }
-
-        assert.fail('should have thrown before');
-    });
-
-    it('should fail to reveal auction for lacking commitment', async () => {
-        try {
-            await revealBid(BID0, bidder0);
-        } catch (e) {
-            assert.isAbove(
-                e.message.search('must have enough value in commitment'),
                 -1
             );
             return;

@@ -91,6 +91,8 @@ contract LiBA is Pausable, TokenUtil, PullPayment, WhitelistedRole {
         _;
     }
 
+    function() external payable { }
+
     /**
      * @notice Launch a new auction
      * @param _tokenAddress Token address to borrow
@@ -323,7 +325,7 @@ contract LiBA is Pausable, TokenUtil, PullPayment, WhitelistedRole {
         for (; i < winners.length; i++) {
             address winner = winners[i];
             Bid storage winnerBid = bidsByUser[winner][_auctionId];
-            _repayCommitment(auction.tokenAddress, winner, winnerBid.commitmentId, winnerBid.value)
+            _repayCommitment(auction.tokenAddress, winner, winnerBid.commitmentId, winnerBid.value);
             celerToken.safeTransferFrom(address(this), winner, winnerBid.celerValue);
             winnerBid.celerValue = 0;
             winnerBid.rate = 0;
@@ -356,7 +358,7 @@ contract LiBA is Pausable, TokenUtil, PullPayment, WhitelistedRole {
         Bid storage bid = bidsByUser[msg.sender][_auctionId];
         require(bid.value > 0, "you do not have valid bid");
 
-        _repayCommitment(auction.tokenAddress, msg.sender, bid.commitmentId, bid.value)
+        _repayCommitment(auction.tokenAddress, msg.sender, bid.commitmentId, bid.value);
         celerToken.safeTransferFrom(address(this), msg.sender, bid.celerValue);
         bid.celerValue = 0;
         bid.rate = 0;

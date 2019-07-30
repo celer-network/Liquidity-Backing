@@ -229,18 +229,18 @@ contract PoLC is Ownable, Pausable, IPoLC, TokenUtil {
         address _user,
         uint _commitmentId,
         address _tokenAddress,
-        uint _value,
+        uint _value
     )
         external
         whenNotPaused
     {
         require(msg.sender == libaAddress, "sender must be liba contract");
         Commitment storage commitment = commitmentsByUser[_user][_commitmentId];
-        require(commiment.tokenAddress == _tokenAddress, "commiment tokenAddress must match _tokenAddress");
+        require(commitment.tokenAddress == _tokenAddress, "commiment tokenAddress must match _tokenAddress");
 
         commitment.availableValue = commitment.availableValue.sub(_value);
         commitment.lendingValue = commitment.lendingValue.add(_value);
-        _transfer(commitment.tokenAddress, libaAddress, _value);
+        _transfer(commitment.tokenAddress, msg.sender, _value);
     }
 
    /**
