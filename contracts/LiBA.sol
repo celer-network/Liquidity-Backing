@@ -91,6 +91,8 @@ contract LiBA is Pausable, TokenUtil, PullPayment, WhitelistedRole {
         _;
     }
 
+    function() external payable { }
+
     /**
      * @notice Launch a new auction
      * @param _tokenAddress Token address to borrow
@@ -156,8 +158,6 @@ contract LiBA is Pausable, TokenUtil, PullPayment, WhitelistedRole {
         auction.challengeEnd = auction.claimEnd.add(_challengeDuration);
         auction.finalizeEnd = auction.challengeEnd.add(_finalizeDuration);
 
-        uint borrowFee = polc.calculateAuctionFee(auction.tokenAddress, _value, _duration);
-        celerToken.safeTransferFrom(msg.sender, address(polc), borrowFee);
         emit NewAuction(auctionCount, auction.asker);
         auctionCount = auctionCount.add(1);
     }
@@ -236,16 +236,11 @@ contract LiBA is Pausable, TokenUtil, PullPayment, WhitelistedRole {
             celerToken.safeTransfer(msg.sender, celerRefund);
         }
 
-        address tokenAddress;
-        uint availableValue;
-        (tokenAddress, availableValue) = polc.getCommitmentAvailableValue(msg.sender, _commitmentId);
-        require(tokenAddress == auction.tokenAddress, "tokenAddress of commitment must match tokenAddress of auction");
-        require(availableValue >= _value, "must have enough value in commitment");
-
         bid.commitmentId = _commitmentId;
         bid.rate = _rate;
         bid.value = _value;
         bid.hash = bytes32(0);
+        polc.lendCommitment(msg.sender, _commitmentId, auction.tokenAddress, _value);
 
         emit RevealBid(_auctionId, msg.sender);
     }
@@ -308,24 +303,39 @@ contract LiBA is Pausable, TokenUtil, PullPayment, WhitelistedRole {
 
         auction.finalized = true;
         address[] storage winners = auction.winners;
-        uint value = auction.value;
-        for (uint i = 0; i < winners.length && value > 0; i++) {
+        uint value = 0;
+
+        uint i = 0;
+        // calculating the exact auction value from winner bids
+        for (; i < winners.length; i++) {
             address winner = winners[i];
             Bid storage winnerBid = bidsByUser[winner][_auctionId];
+            value = value.add(winnerBid.value);
 
-            if (value > winnerBid.value) {
-                value = value.sub(winnerBid.value);
-            } else {
-                winnerBid.value = value;
-                value = 0;
+            if (value > auction.value) {
+                uint repayValue = value.sub(auction.value);
+                _repayCommitment(auction.tokenAddress, winner, winnerBid.commitmentId, repayValue);
+                winnerBid.value = winnerBid.value.sub(repayValue);
+                value = auction.value;
+                break;
             }
-            polc.lendCommitment(
-                winner,
-                winnerBid.commitmentId,
-                winnerBid.value,
-                auction.asker
-            );
         }
+
+        // return rest of winners fund
+        for (; i < winners.length; i++) {
+            address winner = winners[i];
+            Bid storage winnerBid = bidsByUser[winner][_auctionId];
+            _repayCommitment(auction.tokenAddress, winner, winnerBid.commitmentId, winnerBid.value);
+            celerToken.safeTransferFrom(address(this), winner, winnerBid.celerValue);
+            winnerBid.celerValue = 0;
+            winnerBid.rate = 0;
+            winnerBid.value = 0;
+        }
+
+        uint borrowFee = polc.calculateAuctionFee(auction.tokenAddress, value, auction.duration);
+        celerToken.safeTransferFrom(msg.sender, address(polc), borrowFee);
+        _transfer(auction.tokenAddress, auction.asker, value);
+
         emit FinalizeAuction(_auctionId);
     }
 
@@ -346,13 +356,13 @@ contract LiBA is Pausable, TokenUtil, PullPayment, WhitelistedRole {
         require(allowWithdraw, "you are not allowed to withdraw currently");
 
         Bid storage bid = bidsByUser[msg.sender][_auctionId];
-        require(bid.celerValue > 0, "you do not have valid bid");
+        require(bid.value > 0, "you do not have valid bid");
 
-        uint celerValue = bid.celerValue;
+        _repayCommitment(auction.tokenAddress, msg.sender, bid.commitmentId, bid.value);
+        celerToken.safeTransferFrom(address(this), msg.sender, bid.celerValue);
         bid.celerValue = 0;
         bid.rate = 0;
         bid.value = 0;
-        celerToken.safeTransferFrom(address(this), msg.sender, celerValue);
     }
 
     /**
@@ -382,8 +392,8 @@ contract LiBA is Pausable, TokenUtil, PullPayment, WhitelistedRole {
                 polc.repayCommitment.value(bidValue)(winner, winnerBid.commitmentId, bidValue);
                 _asyncTransfer(winner, interest);
             } else {
-                token.safeTransferFrom(msg.sender, winner, interest);
                 polc.repayCommitment(winner, winnerBid.commitmentId, bidValue);
+                token.safeTransferFrom(msg.sender, winner, interest);
             }
         }
 
@@ -536,5 +546,29 @@ contract LiBA is Pausable, TokenUtil, PullPayment, WhitelistedRole {
         }
 
         return false;
+    }
+
+    /**
+     * @notice Helper function to repay the fund in commitment
+     * @param _tokenAddress Token address
+     * @param _user Owner of the commitment
+     * @param _commitmentId Commitment ID
+     * @param _value Value to repay
+     */
+    function _repayCommitment(
+        address _tokenAddress,
+        address _user,
+        uint _commitmentId,
+        uint _value
+    )
+        private
+    {
+        bool isEth = _tokenAddress == address(0);
+
+        if (isEth) {
+            polc.repayCommitment.value(_value)(_user, _commitmentId, _value);
+        } else {
+            polc.repayCommitment(_user, _commitmentId, _value);
+        }
     }
 }
