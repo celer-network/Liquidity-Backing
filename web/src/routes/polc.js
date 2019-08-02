@@ -10,7 +10,8 @@ import { getUnitByAddress, formatCurrencyValue } from '../utils/unit';
 const DAY = 24 * 60 * 60 * 1000;
 
 const formatDayTime = day => {
-    return new Date(_.toNumber(day) * DAY).toLocaleDateString();
+    const date = day !== '0' ? new Date(_.toNumber(day) * DAY) : new Date();
+    return date.toLocaleDateString();
 };
 
 const checkLock = day => {
@@ -32,9 +33,10 @@ class PoLC extends React.Component {
     };
 
     withdrawFund = e => {
-        const { index } = e.target.parentNode.dataset;
+        const { index } = e.currentTarget.dataset;
         const { PoLC } = this.props;
         const commitment = _.values(PoLC.commitmentsByUser)[index];
+
         const { lockEnd } = commitment.value;
         const [, commitmentId] = commitment.args;
 
@@ -46,7 +48,7 @@ class PoLC extends React.Component {
     };
 
     withdrawReward = e => {
-        const { index } = e.target.parentNode.dataset;
+        const { index } = e.currentTarget.dataset;
         const { PoLC } = this.props;
         const commitment = _.values(PoLC.commitmentsByUser)[index];
         const { lockEnd } = commitment.value;

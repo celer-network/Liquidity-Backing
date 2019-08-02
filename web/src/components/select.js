@@ -32,9 +32,9 @@ export default class extends React.Component {
     };
 
     render() {
-        const { defaultValue, value } = this.props;
+        const { defaultValue } = this.props;
         const props = {
-            ..._.omit(this.props, ['options', 'defaultValue', 'value'])
+            ..._.omit(this.props, ['options', 'defaultValue'])
         };
 
         if (!props.onChange) {
@@ -42,9 +42,6 @@ export default class extends React.Component {
         }
         if (!_.isNil(defaultValue)) {
             props.defaultValue = defaultValue;
-        }
-        if (!_.isNil(value)) {
-            props.value = value;
         }
 
         return (
