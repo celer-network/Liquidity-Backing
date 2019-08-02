@@ -1,7 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import web3 from 'web3';
-import { Modal } from 'antd';
+import { Alert, Modal } from 'antd';
 
 import Form from '../form';
 import { EMPTY_ADDRESS } from '../../utils/constant';
@@ -107,6 +107,11 @@ class CommimentForm extends React.Component {
                 onOk={this.handleCommitFund}
                 onCancel={onClose}
             >
+                <Alert
+                    message="Your fund will not be available until the commitment expires"
+                    type="warning"
+                    showIcon
+                />
                 <Form
                     ref={this.form}
                     items={formItems}
