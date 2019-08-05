@@ -5,18 +5,22 @@ import { Modal } from 'antd';
 
 import Form from '../form';
 import {
-    etherFieldOptions,
-    dayFieldOptions,
-    minValueRule
+    currencyFieldOptions,
+    minValueRule,
+    blockFieldOptions
 } from '../../utils/form';
+import { getUnitByAddress } from '../../utils/unit';
 
 class AuctionForm extends React.Component {
     constructor(props, context) {
         super(props);
 
+        this.state = {};
         this.form = React.createRef();
         this.contracts = context.drizzle.contracts;
     }
+
+    handleValueChange = changedValue => this.setState(changedValue);
 
     handleInitAuction = () => {
         const { onClose } = this.props;
@@ -27,6 +31,7 @@ class AuctionForm extends React.Component {
             }
 
             const {
+                token,
                 bidDuration,
                 revealDuration,
                 claimDuration,
@@ -35,10 +40,13 @@ class AuctionForm extends React.Component {
                 value,
                 duration,
                 maxRate,
-                minValue
+                minValue,
+                collateralAddress,
+                collateralValue = 0
             } = values;
 
             this.contracts.LiBA.methods.initAuction.cacheSend(
+                token,
                 bidDuration,
                 revealDuration,
                 claimDuration,
@@ -47,95 +55,47 @@ class AuctionForm extends React.Component {
                 web3.utils.toWei(value.toString(), 'ether'),
                 duration,
                 maxRate,
-                web3.utils.toWei(minValue.toString(), 'ether')
+                web3.utils.toWei(minValue.toString(), 'ether'),
+                collateralAddress,
+                web3.utils.toWei(collateralValue.toString(), 'ether')
             );
             onClose();
         });
     };
 
     render() {
-        const { visible, onClose } = this.props;
+        const { visible, network, onClose } = this.props;
+        const supportedTokenOptions = network.supportedTokens.map(
+            supportedToken => [
+                supportedToken.address,
+                `${supportedToken.symbol} (${supportedToken.address})`
+            ]
+        );
+
         const formItems = [
+            {
+                name: 'token',
+                field: 'select',
+                fieldOptions: {
+                    options: supportedTokenOptions
+                },
+                rules: [
+                    {
+                        message: 'Please select a token!',
+                        required: true
+                    }
+                ]
+            },
             {
                 name: 'value',
                 field: 'number',
-                fieldOptions: etherFieldOptions,
+                fieldOptions: currencyFieldOptions(
+                    getUnitByAddress(network.supportedTokens, this.state.token)
+                ),
                 rules: [
                     minValueRule(0),
                     {
                         message: 'Please enter a value!',
-                        required: true
-                    }
-                ]
-            },
-            {
-                name: 'duration',
-                field: 'number',
-                fieldOptions: dayFieldOptions,
-                rules: [
-                    minValueRule(0),
-                    {
-                        message: 'Please enter a duration!',
-                        required: true
-                    }
-                ]
-            },
-            {
-                name: 'bidDuration',
-                label: 'Bid Duration',
-                field: 'number',
-                rules: [
-                    minValueRule(0),
-                    {
-                        message: 'Please enter a duration!',
-                        required: true
-                    }
-                ]
-            },
-            {
-                name: 'revealDuration',
-                label: 'Reveal Duration',
-                field: 'number',
-                rules: [
-                    minValueRule(0),
-                    {
-                        message: 'Please enter a duration!',
-                        required: true
-                    }
-                ]
-            },
-            {
-                name: 'claimDuration',
-                label: 'Claim Duration',
-                field: 'number',
-                rules: [
-                    minValueRule(0),
-                    {
-                        message: 'Please enter a duration!',
-                        required: true
-                    }
-                ]
-            },
-            {
-                name: 'challengeDuration',
-                label: 'Challenge Duration',
-                field: 'number',
-                rules: [
-                    minValueRule(0),
-                    {
-                        message: 'Please enter a duration!',
-                        required: true
-                    }
-                ]
-            },
-            {
-                name: 'finalizeDuration',
-                label: 'Finalize Duration',
-                field: 'number',
-                rules: [
-                    minValueRule(0),
-                    {
-                        message: 'Please enter a duration!',
                         required: true
                     }
                 ]
@@ -156,11 +116,100 @@ class AuctionForm extends React.Component {
                 name: 'minValue',
                 label: 'Min Value',
                 field: 'number',
-                fieldOptions: etherFieldOptions,
+                fieldOptions: currencyFieldOptions(
+                    getUnitByAddress(network.supportedTokens, this.state.token)
+                ),
                 rules: [
                     minValueRule(0),
                     {
                         message: 'Please enter a min value!',
+                        required: true
+                    }
+                ]
+            },
+            {
+                name: 'duration',
+                field: 'number',
+                fieldOptions: blockFieldOptions,
+                rules: [
+                    minValueRule(0),
+                    {
+                        message: 'Please enter a duration!',
+                        required: true
+                    }
+                ]
+            },
+            {
+                name: 'collateralAddress',
+                label: 'Collateral Address'
+            },
+            {
+                name: 'collateralValue',
+                label: 'Collateral Value',
+                field: 'number',
+                rules: [minValueRule(0)]
+            },
+            {
+                name: 'bidDuration',
+                label: 'Bid Duration',
+                field: 'number',
+                fieldOptions: blockFieldOptions,
+                rules: [
+                    minValueRule(0),
+                    {
+                        message: 'Please enter a duration!',
+                        required: true
+                    }
+                ]
+            },
+            {
+                name: 'revealDuration',
+                label: 'Reveal Duration',
+                field: 'number',
+                fieldOptions: blockFieldOptions,
+                rules: [
+                    minValueRule(0),
+                    {
+                        message: 'Please enter a duration!',
+                        required: true
+                    }
+                ]
+            },
+            {
+                name: 'claimDuration',
+                label: 'Claim Duration',
+                field: 'number',
+                fieldOptions: blockFieldOptions,
+                rules: [
+                    minValueRule(0),
+                    {
+                        message: 'Please enter a duration!',
+                        required: true
+                    }
+                ]
+            },
+            {
+                name: 'challengeDuration',
+                label: 'Challenge Duration',
+                field: 'number',
+                fieldOptions: blockFieldOptions,
+                rules: [
+                    minValueRule(0),
+                    {
+                        message: 'Please enter a duration!',
+                        required: true
+                    }
+                ]
+            },
+            {
+                name: 'finalizeDuration',
+                label: 'Finalize Duration',
+                field: 'number',
+                fieldOptions: blockFieldOptions,
+                rules: [
+                    minValueRule(0),
+                    {
+                        message: 'Please enter a duration!',
                         required: true
                     }
                 ]
@@ -174,7 +223,11 @@ class AuctionForm extends React.Component {
                 onOk={this.handleInitAuction}
                 onCancel={onClose}
             >
-                <Form ref={this.form} items={formItems} />
+                <Form
+                    ref={this.form}
+                    items={formItems}
+                    onValuesChange={this.handleValueChange}
+                />
             </Modal>
         );
     }

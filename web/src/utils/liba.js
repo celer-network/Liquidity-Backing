@@ -1,5 +1,4 @@
 import _ from 'lodash';
-import web3 from 'web3';
 
 export const BID = 'Bid';
 export const REVEAL = 'Reveal';
@@ -7,14 +6,17 @@ export const CLAIM = 'Claim';
 export const CHALLENGE = 'Challenge';
 export const FINALIZE = 'Finalize';
 
-export const getCurrentPeriod = (blockNumber, auction) => {
-    const {
-        bidEnd,
-        revealEnd,
-        claimEnd,
-        challengeEnd,
-        finalizeEnd
-    } = auction.value;
+export const getCurrentPeriod = (blockNumber, auction, auctionPeriods) => {
+    const auctionPeriod = _.find(
+        auctionPeriods,
+        auctionPeriod => auctionPeriod.args[0] === auction.args[0]
+    );
+
+    const { bidEnd, revealEnd, claimEnd, challengeEnd, finalizeEnd } = _.get(
+        auctionPeriod,
+        'value',
+        {}
+    );
 
     if (blockNumber < _.toNumber(bidEnd)) {
         return BID;
@@ -39,36 +41,21 @@ export const getCurrentPeriod = (blockNumber, auction) => {
     return 'Unknown';
 };
 
-const calculateScore = (bid, maxRate, maxFactor) => {
-    const { rate, celerValue, value } = bid.value;
-    const valueFactor =
-        web3.utils.toWei(celerValue, 'ether') / value / maxFactor;
-    const rateFactor = rate / maxRate;
+const compareBid = (bid1, bid2) => {
+    const { rate1, celerValue1 } = bid1.value;
+    const { rate2, celerValue2 } = bid2.value;
 
-    return valueFactor - rateFactor;
+    if (rate1 !== rate2) {
+        return rate1 - rate2;
+    }
+
+    return celerValue2 - celerValue1;
 };
 
 export const getWinners = (auction, bids) => {
-    let maxRate = 0;
-    let maxFactor = 0;
-
-    _.forEach(bids, bid => {
-        const { rate, celerValue, value } = bid.value;
-
-        if (rate > maxRate) {
-            maxRate = rate;
-        }
-
-        const factor = web3.utils.toWei(celerValue, 'ether') / value;
-        if (factor > maxFactor) {
-            maxFactor = factor;
-        }
-    });
-
-    bids.sort((bid1, bid2) => calculateScore(bid2) - calculateScore(bid1));
-
     const result = [];
     let remainingValue = auction.value.value;
+    bids.sort(compareBid);
 
     _.forEach(bids, bid => {
         const bidder = bid.args[0];

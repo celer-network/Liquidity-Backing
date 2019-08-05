@@ -117,6 +117,8 @@ CustomizeForm.defaultProps = {
 
 export default Form.create({
     onValuesChange(props, changedValues) {
-        props.onValuesChange(changedValues);
+        if (props.onValuesChange) {
+            props.onValuesChange(changedValues);
+        }
     }
 })(CustomizeForm);

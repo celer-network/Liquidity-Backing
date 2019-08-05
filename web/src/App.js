@@ -21,7 +21,7 @@ class App extends React.Component {
 
     componentWillMount() {
         const { accounts, dispatch } = this.props;
-        subscribeEvent(accounts[0], this.contracts);
+        subscribeEvent(accounts[0], this.contracts, dispatch);
         subscribeChainInfo(this.web3, dispatch);
 
         dispatch({

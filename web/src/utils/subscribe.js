@@ -1,6 +1,6 @@
 const POLL_INTERVAL = 1000;
 
-export const subscribeEvent = (account, contracts) => {
+export const subscribeEvent = (account, contracts, dispatch) => {
     const { PoLC, LiBA } = contracts;
 
     PoLC.events.NewCommitment(
@@ -31,6 +31,27 @@ export const subscribeEvent = (account, contracts) => {
 
             const { auctionId } = event.returnValues;
             LiBA.methods.getAuction.cacheCall(auctionId);
+            LiBA.methods.getAuctionPeriod.cacheCall(auctionId);
+        }
+    );
+
+    LiBA.events.NewBid(
+        {
+            fromBlock: 0,
+            filter: {
+                bidder: account
+            }
+        },
+        (err, event) => {
+            if (err) {
+                return;
+            }
+
+            const { auctionId } = event.returnValues;
+            dispatch({
+                type: 'LiBA/addBid',
+                payload: { auctionId }
+            });
         }
     );
 };

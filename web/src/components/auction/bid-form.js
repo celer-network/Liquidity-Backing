@@ -32,7 +32,7 @@ class BidForm extends React.Component {
                     celerValue,
                     salt
                 ),
-                celerValue
+                celerValue + salt
             );
             onClose();
         });

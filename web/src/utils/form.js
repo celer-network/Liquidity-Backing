@@ -13,6 +13,11 @@ export const dayFieldOptions = {
     parser: value => value.replace(/[a-z]/g, '')
 };
 
+export const blockFieldOptions = {
+    formatter: value => (value ? `${value}block` : ''),
+    parser: value => value.replace(/[a-z]/g, '')
+};
+
 export const minValueRule = minValue => ({
     validator: (rule, value, callback) => {
         if (value < minValue) {
