@@ -148,28 +148,32 @@ contract('LiBA', ([provider, bidder0, bidder1, bidder2]) => {
         assert.equal(auctionId, 0);
 
         const auction = await liba.getAuction.call(auctionId);
+        const auctionPeriod = await liba.getAuctionPeriod.call(auctionId);
         const latestBlock = await web3.eth.getBlockNumber();
         assert.equal(auction.asker, provider);
         assert.equal(auction.value.toNumber(), VALUE);
         assert.equal(auction.duration.toNumber(), DURATION);
         assert.equal(auction.maxRate.toNumber(), MAX_RATE);
         assert.equal(auction.minValue.toNumber(), MIN_VALUE);
-        assert.equal(auction.bidEnd.toNumber(), latestBlock + BID_DURATION);
         assert.equal(
-            auction.revealEnd.toNumber(),
-            auction.bidEnd.toNumber() + REVEAL_DURATION
+            auctionPeriod.bidEnd.toNumber(),
+            latestBlock + BID_DURATION
         );
         assert.equal(
-            auction.claimEnd.toNumber(),
-            auction.revealEnd.toNumber() + CLAIM_DURATION
+            auctionPeriod.revealEnd.toNumber(),
+            auctionPeriod.bidEnd.toNumber() + REVEAL_DURATION
         );
         assert.equal(
-            auction.challengeEnd.toNumber(),
-            auction.claimEnd.toNumber() + CHALLENGE_DURATION
+            auctionPeriod.claimEnd.toNumber(),
+            auctionPeriod.revealEnd.toNumber() + CLAIM_DURATION
         );
         assert.equal(
-            auction.finalizeEnd.toNumber(),
-            auction.challengeEnd.toNumber() + FINALIZE_DURATION
+            auctionPeriod.challengeEnd.toNumber(),
+            auctionPeriod.claimEnd.toNumber() + CHALLENGE_DURATION
+        );
+        assert.equal(
+            auctionPeriod.finalizeEnd.toNumber(),
+            auctionPeriod.challengeEnd.toNumber() + FINALIZE_DURATION
         );
     });
 

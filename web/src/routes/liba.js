@@ -45,6 +45,7 @@ class LiBA extends React.Component {
     renderAuction = auction => {
         const { network } = this.props;
         const { asker, value, duration } = auction.value;
+        const { LiBA } = this.props;
 
         return (
             <List.Item>
@@ -63,8 +64,9 @@ class LiBA extends React.Component {
                             <Statistic
                                 title="Period"
                                 value={getCurrentPeriod(
-                                    network.block.number,
-                                    auction
+                                    _.get(network, 'block.number'),
+                                    auction,
+                                    LiBA.getAuctionPeriod
                                 )}
                             />
                         </Col>
@@ -89,12 +91,19 @@ class LiBA extends React.Component {
     renderAuctions = () => {
         const { accounts, LiBA } = this.props;
         const { tab } = this.state;
+
         let data = _.values(LiBA.getAuction);
 
         if (tab === 'own') {
             data = _.filter(
                 data,
                 auction => auction.value.asker === accounts[0]
+            );
+        }
+
+        if (tab === 'bid') {
+            data = _.filter(data, auction =>
+                _.includes(LiBA.bids, auction.args[0])
             );
         }
 
@@ -109,6 +118,7 @@ class LiBA extends React.Component {
 
     render() {
         const { isModalVisible, tab } = this.state;
+        const { network } = this.props;
 
         return (
             <Card
@@ -124,6 +134,7 @@ class LiBA extends React.Component {
             >
                 {this.renderAuctions()}
                 <AuctionForm
+                    network={network}
                     visible={isModalVisible}
                     onClose={this.toggleModal}
                 />

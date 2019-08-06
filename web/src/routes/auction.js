@@ -95,8 +95,12 @@ class Auction extends React.Component {
             return {};
         }
 
-        const currentBlockNumber = network.block.number;
-        const currentPeriod = getCurrentPeriod(currentBlockNumber, auction);
+        const currentBlockNumber = _.get(network, 'block.number');
+        const currentPeriod = getCurrentPeriod(
+            currentBlockNumber,
+            auction,
+            LiBA.getAuctionPeriod
+        );
         const currentStep = _.indexOf(steps, currentPeriod);
 
         return { auction, currentStep, currentPeriod };
@@ -190,13 +194,26 @@ class Auction extends React.Component {
 
     renderAuctionDetail = () => {
         const { auction } = this.state;
-        const { asker, value, duration, maxRate, minValue } = auction.value;
+        const {
+            asker,
+            tokenAddress,
+            collateralAddress,
+            collateralValue,
+            value,
+            duration,
+            maxRate,
+            minValue
+        } = auction.value;
+        console.log(auction.value);
         const auctionId = auction.args[0];
 
         return (
             <Row style={{ marginTop: '10px' }}>
                 <Col span={24}>
                     <Statistic title="Asker" value={asker} />
+                </Col>
+                <Col span={24}>
+                    <Statistic title="Token Address" value={tokenAddress} />
                 </Col>
                 <Col span={12}>
                     <Statistic title="Value" value={formatEthValue(value)} />
@@ -212,6 +229,18 @@ class Auction extends React.Component {
                 </Col>
                 <Col span={12}>
                     <Statistic title="Max Rate" value={maxRate} />
+                </Col>
+                <Col span={12}>
+                    <Statistic
+                        title="Collateral Address"
+                        value={collateralAddress | 'N/A'}
+                    />
+                </Col>
+                <Col span={12}>
+                    <Statistic
+                        title="Collateral Value"
+                        value={collateralValue | 'N/A'}
+                    />
                 </Col>
                 <Col span={24}>
                     <BidTable auctionId={auctionId} />

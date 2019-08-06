@@ -54,7 +54,7 @@ contract LiBA is Pausable, TokenUtil, PullPayment, WhitelistedRole {
     mapping(address => mapping(uint => Bid)) public bidsByUser;
 
     event NewAuction(uint auctionId, address asker);
-    event NewBid(uint auctionId, address bidder);
+    event NewBid(uint auctionId, address indexed bidder);
     event UpdateBid(uint auctionId, address bidder);
     event RevealBid(uint indexed auctionId, address bidder);
     event ClaimWinners(uint indexed auctionId, address[] winners);
@@ -430,10 +430,37 @@ contract LiBA is Pausable, TokenUtil, PullPayment, WhitelistedRole {
         view
         returns (
             address asker,
+            address tokenAddress,
+            address collateralAddress,
+            uint collateraValue,
             uint value,
             uint duration,
             uint maxRate,
-            uint minValue,
+            uint minValue
+        )
+    {
+        Auction storage auction = auctions[_auctionId];
+
+        asker = auction.asker;
+        tokenAddress = auction.tokenAddress;
+        collateralAddress = auction.collateralAddress;
+        collateraValue = auction.collateraValue;
+        value = auction.value;
+        duration = auction.duration;
+        maxRate = auction.maxRate;
+        minValue = auction.minValue;
+    }
+
+    /**
+     * @notice Get auction period
+     * @param _auctionId Id of the auction
+     */
+    function getAuctionPeriod(
+        uint _auctionId
+    )
+        external
+        view
+        returns (
             uint bidEnd,
             uint revealEnd,
             uint claimEnd,
@@ -443,11 +470,6 @@ contract LiBA is Pausable, TokenUtil, PullPayment, WhitelistedRole {
     {
         Auction storage auction = auctions[_auctionId];
 
-        asker = auction.asker;
-        value = auction.value;
-        duration = auction.duration;
-        maxRate = auction.maxRate;
-        minValue = auction.minValue;
         bidEnd = auction.bidEnd;
         revealEnd = auction.revealEnd;
         claimEnd = auction.claimEnd;
