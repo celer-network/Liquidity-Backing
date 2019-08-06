@@ -8,6 +8,8 @@ import {
     Steps,
     Skeleton,
     Statistic,
+    Tabs,
+    List,
     Row,
     Col,
     notification
@@ -95,9 +97,8 @@ class Auction extends React.Component {
             return {};
         }
 
-        const currentBlockNumber = _.get(network, 'block.number');
         const currentPeriod = getCurrentPeriod(
-            currentBlockNumber,
+            network,
             auction,
             LiBA.getAuctionPeriod
         );
@@ -160,7 +161,9 @@ class Auction extends React.Component {
         }
 
         const auctionId = auction.args[0];
-        this.contracts.LiBA.methods.challengeWinners(auctionId, winners).send();
+        this.contracts.LiBA.methods
+            .challengeWinners(auctionId, calculatedWinners)
+            .send();
     };
 
     finalizeAuction = () => {
@@ -193,7 +196,7 @@ class Auction extends React.Component {
     };
 
     renderAuctionDetail = () => {
-        const { auction } = this.state;
+        const { auction, winners } = this.state;
         const {
             asker,
             tokenAddress,
@@ -204,7 +207,6 @@ class Auction extends React.Component {
             maxRate,
             minValue
         } = auction.value;
-        console.log(auction.value);
         const auctionId = auction.args[0];
 
         return (
@@ -243,7 +245,21 @@ class Auction extends React.Component {
                     />
                 </Col>
                 <Col span={24}>
-                    <BidTable auctionId={auctionId} />
+                    <Tabs>
+                        <Tabs.TabPane tab="Bids" key="bids">
+                            <BidTable auctionId={auctionId} />
+                        </Tabs.TabPane>
+                        <Tabs.TabPane tab="Winners" key="winners">
+                            <List
+                                size="small"
+                                bordered
+                                dataSource={winners}
+                                renderItem={winner => (
+                                    <List.Item>{winner}</List.Item>
+                                )}
+                            />
+                        </Tabs.TabPane>
+                    </Tabs>
                 </Col>
             </Row>
         );
@@ -297,7 +313,6 @@ Auction.contextTypes = {
 function mapStateToProps(state) {
     const { accounts, contracts, LiBA, network } = state;
 
-    console.log(contracts, LiBA);
     return {
         accounts,
         network,
