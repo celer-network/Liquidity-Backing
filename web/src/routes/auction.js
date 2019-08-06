@@ -3,6 +3,7 @@ import PropTypes from 'prop-types';
 import _ from 'lodash';
 import { drizzleConnect } from 'drizzle-react';
 import {
+    Alert,
     Button,
     Card,
     Steps,
@@ -26,7 +27,9 @@ import {
     REVEAL,
     CLAIM,
     CHALLENGE,
-    FINALIZE
+    FINALIZE,
+    EXPIRED,
+    FINALIZED
 } from '../utils/liba';
 
 const { Step } = Steps;
@@ -103,8 +106,9 @@ class Auction extends React.Component {
             LiBA.getAuctionPeriod
         );
         const currentStep = _.indexOf(steps, currentPeriod);
+        const auctionId = auction.args[0];
 
-        return { auction, currentStep, currentPeriod };
+        return { auction, auctionId, currentStep, currentPeriod };
     }
 
     takeAction = () => {
@@ -137,16 +141,15 @@ class Auction extends React.Component {
     };
 
     claimWinners = () => {
-        const { auction } = this.state;
+        const { auction, auctionId } = this.state;
         const { LiBA } = this.props;
         const winners = getWinners(auction, _.values(LiBA.bidsByUser));
-        const auctionId = auction.args[0];
 
         this.contracts.LiBA.methods.claimWinners(auctionId, winners).send();
     };
 
     challengeWinners = () => {
-        const { auction, winners } = this.state;
+        const { auction, auctionId, winners } = this.state;
         const { LiBA } = this.props;
         const calculatedWinners = getWinners(
             auction,
@@ -160,30 +163,74 @@ class Auction extends React.Component {
             return;
         }
 
-        const auctionId = auction.args[0];
         this.contracts.LiBA.methods
             .challengeWinners(auctionId, calculatedWinners)
             .send();
     };
 
     finalizeAuction = () => {
-        const { auction } = this.state;
-        this.contracts.LiBA.methods.finalizeAuction.cacheSend(auction.args[0]);
+        const { auctionId } = this.state;
+        this.contracts.LiBA.methods.finalizeAuction.cacheSend(auctionId);
+    };
+
+    finalizeBid = () => {
+        const { auctionId } = this.state;
+        this.contracts.LiBA.methods.finalizeBid.cacheSend(auctionId);
+    };
+
+    collectCollateral = () => {
+        const { auctionId } = this.state;
+        this.contracts.LiBA.methods.collectCollateral.cacheSend(auctionId);
+    };
+
+    repayAuction = () => {
+        const { auctionId } = this.state;
+        this.contracts.LiBA.methods.repayAuction.cacheSend(auctionId);
     };
 
     renderAction = () => {
         const { accounts } = this.props;
-        const { auction, currentPeriod } = this.state;
+        const { auction, currentPeriod, currentStep, winners } = this.state;
+        const currentAccount = accounts[0];
+        const isAsker = currentAccount === auction.value.asker;
 
-        if (currentPeriod === CLAIM) {
-            if (auction.value.asker !== accounts[0]) {
+        if (isAsker) {
+            if (currentPeriod === FINALIZED) {
+                return [
+                    <Button block type="primary" onClick={this.repayAuction}>
+                        Repay
+                    </Button>
+                ];
+            }
+
+            if (!_.includes([CLAIM, FINALIZE], currentPeriod)) {
                 return [];
             }
         } else {
             if (
-                currentPeriod !== FINALIZE &&
-                auction.value.asker === accounts[0]
+                currentPeriod === EXPIRED ||
+                (currentStep === -1 && !_.includes(winners, currentAccount))
             ) {
+                return [
+                    <Button block type="primary" onClick={this.finalizeBid}>
+                        Withdraw bid
+                    </Button>
+                ];
+            }
+
+            if (currentPeriod === FINALIZED) {
+                return [
+                    <Button
+                        block
+                        type="primary"
+                        onClick={this.collectCollateral}
+                    >
+                        Collect collateral
+                    </Button>
+                ];
+            }
+
+            if (!_.includes([BID, REVEAL, CHALLENGE], currentPeriod)) {
                 return [];
             }
         }
@@ -232,18 +279,24 @@ class Auction extends React.Component {
                 <Col span={12}>
                     <Statistic title="Max Rate" value={maxRate} />
                 </Col>
-                <Col span={12}>
-                    <Statistic
-                        title="Collateral Address"
-                        value={collateralAddress | 'N/A'}
-                    />
-                </Col>
-                <Col span={12}>
-                    <Statistic
-                        title="Collateral Value"
-                        value={collateralValue | 'N/A'}
-                    />
-                </Col>
+                {collateralValue > 0 && (
+                    <>
+                        (
+                        <Col span={12}>
+                            <Statistic
+                                title="Collateral Address"
+                                value={collateralAddress}
+                            />
+                        </Col>
+                        <Col span={12}>
+                            <Statistic
+                                title="Collateral Value"
+                                value={collateralValue}
+                            />
+                        </Col>
+                    </>
+                )}
+
                 <Col span={24}>
                     <Tabs>
                         <Tabs.TabPane tab="Bids" key="bids">
@@ -269,6 +322,7 @@ class Auction extends React.Component {
         const {
             auction,
             currentStep,
+            currentPeriod,
             isBidModalVisible,
             isRevealModalVisible
         } = this.state;
@@ -278,14 +332,21 @@ class Auction extends React.Component {
         }
 
         const auctionId = auction.args[0];
+        let alertMsg;
+
+        if (currentStep === -1)
+            alertMsg = <Alert message={currentPeriod} type="info" showIcon />;
 
         return (
             <Card title="Auction" actions={this.renderAction()}>
-                <Steps size="small" current={currentStep}>
-                    {_.map(steps, step => (
-                        <Step key={step} title={step} />
-                    ))}
-                </Steps>
+                {alertMsg || (
+                    <Steps size="small" current={currentStep}>
+                        {_.map(steps, step => (
+                            <Step key={step} title={step} />
+                        ))}
+                    </Steps>
+                )}
+
                 {this.renderAuctionDetail()}
                 <BidForm
                     auctionId={auctionId}

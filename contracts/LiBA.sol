@@ -465,7 +465,8 @@ contract LiBA is Pausable, TokenUtil, PullPayment, WhitelistedRole {
             uint revealEnd,
             uint claimEnd,
             uint challengeEnd,
-            uint finalizeEnd
+            uint finalizeEnd,
+            bool finalized
         )
     {
         Auction storage auction = auctions[_auctionId];
@@ -475,6 +476,7 @@ contract LiBA is Pausable, TokenUtil, PullPayment, WhitelistedRole {
         claimEnd = auction.claimEnd;
         challengeEnd = auction.challengeEnd;
         finalizeEnd = auction.finalizeEnd;
+        finalized = auction.finalized;
     }
 
     /**
