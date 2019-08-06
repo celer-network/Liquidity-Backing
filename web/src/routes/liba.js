@@ -64,7 +64,7 @@ class LiBA extends React.Component {
                             <Statistic
                                 title="Period"
                                 value={getCurrentPeriod(
-                                    _.get(network, 'block.number'),
+                                    network,
                                     auction,
                                     LiBA.getAuctionPeriod
                                 )}

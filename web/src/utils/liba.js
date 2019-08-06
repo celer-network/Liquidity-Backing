@@ -5,13 +5,14 @@ export const REVEAL = 'Reveal';
 export const CLAIM = 'Claim';
 export const CHALLENGE = 'Challenge';
 export const FINALIZE = 'Finalize';
+export const UNKNOWN = 'Unknown';
 
-export const getCurrentPeriod = (blockNumber, auction, auctionPeriods) => {
+export const getCurrentPeriod = (network, auction, auctionPeriods) => {
+    const blockNumber = _.get(network, 'block.number');
     const auctionPeriod = _.find(
         auctionPeriods,
         auctionPeriod => auctionPeriod.args[0] === auction.args[0]
     );
-
     const { bidEnd, revealEnd, claimEnd, challengeEnd, finalizeEnd } = _.get(
         auctionPeriod,
         'value',
@@ -38,7 +39,7 @@ export const getCurrentPeriod = (blockNumber, auction, auctionPeriods) => {
         return FINALIZE;
     }
 
-    return 'Unknown';
+    return UNKNOWN;
 };
 
 const compareBid = (bid1, bid2) => {
