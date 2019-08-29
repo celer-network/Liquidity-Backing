@@ -3,6 +3,7 @@
     "version": "0.1.0",
     "description": "truffle dapp with react/redux",
     "private": true,
+    "homepage": "https://celer-network.github.io/cEconomy",
     "dependencies": {
         "antd": "^3.20.1",
         "drizzle": "^1.4.0",
@@ -19,6 +20,7 @@
     },
     "devDependencies": {
         "eslint-config-airbnb": "^17.1.1",
+        "gh-pages": "^2.1.1",
         "react-scripts": "^3.0.1",
         "react-test-renderer": "^16.8.6",
         "redux-logger": "^3.0.6"
@@ -26,6 +28,7 @@
     "scripts": {
         "start": "react-scripts start",
         "build": "react-scripts build",
+        "deploy": "gh-pages -d build",
         "test": "react-scripts test --env=jsdom",
         "lint": "eslint src --ignore-path .gitignore",
         "lint-fix": "eslint src --fix --ignore-path .gitignore"

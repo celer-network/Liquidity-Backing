@@ -114,7 +114,7 @@ class PoLC extends React.Component {
                         </Col>
                         <Col span={12}>
                             <Statistic
-                                title="Locked Value"
+                                title="Lending Value"
                                 value={formatCurrencyValue(lendingValue, unit)}
                             />
                         </Col>
