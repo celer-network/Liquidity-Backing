@@ -1,6 +1,6 @@
 self.__precacheManifest = (self.__precacheManifest || []).concat([
   {
-    "revision": "25374a6b648f2b234e2d0b8ed1847183",
+    "revision": "9cb1b78dd0277b47261d148eb8089674",
     "url": "/cEconomy/index.html"
   },
   {
@@ -32,15 +32,15 @@ self.__precacheManifest = (self.__precacheManifest || []).concat([
     "url": "/cEconomy/static/js/6.35ef47ce.chunk.js"
   },
   {
-    "revision": "c920bce480136ee4dde5",
-    "url": "/cEconomy/static/js/7.de13b0e9.chunk.js"
+    "revision": "7b95db49b06500b089d9",
+    "url": "/cEconomy/static/js/7.74c65c7b.chunk.js"
   },
   {
     "revision": "c33be305585acbb2cc86",
     "url": "/cEconomy/static/js/main.9ec6986a.chunk.js"
   },
   {
-    "revision": "0ed0c3495fcbf694e7bc",
-    "url": "/cEconomy/static/js/runtime~main.3cc63070.js"
+    "revision": "463cf846860ac5c17e9d",
+    "url": "/cEconomy/static/js/runtime~main.7ef08591.js"
   }
 ]);
