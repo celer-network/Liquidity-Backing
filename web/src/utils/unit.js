@@ -25,12 +25,6 @@ export const formatCurrencyValue = (value, unit) => {
     return `${web3.utils.fromWei(value)} ${unit}`;
 };
 
-export const formatEthValue = value => {
-    const num = _.toNumber(value);
-
-    if (num < 100000) {
-        return `${value} wei`;
-    }
-
-    return `${web3.utils.fromWei(value)} ether`;
+export const formatCelrValue = value => {
+    return formatCurrencyValue(value, 'CELR');
 };

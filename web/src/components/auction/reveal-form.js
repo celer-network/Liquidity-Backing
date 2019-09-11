@@ -6,8 +6,12 @@ import { drizzleConnect } from 'drizzle-react';
 import { Modal } from 'antd';
 
 import Form from '../form';
-import { etherFieldOptions, minValueRule } from '../../utils/form';
-import { formatEthValue } from '../../utils/unit';
+import {
+    celerFieldOptions,
+    currencyFieldOptions,
+    minValueRule
+} from '../../utils/form';
+import { getUnitByAddress, formatCurrencyValue } from '../../utils/unit';
 
 class RevealForm extends React.Component {
     constructor(props, context) {
@@ -18,7 +22,7 @@ class RevealForm extends React.Component {
     }
 
     onSubmit = () => {
-        const { auctionId, onClose } = this.props;
+        const { auction, onClose } = this.props;
 
         this.form.current.validateFields((err, values) => {
             if (err) {
@@ -28,10 +32,10 @@ class RevealForm extends React.Component {
             const { celerValue, value, rate, salt, commitmentID } = values;
 
             this.contracts.LiBA.methods.revealBid.cacheSend(
-                auctionId,
+                auction.args[0],
                 rate,
                 web3.utils.toWei(value.toString(), 'ether'),
-                celerValue,
+                web3.utils.toWei(celerValue.toString(), 'ether'),
                 salt,
                 parseInt(commitmentID)
             );
@@ -40,11 +44,16 @@ class RevealForm extends React.Component {
     };
 
     render() {
-        const { visible, PoLC, onClose } = this.props;
+        const { auction, network, PoLC, visible, onClose } = this.props;
+        const unit = getUnitByAddress(
+            network.supportedTokens,
+            auction.value.tokenAddress
+        );
         const commitmentOptions = _.map(PoLC.commitmentsByUser, commitment => {
             const id = commitment.args[1];
-            const availableValue = formatEthValue(
-                commitment.value.availableValue
+            const availableValue = formatCurrencyValue(
+                commitment.value.availableValue,
+                unit
             );
 
             return [id, `ID: ${id}, Available Value: ${availableValue}`];
@@ -54,7 +63,7 @@ class RevealForm extends React.Component {
             {
                 name: 'value',
                 field: 'number',
-                fieldOptions: etherFieldOptions,
+                fieldOptions: currencyFieldOptions(unit),
                 rules: [
                     minValueRule(0),
                     {
@@ -78,6 +87,7 @@ class RevealForm extends React.Component {
                 name: 'celerValue',
                 label: 'Celer Value',
                 field: 'number',
+                fieldOptions: celerFieldOptions,
                 rules: [
                     minValueRule(0),
                     {
@@ -126,7 +136,8 @@ class RevealForm extends React.Component {
 }
 
 RevealForm.propTypes = {
-    auctionId: PropTypes.string.isRequired,
+    auction: PropTypes.object.isRequired,
+    network: PropTypes.object.isRequired,
     visible: PropTypes.bool.isRequired,
     onClose: PropTypes.func.isRequired
 };

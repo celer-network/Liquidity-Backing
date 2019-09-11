@@ -4,7 +4,12 @@ import web3 from 'web3';
 import { Modal } from 'antd';
 
 import Form from '../form';
-import { etherFieldOptions, minValueRule } from '../../utils/form';
+import {
+    currencyFieldOptions,
+    celerFieldOptions,
+    minValueRule
+} from '../../utils/form';
+import { getUnitByAddress } from '../../utils/unit';
 
 class BidForm extends React.Component {
     constructor(props, context) {
@@ -15,7 +20,7 @@ class BidForm extends React.Component {
     }
 
     onSubmit = () => {
-        const { auctionId, onClose } = this.props;
+        const { auction, onClose } = this.props;
 
         this.form.current.validateFields((err, values) => {
             if (err) {
@@ -25,11 +30,11 @@ class BidForm extends React.Component {
             const { celerValue, value, rate, salt } = values;
 
             this.contracts.LiBA.methods.placeBid.cacheSend(
-                auctionId,
+                auction.args[0],
                 web3.utils.soliditySha3(
                     rate,
                     web3.utils.toWei(value.toString(), 'ether'),
-                    celerValue,
+                    web3.utils.toWei(celerValue.toString(), 'ether'),
                     salt
                 ),
                 celerValue + salt
@@ -39,12 +44,17 @@ class BidForm extends React.Component {
     };
 
     render() {
-        const { visible, onClose } = this.props;
+        const { auction, network, visible, onClose } = this.props;
         const formItems = [
             {
                 name: 'value',
                 field: 'number',
-                fieldOptions: etherFieldOptions,
+                fieldOptions: currencyFieldOptions(
+                    getUnitByAddress(
+                        network.supportedTokens,
+                        auction.value.tokenAddress
+                    )
+                ),
                 rules: [
                     minValueRule(0),
                     {
@@ -68,6 +78,7 @@ class BidForm extends React.Component {
                 name: 'celerValue',
                 label: 'Celer Value',
                 field: 'number',
+                fieldOptions: celerFieldOptions,
                 rules: [
                     minValueRule(0),
                     {
@@ -103,7 +114,8 @@ class BidForm extends React.Component {
 }
 
 BidForm.propTypes = {
-    auctionId: PropTypes.string.isRequired,
+    auction: PropTypes.object.isRequired,
+    network: PropTypes.object.isRequired,
     visible: PropTypes.bool.isRequired,
     onClose: PropTypes.func.isRequired
 };

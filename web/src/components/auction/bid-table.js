@@ -4,7 +4,11 @@ import _ from 'lodash';
 import { drizzleConnect } from 'drizzle-react';
 import { Table } from 'antd';
 
-import { formatEthValue } from '../../utils/unit';
+import {
+    formatCurrencyValue,
+    formatCelrValue,
+    getUnitByAddress
+} from '../../utils/unit';
 
 const columns = [
     {
@@ -27,17 +31,23 @@ const columns = [
 
 class BidTable extends React.Component {
     render() {
-        const { auctionId, LiBA } = this.props;
+        const { auction, network, LiBA } = this.props;
+        const unit = getUnitByAddress(
+            network.supportedTokens,
+            auction.value.tokenAddress
+        );
+
         const dataSource = _.filter(
             LiBA.bidsByUser,
-            bid => bid.args[1] === auctionId
+            bid => bid.args[1] === auction.args[0]
         ).map(bid => {
             const bidder = bid.args[0];
 
             return {
                 ...bid.value,
                 bidder,
-                value: formatEthValue(bid.value.value)
+                value: formatCurrencyValue(bid.value, unit),
+                celerValue: formatCelrValue(bid.value.celerValue)
             };
         });
 
@@ -52,7 +62,8 @@ class BidTable extends React.Component {
 }
 
 BidTable.propTypes = {
-    auctionId: PropTypes.string.isRequired,
+    auction: PropTypes.object.isRequired,
+    network: PropTypes.object.isRequired,
     LiBA: PropTypes.object.isRequired
 };
 

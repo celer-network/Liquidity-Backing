@@ -1,6 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import _ from 'lodash';
+import web3 from 'web3';
 import { drizzleConnect } from 'drizzle-react';
 import {
     Alert,
@@ -19,7 +20,7 @@ import {
 import BidTable from '../components/auction/bid-table';
 import BidForm from '../components/auction/bid-form';
 import RevealForm from '../components/auction/reveal-form';
-import { formatEthValue } from '../utils/unit';
+import { formatCurrencyValue, getUnitByAddress } from '../utils/unit';
 import {
     getCurrentPeriod,
     getWinners,
@@ -31,6 +32,7 @@ import {
     EXPIRED,
     FINALIZED
 } from '../utils/liba';
+import { EMPTY_ADDRESS } from '../utils/constant';
 
 const { Step } = Steps;
 
@@ -184,8 +186,17 @@ class Auction extends React.Component {
     };
 
     repayAuction = () => {
-        const { auctionId } = this.state;
-        this.contracts.LiBA.methods.repayAuction.cacheSend(auctionId);
+        const { auctionId, auction } = this.state;
+        const { tokenAddress, value } = auction;
+        const sendOption = {};
+        if (tokenAddress === EMPTY_ADDRESS) {
+            sendOption.value = web3.utils.toWei(value.toString(), 'ether');
+        }
+        console.log(auction);
+        this.contracts.LiBA.methods.repayAuction.cacheSend(
+            auctionId,
+            undefined
+        );
     };
 
     renderAction = () => {
@@ -243,6 +254,7 @@ class Auction extends React.Component {
     };
 
     renderAuctionDetail = () => {
+        const { network } = this.props;
         const { auction, winners } = this.state;
         const {
             asker,
@@ -254,8 +266,7 @@ class Auction extends React.Component {
             maxRate,
             minValue
         } = auction.value;
-        const auctionId = auction.args[0];
-
+        const unit = getUnitByAddress(network.supportedTokens, tokenAddress);
         return (
             <Row style={{ marginTop: '10px' }}>
                 <Col span={24}>
@@ -265,7 +276,10 @@ class Auction extends React.Component {
                     <Statistic title="Token Address" value={tokenAddress} />
                 </Col>
                 <Col span={12}>
-                    <Statistic title="Value" value={formatEthValue(value)} />
+                    <Statistic
+                        title="Value"
+                        value={formatCurrencyValue(value, unit)}
+                    />
                 </Col>
                 <Col span={12}>
                     <Statistic title="Duration" value={duration} />
@@ -273,7 +287,7 @@ class Auction extends React.Component {
                 <Col span={12}>
                     <Statistic
                         title="Min Value"
-                        value={formatEthValue(minValue)}
+                        value={formatCurrencyValue(minValue, unit)}
                     />
                 </Col>
                 <Col span={12}>
@@ -300,7 +314,7 @@ class Auction extends React.Component {
                 <Col span={24}>
                     <Tabs>
                         <Tabs.TabPane tab="Bids" key="bids">
-                            <BidTable auctionId={auctionId} />
+                            <BidTable auction={auction} network={network} />
                         </Tabs.TabPane>
                         <Tabs.TabPane tab="Winners" key="winners">
                             <List
@@ -319,6 +333,7 @@ class Auction extends React.Component {
     };
 
     render() {
+        const { network } = this.props;
         const {
             auction,
             currentStep,
@@ -331,9 +346,7 @@ class Auction extends React.Component {
             return <Skeleton />;
         }
 
-        const auctionId = auction.args[0];
         let alertMsg;
-
         if (currentStep === -1)
             alertMsg = <Alert message={currentPeriod} type="info" showIcon />;
 
@@ -349,12 +362,14 @@ class Auction extends React.Component {
 
                 {this.renderAuctionDetail()}
                 <BidForm
-                    auctionId={auctionId}
+                    auction={auction}
+                    network={network}
                     visible={isBidModalVisible}
                     onClose={this.toggleBidModal}
                 />
                 <RevealForm
-                    auctionId={auctionId}
+                    auction={auction}
+                    network={network}
                     visible={isRevealModalVisible}
                     onClose={this.toggleRevealModal}
                 />

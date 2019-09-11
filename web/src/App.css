@@ -16,6 +16,11 @@
     text-overflow: ellipsis;
 }
 
+.ant-menu-item.approve-celr {
+    position: absolute;
+    bottom: 0;
+}
+
 .ant-statistic-content {
     overflow: hidden;
     text-overflow: ellipsis;

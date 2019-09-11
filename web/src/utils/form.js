@@ -1,12 +1,9 @@
-export const etherFieldOptions = {
-    formatter: value => (value ? `${value}ether` : ''),
-    parser: value => value.replace(/[a-z]/g, '')
-};
-
 export const currencyFieldOptions = unit => ({
     formatter: value => (value ? `${value}${unit}` : ''),
     parser: value => value.replace(/[A-Z]/g, '')
 });
+
+export const celerFieldOptions = currencyFieldOptions('CELR');
 
 export const dayFieldOptions = {
     formatter: value => (value ? `${value}day` : ''),
