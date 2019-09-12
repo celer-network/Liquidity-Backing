@@ -187,13 +187,14 @@ class Auction extends React.Component {
     repayAuction = () => {
         const { auctionId, auction, bids, winners } = this.state;
         const { tokenAddress } = auction.value;
+        const sendArgs = [auctionId];
         if (tokenAddress === EMPTY_ADDRESS) {
-            this.contracts.LiBA.methods.repayAuction.cacheSend(auctionId, {
+            sendArgs.push({
                 value: calculateRepay(bids, winners).toString()
             });
-            return;
         }
-        this.contracts.LiBA.methods.repayAuction.cacheSend(auctionId);
+
+        this.contracts.LiBA.methods.repayAuction.cacheSend(...sendArgs);
     };
 
     getWinners = () => {
