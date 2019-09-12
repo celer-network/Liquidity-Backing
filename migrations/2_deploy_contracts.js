@@ -11,7 +11,9 @@ module.exports = function(deployer, network, accounts) {
             return ERC20ExampleToken.deployed();
         })
         .then(token => {
-            token.transfer(accounts[0], 10000000);
+            if (network === 'development') {
+                token.transfer(accounts[1], '100000000000000000000000');
+            }
         })
         .then(() => {
             return deployer.deploy(PoLC, ERC20ExampleToken.address, 100);

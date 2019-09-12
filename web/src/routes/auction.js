@@ -24,6 +24,7 @@ import { formatCurrencyValue, getUnitByAddress } from '../utils/unit';
 import {
     getCurrentPeriod,
     getWinners,
+    calculateRepay,
     BID,
     REVEAL,
     CLAIM,
@@ -109,8 +110,12 @@ class Auction extends React.Component {
         );
         const currentStep = _.indexOf(steps, currentPeriod);
         const auctionId = auction.args[0];
+        const bids = _.filter(
+            LiBA.bidsByUser,
+            bid => bid.args[1] === auctionId
+        );
 
-        return { auction, auctionId, currentStep, currentPeriod };
+        return { auction, auctionId, bids, currentStep, currentPeriod };
     }
 
     takeAction = () => {
@@ -143,20 +148,15 @@ class Auction extends React.Component {
     };
 
     claimWinners = () => {
-        const { auction, auctionId } = this.state;
-        const { LiBA } = this.props;
-        const winners = getWinners(auction, _.values(LiBA.bidsByUser));
+        const { auctionId } = this.state;
+        const winners = this.getWinners();
 
         this.contracts.LiBA.methods.claimWinners(auctionId, winners).send();
     };
 
     challengeWinners = () => {
-        const { auction, auctionId, winners } = this.state;
-        const { LiBA } = this.props;
-        const calculatedWinners = getWinners(
-            auction,
-            _.values(LiBA.bidsByUser)
-        );
+        const { auctionId, winners } = this.state;
+        const calculatedWinners = this.getWinners();
 
         if (_.isEqual(winners, calculatedWinners)) {
             notification.error({
@@ -186,17 +186,20 @@ class Auction extends React.Component {
     };
 
     repayAuction = () => {
-        const { auctionId, auction } = this.state;
-        const { tokenAddress, value } = auction;
-        const sendOption = {};
+        const { auctionId, auction, bids, winners } = this.state;
+        const { tokenAddress } = auction.value;
         if (tokenAddress === EMPTY_ADDRESS) {
-            sendOption.value = web3.utils.toWei(value.toString(), 'ether');
+            this.contracts.LiBA.methods.repayAuction.cacheSend(auctionId, {
+                value: calculateRepay(bids, winners).toString()
+            });
+            return;
         }
-        console.log(auction);
-        this.contracts.LiBA.methods.repayAuction.cacheSend(
-            auctionId,
-            undefined
-        );
+        this.contracts.LiBA.methods.repayAuction.cacheSend(auctionId);
+    };
+
+    getWinners = () => {
+        const { auction, bids } = this.state;
+        return getWinners(auction, bids);
     };
 
     renderAction = () => {
@@ -255,7 +258,7 @@ class Auction extends React.Component {
 
     renderAuctionDetail = () => {
         const { network } = this.props;
-        const { auction, winners } = this.state;
+        const { auction, bids, winners } = this.state;
         const {
             asker,
             tokenAddress,
@@ -314,7 +317,11 @@ class Auction extends React.Component {
                 <Col span={24}>
                     <Tabs>
                         <Tabs.TabPane tab="Bids" key="bids">
-                            <BidTable auction={auction} network={network} />
+                            <BidTable
+                                auction={auction}
+                                bids={bids}
+                                network={network}
+                            />
                         </Tabs.TabPane>
                         <Tabs.TabPane tab="Winners" key="winners">
                             <List

@@ -31,22 +31,19 @@ const columns = [
 
 class BidTable extends React.Component {
     render() {
-        const { auction, network, LiBA } = this.props;
+        const { auction, bids, network } = this.props;
         const unit = getUnitByAddress(
             network.supportedTokens,
             auction.value.tokenAddress
         );
 
-        const dataSource = _.filter(
-            LiBA.bidsByUser,
-            bid => bid.args[1] === auction.args[0]
-        ).map(bid => {
+        const dataSource = _.filter(bids).map(bid => {
             const bidder = bid.args[0];
 
             return {
                 ...bid.value,
                 bidder,
-                value: formatCurrencyValue(bid.value, unit),
+                value: formatCurrencyValue(bid.value.value, unit),
                 celerValue: formatCelrValue(bid.value.celerValue)
             };
         });
@@ -67,12 +64,6 @@ BidTable.propTypes = {
     LiBA: PropTypes.object.isRequired
 };
 
-function mapStateToProps(state) {
-    const { contracts } = state;
-
-    return {
-        LiBA: contracts.LiBA
-    };
-}
+function mapStateToProps(state) {}
 
 export default drizzleConnect(BidTable, mapStateToProps);
