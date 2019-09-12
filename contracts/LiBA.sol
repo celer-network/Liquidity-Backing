@@ -228,7 +228,6 @@ contract LiBA is Pausable, TokenUtil, PullPayment, WhitelistedRole {
         Bid storage bid = bidsByUser[msg.sender][_auctionId];
         bytes32 hash = keccak256(abi.encodePacked(_rate, _value, _celerValue, _salt));
         require(hash == bid.hash, "hash must be same as the bid hash");
-        require(_celerValue.mul(1 ether) >= _value, "celer value must be larger than value");
 
         uint celerRefund = bid.celerValue.sub(_celerValue);
         bid.celerValue = _celerValue;
@@ -326,7 +325,7 @@ contract LiBA is Pausable, TokenUtil, PullPayment, WhitelistedRole {
             address winner = winners[i];
             Bid storage winnerBid = bidsByUser[winner][_auctionId];
             _repayCommitment(auction.tokenAddress, winner, winnerBid.commitmentId, winnerBid.value);
-            celerToken.safeTransferFrom(address(this), winner, winnerBid.celerValue);
+            celerToken.safeTransfer(winner, winnerBid.celerValue);
             winnerBid.celerValue = 0;
             winnerBid.rate = 0;
             winnerBid.value = 0;
@@ -359,7 +358,7 @@ contract LiBA is Pausable, TokenUtil, PullPayment, WhitelistedRole {
         require(bid.value > 0, "you do not have valid bid");
 
         _repayCommitment(auction.tokenAddress, msg.sender, bid.commitmentId, bid.value);
-        celerToken.safeTransferFrom(address(this), msg.sender, bid.celerValue);
+        celerToken.safeTransfer(msg.sender, bid.celerValue);
         bid.celerValue = 0;
         bid.rate = 0;
         bid.value = 0;
@@ -397,7 +396,9 @@ contract LiBA is Pausable, TokenUtil, PullPayment, WhitelistedRole {
             }
         }
 
-        _transfer(auction.collateralAddress, auction.asker, auction.collateraValue);
+        if (auction.collateraValue > 0) {
+            _transfer(auction.collateralAddress, auction.asker, auction.collateraValue);
+        }
         emit RepayAuction(_auctionId);
     }
 

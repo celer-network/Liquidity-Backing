@@ -377,7 +377,7 @@ contract('LiBA', ([provider, bidder0, bidder1, bidder2]) => {
         assert.equal(event, 'RepayAuction');
         assert.deepEqual(args.auctionId.toNumber(), auctionId);
         const balance = await borrowToken.balanceOf(provider);
-        assert.equal(balance.toNumber(), 300000);
+        assert.equal(balance.toString(), '300000000000000000000000');
     });
 
     it('should init ERC20 auction successfully', async () => {
@@ -410,7 +410,7 @@ contract('LiBA', ([provider, bidder0, bidder1, bidder2]) => {
         await borrowToken.approve(liba.address, 10000);
         await liba.finalizeAuction(auctionId);
         const balance = await borrowToken.balanceOf(provider);
-        assert.equal(balance.toNumber(), 290100);
+        assert.equal(balance.toString(), '299999999999999999990100');
         await borrowToken.approve(polc.address, 10000);
         await liba.repayAuction(auctionId);
     });

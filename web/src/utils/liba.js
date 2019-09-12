@@ -1,4 +1,7 @@
 import _ from 'lodash';
+import web3 from 'web3';
+
+const { BN } = web3.utils;
 
 export const BID = 'Bid';
 export const REVEAL = 'Reveal';
@@ -51,24 +54,13 @@ export const getCurrentPeriod = (network, auction, auctionPeriods) => {
     return EXPIRED;
 };
 
-const compareBid = (bid1, bid2) => {
-    const { rate1, celerValue1 } = bid1.value;
-    const { rate2, celerValue2 } = bid2.value;
-
-    if (rate1 !== rate2) {
-        return rate1 - rate2;
-    }
-
-    return celerValue2 - celerValue1;
-};
-
 export const getWinners = (auction, bids) => {
     const result = [];
     let remainingValue = auction.value.value;
     bids.sort(compareBid);
 
     _.forEach(bids, bid => {
-        const bidder = bid.args[0];
+        const [bidder] = bid.args;
         const { value } = bid.value;
 
         remainingValue -= value;
@@ -80,4 +72,33 @@ export const getWinners = (auction, bids) => {
     });
 
     return result;
+};
+
+export const calculateRepay = (bids, winners) => {
+    let result = new BN(0);
+
+    _.forEach(bids, bid => {
+        const [bidder] = bid.args;
+        const { value, rate } = bid.value;
+
+        if (!_.includes(winners, bidder)) {
+            return;
+        }
+
+        result = result.add(new BN(value).muln(100 + parseInt(rate)).divn(100));
+        console.log(rate, result.toString());
+    });
+
+    return result;
+};
+
+const compareBid = (bid1, bid2) => {
+    const { rate1, celerValue1 } = bid1.value;
+    const { rate2, celerValue2 } = bid2.value;
+
+    if (rate1 !== rate2) {
+        return rate1 - rate2;
+    }
+
+    return celerValue2 - celerValue1;
 };

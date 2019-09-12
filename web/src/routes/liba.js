@@ -6,7 +6,7 @@ import { Link } from 'dva/router';
 import { Button, Card, List, Statistic, Row, Col, Icon } from 'antd';
 
 import AuctionForm from '../components/liba/auction-form';
-import { formatEthValue } from '../utils/unit';
+import { getUnitByAddress, formatCurrencyValue } from '../utils/unit';
 import { getCurrentPeriod } from '../utils/liba';
 
 const tabList = [
@@ -43,9 +43,9 @@ class LiBA extends React.Component {
     };
 
     renderAuction = auction => {
-        const { network } = this.props;
-        const { asker, value, duration } = auction.value;
-        const { LiBA } = this.props;
+        const { network, LiBA } = this.props;
+        const { asker, value, duration, tokenAddress } = auction.value;
+        const unit = getUnitByAddress(network.supportedTokens, tokenAddress);
 
         return (
             <List.Item>
@@ -73,7 +73,7 @@ class LiBA extends React.Component {
                         <Col span={12}>
                             <Statistic
                                 title="Value"
-                                value={formatEthValue(value)}
+                                value={formatCurrencyValue(value, unit)}
                             />
                         </Col>
                         <Col span={12}>
