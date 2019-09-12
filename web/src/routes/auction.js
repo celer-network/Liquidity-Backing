@@ -1,7 +1,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import _ from 'lodash';
-import web3 from 'web3';
 import { drizzleConnect } from 'drizzle-react';
 import {
     Alert,
