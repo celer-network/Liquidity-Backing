@@ -96,18 +96,6 @@ class PoLC extends React.Component {
                         >
                             Reward
                         </Button>
-                        // <Icon
-                        //     type="export"
-                        //     title="Withdraw Fund"
-                        //     data-index={index}
-                        //     onClick={this.withdrawFund}
-                        // />,
-                        // <Icon
-                        //     type="dollar"
-                        //     title="Withdraw Reward"
-                        //     data-index={index}
-                        //     onClick={this.withdrawReward}
-                        // />
                     ]}
                 >
                     <Row>
