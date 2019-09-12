@@ -397,7 +397,7 @@ contract LiBA is Pausable, TokenUtil, PullPayment, WhitelistedRole {
         }
 
         if (auction.collateraValue > 0) {
-        _transfer(auction.collateralAddress, auction.asker, auction.collateraValue);
+            _transfer(auction.collateralAddress, auction.asker, auction.collateraValue);
         }
         emit RepayAuction(_auctionId);
     }
