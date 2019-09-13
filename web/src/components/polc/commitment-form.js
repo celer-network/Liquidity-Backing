@@ -52,13 +52,18 @@ class CommimentForm extends React.Component {
                 `${supportedToken.symbol} (${supportedToken.address})`
             ]
         );
+        const unit = getUnitByAddress(
+            network.supportedTokens,
+            this.state.token
+        );
 
         const formItems = [
             {
                 name: 'token',
                 field: 'select',
                 fieldOptions: {
-                    options: supportedTokenOptions
+                    options: supportedTokenOptions,
+                    placeholder: 'Token type to commit'
                 },
                 rules: [
                     {
@@ -70,9 +75,10 @@ class CommimentForm extends React.Component {
             {
                 name: 'value',
                 field: 'number',
-                fieldOptions: currencyFieldOptions(
-                    getUnitByAddress(network.supportedTokens, this.state.token)
-                ),
+                fieldOptions: {
+                    ...currencyFieldOptions(unit),
+                    placeholder: 'The amount of token to commit'
+                },
                 rules: [
                     minValueRule(0),
                     {
@@ -84,7 +90,10 @@ class CommimentForm extends React.Component {
             {
                 name: 'duration',
                 field: 'number',
-                fieldOptions: dayFieldOptions,
+                fieldOptions: {
+                    ...dayFieldOptions,
+                    placeholder: 'Lock-in duration'
+                },
                 rules: [
                     minValueRule(0),
                     {

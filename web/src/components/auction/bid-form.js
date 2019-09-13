@@ -45,16 +45,18 @@ class BidForm extends React.Component {
 
     render() {
         const { auction, network, visible, onClose } = this.props;
+        const unit = getUnitByAddress(
+            network.supportedTokens,
+            auction.value.tokenAddress
+        );
         const formItems = [
             {
                 name: 'value',
                 field: 'number',
-                fieldOptions: currencyFieldOptions(
-                    getUnitByAddress(
-                        network.supportedTokens,
-                        auction.value.tokenAddress
-                    )
-                ),
+                fieldOptions: {
+                    ...currencyFieldOptions(unit),
+                    placeholder: 'The amount of token to lend'
+                },
                 rules: [
                     minValueRule(0),
                     {
@@ -66,6 +68,9 @@ class BidForm extends React.Component {
             {
                 name: 'rate',
                 field: 'number',
+                fieldOptions: {
+                    placeholder: 'The lending interest rate'
+                },
                 rules: [
                     minValueRule(0),
                     {
@@ -78,7 +83,10 @@ class BidForm extends React.Component {
                 name: 'celerValue',
                 label: 'Celer Value',
                 field: 'number',
-                fieldOptions: celerFieldOptions,
+                fieldOptions: {
+                    ...celerFieldOptions,
+                    placeholder: 'The amount of celer token for bidding'
+                },
                 rules: [
                     minValueRule(0),
                     {
@@ -90,6 +98,9 @@ class BidForm extends React.Component {
             {
                 name: 'salt',
                 field: 'number',
+                fieldOptions: {
+                    placeholder: 'A random number used to hide your bid info'
+                },
                 rules: [
                     minValueRule(0),
                     {

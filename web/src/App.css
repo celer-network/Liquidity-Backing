@@ -25,3 +25,7 @@
     overflow: hidden;
     text-overflow: ellipsis;
 }
+
+.ant-input-number {
+    width: 315px;
+}
