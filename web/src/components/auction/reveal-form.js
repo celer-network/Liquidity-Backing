@@ -63,7 +63,10 @@ class RevealForm extends React.Component {
             {
                 name: 'value',
                 field: 'number',
-                fieldOptions: currencyFieldOptions(unit),
+                fieldOptions: {
+                    ...currencyFieldOptions(unit),
+                    placeholder: 'The amount of token to lend'
+                },
                 rules: [
                     minValueRule(0),
                     {
@@ -75,6 +78,9 @@ class RevealForm extends React.Component {
             {
                 name: 'rate',
                 field: 'number',
+                fieldOptions: {
+                    placeholder: 'The lending interest rate'
+                },
                 rules: [
                     minValueRule(0),
                     {
@@ -87,7 +93,10 @@ class RevealForm extends React.Component {
                 name: 'celerValue',
                 label: 'Celer Value',
                 field: 'number',
-                fieldOptions: celerFieldOptions,
+                fieldOptions: {
+                    ...celerFieldOptions,
+                    placeholder: 'The amount of celer token for bidding'
+                },
                 rules: [
                     minValueRule(0),
                     {
@@ -99,6 +108,9 @@ class RevealForm extends React.Component {
             {
                 name: 'salt',
                 field: 'number',
+                fieldOptions: {
+                    placeholder: 'The random number entered for bidding'
+                },
                 rules: [
                     minValueRule(0),
                     {
@@ -111,7 +123,8 @@ class RevealForm extends React.Component {
                 name: 'commitmentID',
                 field: 'select',
                 fieldOptions: {
-                    options: commitmentOptions
+                    options: commitmentOptions,
+                    placeholder: 'The commitment in PoLC used for lending'
                 },
                 rules: [
                     {

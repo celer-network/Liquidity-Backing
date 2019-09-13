@@ -41,7 +41,10 @@ class ApproveCelrForm extends React.Component {
             {
                 name: 'value',
                 field: 'number',
-                fieldOptions: celerFieldOptions,
+                fieldOptions: {
+                    ...celerFieldOptions,
+                    placeholder: 'The amount of CELR allowance LiBA has'
+                },
                 rules: [
                     {
                         message: 'Please enter a value!',

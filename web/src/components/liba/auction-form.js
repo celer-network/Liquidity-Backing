@@ -71,13 +71,18 @@ class AuctionForm extends React.Component {
                 `${supportedToken.symbol} (${supportedToken.address})`
             ]
         );
+        const unit = getUnitByAddress(
+            network.supportedTokens,
+            this.state.token
+        );
 
         const formItems = [
             {
                 name: 'token',
                 field: 'select',
                 fieldOptions: {
-                    options: supportedTokenOptions
+                    options: supportedTokenOptions,
+                    placeholder: 'Token type to borrow'
                 },
                 rules: [
                     {
@@ -89,9 +94,10 @@ class AuctionForm extends React.Component {
             {
                 name: 'value',
                 field: 'number',
-                fieldOptions: currencyFieldOptions(
-                    getUnitByAddress(network.supportedTokens, this.state.token)
-                ),
+                fieldOptions: {
+                    ...currencyFieldOptions(unit),
+                    placeholder: 'The amount of token to borrow'
+                },
                 rules: [
                     minValueRule(0),
                     {
@@ -104,6 +110,9 @@ class AuctionForm extends React.Component {
                 name: 'maxRate',
                 label: 'Max Rate',
                 field: 'number',
+                fieldOptions: {
+                    placeholder: 'The maximum interest rate'
+                },
                 rules: [
                     minValueRule(0),
                     {
@@ -116,9 +125,10 @@ class AuctionForm extends React.Component {
                 name: 'minValue',
                 label: 'Min Value',
                 field: 'number',
-                fieldOptions: currencyFieldOptions(
-                    getUnitByAddress(network.supportedTokens, this.state.token)
-                ),
+                fieldOptions: {
+                    ...currencyFieldOptions(unit),
+                    placeholder: 'The minimum value for bidding'
+                },
                 rules: [
                     minValueRule(0),
                     {
@@ -130,7 +140,10 @@ class AuctionForm extends React.Component {
             {
                 name: 'duration',
                 field: 'number',
-                fieldOptions: blockFieldOptions,
+                fieldOptions: {
+                    ...blockFieldOptions,
+                    placeholder: 'The duration of the borrowing'
+                },
                 rules: [
                     minValueRule(0),
                     {
@@ -141,19 +154,28 @@ class AuctionForm extends React.Component {
             },
             {
                 name: 'collateralAddress',
-                label: 'Collateral Address'
+                label: 'Collateral Address',
+                fieldOptions: {
+                    placeholder: 'The address of collateral token'
+                }
             },
             {
                 name: 'collateralValue',
                 label: 'Collateral Value',
                 field: 'number',
+                fieldOptions: {
+                    placeholder: 'The amount of collateral token'
+                },
                 rules: [minValueRule(0)]
             },
             {
                 name: 'bidDuration',
                 label: 'Bid Duration',
                 field: 'number',
-                fieldOptions: blockFieldOptions,
+                fieldOptions: {
+                    ...blockFieldOptions,
+                    placeholder: 'The duration of bidding period'
+                },
                 rules: [
                     minValueRule(0),
                     {
@@ -166,7 +188,10 @@ class AuctionForm extends React.Component {
                 name: 'revealDuration',
                 label: 'Reveal Duration',
                 field: 'number',
-                fieldOptions: blockFieldOptions,
+                fieldOptions: {
+                    ...blockFieldOptions,
+                    placeholder: 'The duration of revealing period'
+                },
                 rules: [
                     minValueRule(0),
                     {
@@ -179,7 +204,10 @@ class AuctionForm extends React.Component {
                 name: 'claimDuration',
                 label: 'Claim Duration',
                 field: 'number',
-                fieldOptions: blockFieldOptions,
+                fieldOptions: {
+                    ...blockFieldOptions,
+                    placeholder: 'The duration of claiming period'
+                },
                 rules: [
                     minValueRule(0),
                     {
@@ -192,7 +220,10 @@ class AuctionForm extends React.Component {
                 name: 'challengeDuration',
                 label: 'Challenge Duration',
                 field: 'number',
-                fieldOptions: blockFieldOptions,
+                fieldOptions: {
+                    ...blockFieldOptions,
+                    placeholder: 'The duration of challenge period'
+                },
                 rules: [
                     minValueRule(0),
                     {
@@ -205,7 +236,10 @@ class AuctionForm extends React.Component {
                 name: 'finalizeDuration',
                 label: 'Finalize Duration',
                 field: 'number',
-                fieldOptions: blockFieldOptions,
+                fieldOptions: {
+                    ...blockFieldOptions,
+                    placeholder: 'The duration of finalize period'
+                },
                 rules: [
                     minValueRule(0),
                     {
