@@ -33,22 +33,12 @@ class CommimentForm extends React.Component {
 
             const { token, duration, value } = values;
             const formatedValue = web3.utils.toWei(value.toString(), 'ether');
-
+            const sendArgs = [token, duration, formatedValue];
             if (token === EMPTY_ADDRESS) {
-                this.contracts.PoLC.methods.commitFund.cacheSend(
-                    token,
-                    duration,
-                    formatedValue,
-                    { value: formatedValue }
-                );
-                return;
+                sendArgs.push({ value: formatedValue });
             }
 
-            this.contracts.PoLC.methods.commitFund.cacheSend(
-                token,
-                duration,
-                formatedValue
-            );
+            this.contracts.PoLC.methods.commitFund.cacheSend(...sendArgs);
             this.form.current.resetFields();
             onClose();
         });

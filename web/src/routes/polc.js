@@ -76,18 +76,26 @@ class PoLC extends React.Component {
             <List.Item>
                 <Card
                     actions={[
-                        <Icon
-                            type="export"
+                        <Button
+                            data-index={index}
+                            icon="export"
+                            size="small"
                             title="Withdraw Fund"
-                            data-index={index}
+                            type="link"
                             onClick={this.withdrawFund}
-                        />,
-                        <Icon
-                            type="dollar"
-                            title="Withdraw Reward"
+                        >
+                            Withdraw
+                        </Button>,
+                        <Button
                             data-index={index}
+                            icon="dollar"
+                            size="small"
+                            title="Withdraw Reward"
+                            type="link"
                             onClick={this.withdrawReward}
-                        />
+                        >
+                            Reward
+                        </Button>
                     ]}
                 >
                     <Row>
