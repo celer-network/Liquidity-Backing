@@ -6,6 +6,7 @@ import { Modal } from 'antd';
 import Form from '../form';
 import {
     currencyFieldOptions,
+    rateFieldOptions,
     minValueRule,
     blockFieldOptions
 } from '../../utils/form';
@@ -111,6 +112,7 @@ class AuctionForm extends React.Component {
                 label: 'Max Rate',
                 field: 'number',
                 fieldOptions: {
+                    ...rateFieldOptions,
                     placeholder: 'The maximum interest rate'
                 },
                 rules: [

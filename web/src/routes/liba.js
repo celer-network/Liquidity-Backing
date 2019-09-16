@@ -79,7 +79,7 @@ class LiBA extends React.Component {
                         <Col span={12}>
                             <Statistic
                                 title="Duration"
-                                value={`${duration} Days`}
+                                value={`${duration} Block`}
                             />
                         </Col>
                     </Row>

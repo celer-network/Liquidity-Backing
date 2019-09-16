@@ -7,6 +7,7 @@ import Form from '../form';
 import {
     currencyFieldOptions,
     celerFieldOptions,
+    rateFieldOptions,
     minValueRule
 } from '../../utils/form';
 import { getUnitByAddress } from '../../utils/unit';
@@ -69,6 +70,7 @@ class BidForm extends React.Component {
                 name: 'rate',
                 field: 'number',
                 fieldOptions: {
+                    ...rateFieldOptions,
                     placeholder: 'The lending interest rate'
                 },
                 rules: [
