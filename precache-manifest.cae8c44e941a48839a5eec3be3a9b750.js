@@ -1,6 +1,6 @@
 self.__precacheManifest = (self.__precacheManifest || []).concat([
   {
-    "revision": "7f1ccd08c9d8ee1294254d70f5f3cd2f",
+    "revision": "d8fcf9b1555e70ddcaa4ebf239215799",
     "url": "/cEconomy/index.html"
   },
   {
@@ -8,7 +8,7 @@ self.__precacheManifest = (self.__precacheManifest || []).concat([
     "url": "/cEconomy/static/css/3.46439c26.chunk.css"
   },
   {
-    "revision": "92e12997b4e2979ed665",
+    "revision": "950a78b52941367a3045",
     "url": "/cEconomy/static/css/main.cde22e43.chunk.css"
   },
   {
@@ -24,23 +24,23 @@ self.__precacheManifest = (self.__precacheManifest || []).concat([
     "url": "/cEconomy/static/js/4.488e0c9c.chunk.js"
   },
   {
-    "revision": "34fc47c330d93c549b9c",
-    "url": "/cEconomy/static/js/5.7ea51fdc.chunk.js"
+    "revision": "0c4888109f8bee5fce37",
+    "url": "/cEconomy/static/js/5.7fe66ee0.chunk.js"
   },
   {
-    "revision": "1e231dd5a86092b47e79",
-    "url": "/cEconomy/static/js/6.e5394080.chunk.js"
+    "revision": "7c15493616679b813905",
+    "url": "/cEconomy/static/js/6.900c1ae9.chunk.js"
   },
   {
-    "revision": "f17b7bf1e6373a35e1d9",
-    "url": "/cEconomy/static/js/7.b1e4eaff.chunk.js"
+    "revision": "5c4a6f2cbee3ba2c755c",
+    "url": "/cEconomy/static/js/7.ab0f2117.chunk.js"
   },
   {
-    "revision": "92e12997b4e2979ed665",
-    "url": "/cEconomy/static/js/main.c582a596.chunk.js"
+    "revision": "950a78b52941367a3045",
+    "url": "/cEconomy/static/js/main.1be68b7d.chunk.js"
   },
   {
-    "revision": "de7475aeaa6d7af292ff",
-    "url": "/cEconomy/static/js/runtime~main.6c589070.js"
+    "revision": "cc76e864ecfa74261829",
+    "url": "/cEconomy/static/js/runtime~main.29ed8305.js"
   }
 ]);
