@@ -285,7 +285,7 @@ class Auction extends React.Component {
                     />
                 </Col>
                 <Col span={12}>
-                    <Statistic title="Duration" value={duration} />
+                    <Statistic title="Duration" value={`${duration} Block`} />
                 </Col>
                 <Col span={12}>
                     <Statistic
@@ -294,7 +294,7 @@ class Auction extends React.Component {
                     />
                 </Col>
                 <Col span={12}>
-                    <Statistic title="Max Rate" value={maxRate} />
+                    <Statistic title="Max Rate" value={`${maxRate} %`} />
                 </Col>
                 {collateralValue > 0 && (
                     <>

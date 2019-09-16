@@ -15,6 +15,11 @@ export const blockFieldOptions = {
     parser: value => value.replace(/[a-z]/g, '')
 };
 
+export const rateFieldOptions = {
+    formatter: value => (value ? `${value}%` : ''),
+    parser: value => value.replace(/[%]/g, '')
+};
+
 export const minValueRule = minValue => ({
     validator: (rule, value, callback) => {
         if (value < minValue) {

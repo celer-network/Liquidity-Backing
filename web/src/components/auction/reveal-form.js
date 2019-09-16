@@ -9,6 +9,7 @@ import Form from '../form';
 import {
     celerFieldOptions,
     currencyFieldOptions,
+    rateFieldOptions,
     minValueRule
 } from '../../utils/form';
 import { getUnitByAddress, formatCurrencyValue } from '../../utils/unit';
@@ -79,6 +80,7 @@ class RevealForm extends React.Component {
                 name: 'rate',
                 field: 'number',
                 fieldOptions: {
+                    ...rateFieldOptions,
                     placeholder: 'The lending interest rate'
                 },
                 rules: [
