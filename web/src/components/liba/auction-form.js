@@ -8,7 +8,8 @@ import {
     currencyFieldOptions,
     rateFieldOptions,
     minValueRule,
-    blockFieldOptions
+    blockFieldOptions,
+    dayFieldOptions
 } from '../../utils/form';
 import { getUnitByAddress } from '../../utils/unit';
 
@@ -108,6 +109,21 @@ class AuctionForm extends React.Component {
                 ]
             },
             {
+                name: 'duration',
+                field: 'number',
+                fieldOptions: {
+                    ...dayFieldOptions,
+                    placeholder: 'The duration of the borrowing'
+                },
+                rules: [
+                    minValueRule(0),
+                    {
+                        message: 'Please enter a duration!',
+                        required: true
+                    }
+                ]
+            },
+            {
                 name: 'maxRate',
                 label: 'Max Rate',
                 field: 'number',
@@ -137,21 +153,6 @@ class AuctionForm extends React.Component {
                     minValueRule(0),
                     {
                         message: 'Please enter a min value!',
-                        required: true
-                    }
-                ]
-            },
-            {
-                name: 'duration',
-                field: 'number',
-                fieldOptions: {
-                    ...blockFieldOptions,
-                    placeholder: 'The duration of the borrowing'
-                },
-                rules: [
-                    minValueRule(0),
-                    {
-                        message: 'Please enter a duration!',
                         required: true
                     }
                 ]

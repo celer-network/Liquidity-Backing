@@ -285,7 +285,7 @@ class Auction extends React.Component {
                     />
                 </Col>
                 <Col span={12}>
-                    <Statistic title="Duration" value={`${duration} Block`} />
+                    <Statistic title="Duration" value={`${duration} Day`} />
                 </Col>
                 <Col span={12}>
                     <Statistic
