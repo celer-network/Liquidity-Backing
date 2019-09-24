@@ -29,11 +29,12 @@ class BidForm extends React.Component {
             }
 
             const { celerValue, value, rate, salt } = values;
+            const adjustedRate = rate * 1000;
 
             this.contracts.LiBA.methods.placeBid.cacheSend(
                 auction.args[0],
                 web3.utils.soliditySha3(
-                    rate,
+                    adjustedRate,
                     web3.utils.toWei(value.toString(), 'ether'),
                     web3.utils.toWei(celerValue.toString(), 'ether'),
                     salt
@@ -71,7 +72,9 @@ class BidForm extends React.Component {
                 field: 'number',
                 fieldOptions: {
                     ...rateFieldOptions,
-                    placeholder: 'The lending interest rate'
+                    placeholder: 'The lending interest rate',
+                    step: 0.001,
+                    precision: 3
                 },
                 rules: [
                     minValueRule(0),

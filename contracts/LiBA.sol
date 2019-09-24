@@ -371,8 +371,8 @@ contract LiBA is Pausable, TokenUtil, PullPayment, WhitelistedRole {
      */
     function repayAuction(uint _auctionId) external payable whenNotPaused {
         Auction storage auction = auctions[_auctionId];
-        require(block.number <= auction.finalizeEnd + auction.duration,  "must be within auction lending duration");
         require(auction.finalized, "auction must be finalized");
+        require(block.number <= auction.finalizeEnd + auction.duration,  "must be within auction lending duration");
 
         bool isEth = auction.tokenAddress == address(0);
         IERC20 token = IERC20(auction.tokenAddress);
@@ -383,7 +383,7 @@ contract LiBA is Pausable, TokenUtil, PullPayment, WhitelistedRole {
             address winner = winners[i];
             Bid storage winnerBid = bidsByUser[winner][_auctionId];
             uint bidValue = winnerBid.value;
-            uint interest = bidValue.mul(winnerBid.rate).div(100);
+            uint interest = bidValue.mul(winnerBid.rate).div(100000);
             winnerBid.value = 0;
 
             if (isEth) {
