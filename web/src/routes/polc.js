@@ -65,11 +65,11 @@ class PoLC extends React.Component {
         const { network } = this.props;
         const {
             tokenAddress,
-            lockStart,
             lockEnd,
             availableValue,
             lendingValue
         } = commitment.value;
+        const commitmentId = commitment.args[1];
         const unit = getUnitByAddress(network.supportedTokens, tokenAddress);
 
         return (
@@ -101,8 +101,9 @@ class PoLC extends React.Component {
                     <Row>
                         <Col span={12}>
                             <Statistic
-                                title="Lock Start"
-                                value={formatDayTime(lockStart)}
+                                title="ID"
+                                groupSeparator=""
+                                value={commitmentId}
                             />
                         </Col>
                         <Col span={12}>
