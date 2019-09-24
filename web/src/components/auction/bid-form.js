@@ -38,7 +38,7 @@ class BidForm extends React.Component {
                     web3.utils.toWei(celerValue.toString(), 'ether'),
                     salt
                 ),
-                web3.utils.toWei((celerValue + salt).toString(), 'ether')
+                web3.utils.toWei(celerValue.toString(), 'ether')
             );
             onClose();
         });
