@@ -47,6 +47,8 @@ contract LiBA is Pausable, TokenUtil, PullPayment, WhitelistedRole {
         uint lendingStart; // The timestamp when lending starts
     }
 
+    uint constant private RATE_PRECISION = 100000;
+
     IPoLC private polc;
     uint private auctionCount;
     bool private enableWhitelist;
@@ -386,7 +388,7 @@ contract LiBA is Pausable, TokenUtil, PullPayment, WhitelistedRole {
             address winner = winners[i];
             Bid storage winnerBid = bidsByUser[winner][_auctionId];
             uint bidValue = winnerBid.value;
-            uint interest = bidValue.mul(winnerBid.rate).mul(actualDuration).div(100000);
+            uint interest = bidValue.mul(winnerBid.rate).mul(actualDuration).div(RATE_PRECISION);
             winnerBid.value = 0;
 
             if (isEth) {
