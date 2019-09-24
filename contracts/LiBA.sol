@@ -44,6 +44,7 @@ contract LiBA is Pausable, TokenUtil, PullPayment, WhitelistedRole {
         uint claimEnd;
         uint challengeEnd;
         uint finalizeEnd;
+        uint lendingStart; // The timestamp when lending starts
     }
 
     IPoLC private polc;
@@ -334,6 +335,7 @@ contract LiBA is Pausable, TokenUtil, PullPayment, WhitelistedRole {
         uint borrowFee = polc.calculateAuctionFee(auction.tokenAddress, value, auction.duration);
         celerToken.safeTransferFrom(msg.sender, address(polc), borrowFee);
         _transfer(auction.tokenAddress, auction.asker, value);
+        auction.lendingStart = block.timestamp;
 
         emit FinalizeAuction(_auctionId);
     }
@@ -372,18 +374,19 @@ contract LiBA is Pausable, TokenUtil, PullPayment, WhitelistedRole {
     function repayAuction(uint _auctionId) external payable whenNotPaused {
         Auction storage auction = auctions[_auctionId];
         require(auction.finalized, "auction must be finalized");
-        require(block.number <= auction.finalizeEnd + auction.duration,  "must be within auction lending duration");
+        require(block.timestamp <= auction.lendingStart + auction.duration.mul(1 days),  "must be within auction lending duration");
 
         bool isEth = auction.tokenAddress == address(0);
         IERC20 token = IERC20(auction.tokenAddress);
         uint value = msg.value;
+        uint actualDuration = block.timestamp.sub(auction.lendingStart).div(1 days);
 
         address[] storage winners = auction.winners;
         for (uint i = 0; i < winners.length; i++) {
             address winner = winners[i];
             Bid storage winnerBid = bidsByUser[winner][_auctionId];
             uint bidValue = winnerBid.value;
-            uint interest = bidValue.mul(winnerBid.rate).div(100000);
+            uint interest = bidValue.mul(winnerBid.rate).mul(actualDuration).div(100000);
             winnerBid.value = 0;
 
             if (isEth) {
