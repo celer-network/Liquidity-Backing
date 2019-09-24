@@ -31,10 +31,11 @@ class RevealForm extends React.Component {
             }
 
             const { celerValue, value, rate, salt, commitmentID } = values;
+            const adjustedRate = rate * 1000;
 
             this.contracts.LiBA.methods.revealBid.cacheSend(
                 auction.args[0],
-                rate,
+                adjustedRate,
                 web3.utils.toWei(value.toString(), 'ether'),
                 web3.utils.toWei(celerValue.toString(), 'ether'),
                 salt,
@@ -81,6 +82,8 @@ class RevealForm extends React.Component {
                 field: 'number',
                 fieldOptions: {
                     ...rateFieldOptions,
+                    step: 0.001,
+                    precision: 3,
                     placeholder: 'The lending interest rate'
                 },
                 rules: [

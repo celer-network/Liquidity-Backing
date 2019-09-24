@@ -113,6 +113,8 @@ class AuctionForm extends React.Component {
                 field: 'number',
                 fieldOptions: {
                     ...rateFieldOptions,
+                    step: 0.001,
+                    precision: 3,
                     placeholder: 'The maximum interest rate'
                 },
                 rules: [
