@@ -45,6 +45,7 @@ contract LiBA is Pausable, TokenUtil, PullPayment, WhitelistedRole {
         uint challengeEnd;
         uint finalizeEnd;
         uint lendingStart; // The timestamp when lending starts
+        uint feeDeposit;
     }
 
     uint constant private RATE_PRECISION = 100000;
@@ -306,6 +307,7 @@ contract LiBA is Pausable, TokenUtil, PullPayment, WhitelistedRole {
         auction.finalized = true;
         address[] storage winners = auction.winners;
         uint value = 0;
+        uint feeDeposit = 0;
 
         uint i = 0;
         // calculating the exact auction value from winner bids
@@ -313,6 +315,7 @@ contract LiBA is Pausable, TokenUtil, PullPayment, WhitelistedRole {
             address winner = winners[i];
             Bid storage winnerBid = bidsByUser[winner][_auctionId];
             value = value.add(winnerBid.value);
+            feeDeposit = feeDeposit.add(polc.calculateReward(winnerBid.commitmentId));
 
             if (value > auction.value) {
                 uint repayValue = value.sub(auction.value);
@@ -334,10 +337,10 @@ contract LiBA is Pausable, TokenUtil, PullPayment, WhitelistedRole {
             winnerBid.value = 0;
         }
 
-        uint borrowFee = polc.calculateAuctionFee(auction.tokenAddress, value, auction.duration);
-        celerToken.safeTransferFrom(msg.sender, address(polc), borrowFee);
+        celerToken.safeTransferFrom(msg.sender, address(this), feeDeposit);
         _transfer(auction.tokenAddress, auction.asker, value);
         auction.lendingStart = block.timestamp;
+        auction.feeDeposit = feeDeposit;
 
         emit FinalizeAuction(_auctionId);
     }
@@ -404,6 +407,10 @@ contract LiBA is Pausable, TokenUtil, PullPayment, WhitelistedRole {
         if (auction.collateraValue > 0) {
             _transfer(auction.collateralAddress, auction.asker, auction.collateraValue);
         }
+
+        uint borrowFee = polc.calculateAuctionFee(auction.tokenAddress, value, actualDuration);
+        celerToken.safeTransfer(auction.asker, auction.feeDeposit);
+        celerToken.safeTransferFrom(msg.sender, address(polc), borrowFee);
         emit RepayAuction(_auctionId);
     }
 
