@@ -379,6 +379,7 @@ contract LiBA is Pausable, TokenUtil, PullPayment, WhitelistedRole {
     function repayAuction(uint _auctionId) external payable whenNotPaused {
         Auction storage auction = auctions[_auctionId];
         require(auction.finalized, "auction must be finalized");
+        require(msg.sender == auction.asker, "sender must be the auction asker");
         require(block.timestamp <= auction.lendingStart + auction.duration.mul(1 days),  "must be within auction lending duration");
 
         bool isEth = auction.tokenAddress == address(0);
@@ -396,11 +397,11 @@ contract LiBA is Pausable, TokenUtil, PullPayment, WhitelistedRole {
 
             if (isEth) {
                 value = value.sub(bidValue).sub(interest);
-                polc.repayCommitment.value(bidValue)(winner, winnerBid.commitmentId, bidValue);
+                polc.repayCommitment.value(bidValue)(winner, winnerBid.commitmentId, auction.asker, bidValue);
                 _asyncTransfer(winner, interest);
             } else {
-                polc.repayCommitment(winner, winnerBid.commitmentId, bidValue);
-                token.safeTransferFrom(msg.sender, winner, interest);
+                polc.repayCommitment(winner, winnerBid.commitmentId, auction.asker, bidValue);
+                token.safeTransferFrom(auction.asker, winner, interest);
             }
         }
 
@@ -410,7 +411,7 @@ contract LiBA is Pausable, TokenUtil, PullPayment, WhitelistedRole {
 
         uint borrowFee = polc.calculateAuctionFee(auction.tokenAddress, value, actualDuration);
         celerToken.safeTransfer(auction.asker, auction.feeDeposit);
-        celerToken.safeTransferFrom(msg.sender, address(polc), borrowFee);
+        celerToken.safeTransferFrom(auction.asker, address(polc), borrowFee);
         emit RepayAuction(_auctionId);
     }
 
@@ -603,9 +604,9 @@ contract LiBA is Pausable, TokenUtil, PullPayment, WhitelistedRole {
         bool isEth = _tokenAddress == address(0);
 
         if (isEth) {
-            polc.repayCommitment.value(_value)(_user, _commitmentId, _value);
+            polc.repayCommitment.value(_value)(_user, _commitmentId, address(this), _value);
         } else {
-            polc.repayCommitment(_user, _commitmentId, _value);
+            polc.repayCommitment(_user, _commitmentId, address(this), _value);
         }
     }
 }
