@@ -259,6 +259,7 @@ contract PoLC is Ownable, Pausable, IPoLC, TokenUtil {
         if (commitment.tokenAddress == address(0)) {
             require(msg.value == _value, "value must match msg value");
         } else {
+            require(msg.value == 0, "value must be zero");
             IERC20(commitment.tokenAddress).safeTransferFrom(_borrower, address(this), _value);
         }
     }
