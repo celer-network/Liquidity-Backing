@@ -272,7 +272,9 @@ contract('PoLC', ([owner, liba]) => {
 
     it('should fail to repayCommitment for wrong sender', async () => {
         try {
-            await polc.repayCommitment(owner, commitmentId, 1, { value: '1' });
+            await polc.repayCommitment(owner, commitmentId, liba, 1, {
+                value: '1'
+            });
         } catch (e) {
             assert.isAbove(
                 e.message.search('sender must be liba contract'),
@@ -285,7 +287,7 @@ contract('PoLC', ([owner, liba]) => {
     });
 
     it('should repayCommitment successfully', async () => {
-        await polc.repayCommitment(owner, commitmentId, 1, {
+        await polc.repayCommitment(owner, commitmentId, liba, 1, {
             from: liba,
             value: '1'
         });
