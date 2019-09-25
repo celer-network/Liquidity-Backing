@@ -66,7 +66,6 @@ contract('PoLC', ([owner, liba]) => {
         assert.equal(commitment.committedValue.toNumber(), 1);
         assert.equal(commitment.availableValue.toNumber(), 1);
         assert.equal(commitment.lendingValue.toNumber(), 0);
-        assert.equal(commitment.withdrawedReward.toNumber(), 0);
     });
 
     it('should fail to withdraw fund for before lock expire', async () => {
@@ -114,10 +113,21 @@ contract('PoLC', ([owner, liba]) => {
             owner,
             commitmentId
         );
-        assert.equal(
-            commitment.withdrawedReward.toNumber(),
-            BLOCK_REWARD * LOCK_DURATION
-        );
+        assert.equal(commitment.rewardWithdrawn, true);
+    });
+
+    it('should fail to withdraw reward multiple times', async () => {
+        try {
+            await polc.withdrawReward(commitmentId);
+        } catch (e) {
+            assert.isAbove(
+                e.message.search('commiment reward has been withdrawn'),
+                -1
+            );
+            return;
+        }
+
+        assert.fail('should have thrown before');
     });
 
     it('should fail to commit ERC20 fund for unsupported token address', async () => {
@@ -168,7 +178,6 @@ contract('PoLC', ([owner, liba]) => {
         assert.equal(commitment.committedValue.toNumber(), 1);
         assert.equal(commitment.availableValue.toNumber(), 1);
         assert.equal(commitment.lendingValue.toNumber(), 0);
-        assert.equal(commitment.withdrawedReward.toNumber(), 0);
         assert.equal(commitment.tokenAddress, commitToken.address);
     });
 
