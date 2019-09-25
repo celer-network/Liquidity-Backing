@@ -244,7 +244,7 @@ contract PoLC is Ownable, Pausable, IPoLC, TokenUtil {
     function repayCommitment(
         address _user,
         uint _commitmentId,
-        address _borrowser,
+        address _borrower,
         uint _value
     )
         external
@@ -259,7 +259,7 @@ contract PoLC is Ownable, Pausable, IPoLC, TokenUtil {
         if (commitment.tokenAddress == address(0)) {
             require(msg.value == _value, "value must match msg value");
         } else {
-            IERC20(commitment.tokenAddress).safeTransferFrom(_borrowser, address(this), _value);
+            IERC20(commitment.tokenAddress).safeTransferFrom(_borrower, address(this), _value);
         }
     }
 
