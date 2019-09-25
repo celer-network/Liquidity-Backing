@@ -24,7 +24,7 @@ contract PoLC is Ownable, Pausable, IPoLC, TokenUtil {
         uint committedValue;
         uint availableValue;
         uint lendingValue;
-        uint withdrawedReward;
+        bool rewardWithdrawn;
     }
 
     address private libaAddress;
@@ -161,18 +161,10 @@ contract PoLC is Ownable, Pausable, IPoLC, TokenUtil {
     {
         Commitment storage commitment = commitmentsByUser[msg.sender][_commitmentId];
         require(commitment.locked, "commiment must be locked to get reward");
-        uint totalReward = 0;
-        uint power = commitment.committedValue.mul(
-            commitment.lockEnd.sub(commitment.lockStart)
-        );
-        mapping (uint => uint) storage powerByTime = powerByTokenTime[commitment.tokenAddress];
-        for (uint i = commitment.lockStart; i < commitment.lockEnd; i++) {
-            totalReward = totalReward.add(
-                blockReward.mul(power).div(powerByTime[i])
-            );
-        }
+        require(!commitment.rewardWithdrawn, "commiment reward has been withdrawn");
 
-        commitment.withdrawedReward = totalReward;
+        uint totalReward = calculateReward(_commitmentId);
+        commitment.rewardWithdrawn = true;
         celerToken.safeTransfer(msg.sender, totalReward);
         emit WithdrawReward(_commitmentId);
     }
@@ -268,5 +260,30 @@ contract PoLC is Ownable, Pausable, IPoLC, TokenUtil {
         } else {
             IERC20(commitment.tokenAddress).safeTransferFrom(tx.origin, address(this), _value);
         }
+    }
+
+    /**
+     * @notice Calculate reward for a commitment
+     * @param _commitmentId ID of the commitment
+     */
+    function calculateReward(
+        uint _commitmentId
+    )
+        public
+        returns (uint)
+    {
+        Commitment storage commitment = commitmentsByUser[msg.sender][_commitmentId];
+        uint totalReward = 0;
+        uint power = commitment.committedValue.mul(
+            commitment.lockEnd.sub(commitment.lockStart)
+        );
+        mapping (uint => uint) storage powerByTime = powerByTokenTime[commitment.tokenAddress];
+        for (uint i = commitment.lockStart; i < commitment.lockEnd; i++) {
+            totalReward = totalReward.add(
+                blockReward.mul(power).div(powerByTime[i])
+            );
+        }
+
+        return totalReward;
     }
 }
