@@ -56,7 +56,7 @@ For more details about cEcnonomy and Celer Network, please refer to [Celer Netwo
 -   **Lockfree Commiment**: Put digital asset into PoLC without locking
 -   **Whitelist OSP**: Only OSP in the whitelist can launch LiBA auction to borrow fund
 -   **Collateral Lending**: OSP can put collateral into the auction
--   **Blind Auction**: Bidders will not know others' rate and celer value for auction performed in LiBA
+-   **Blind Auction**: Bidders will not know others' rate and CELR value for auction performed in LiBA
 -   **Challenge Auction Result**: Bidders can challenge wrong auction result posted by OSP
 -   **Repay Auction**: OPS can repay the loan through LiBA
 
@@ -70,15 +70,15 @@ For more details about cEcnonomy and Celer Network, please refer to [Celer Netwo
 
 ### LiBA
 
-1. **initAuction(\_tokenAddress, \_bidDuration, \_revealDuration, \_claimDuration, \_challengeDuration, \_finalizeDuration, \_value, \_duration, \_maxRate, \_minValue, \_collateralAddress, \_collateralValue)**: An Authorized service provider starts an auction with specific token, value, and duration. It is optional to provide collateral with the auction
-2. **placeBid(\_auctionId, \_hash, \_celerValue)**: During bidding period, a lender places a bid with claimed celer value and hash calculated from desired rate, value, actual celer value and salt.
-3. **revealBid(\_auctionId, \_rate, \_value, \_celerValue, \_salt, \_commitmentId)**: During reveal period, the bidder reveals its bid with rate, value, celer value, salt, and commitmentId in PoLC. \*\*The commitment in PoLC should have enough available value to fullfil the bid.
-4. **claimWinners(\_auctionId, \_winners)**: During claim period, the service provider submits winners list based on the rate and celer value. The lower rate will be selected. If rate is same, the bid with more celer value will be selected.
+1. **initAuction(\_tokenAddress, \_bidDuration, \_revealDuration, \_claimDuration, \_challengeDuration, \_finalizeDuration, \_value, \_duration, \_maxRate, \_minValue, \_collateralAddress, \_collateralValue)**: An Authorized service provider starts an auction with specific token, value, and duration. It is optional to provide collateral with the auction. It also need to provide duration for each period.
+2. **placeBid(\_auctionId, \_hash, \_celerValue)**: During bidding period, a lender places a bid with claimed CELR value and hash calculated from desired rate, value, actual CELR value and salt.
+3. **revealBid(\_auctionId, \_rate, \_value, \_celerValue, \_salt, \_commitmentId)**: During reveal period, the bidder reveals its bid with rate, value, CELR value, salt, and commitmentId in PoLC. \*\*The commitment in PoLC should have enough available value to fullfil the bid.
+4. **claimWinners(\_auctionId, \_winners)**: During claim period, the service provider submits winners list based on the rate and CELR value. The lower rate will be selected. If rate is same, the bid with more CELR value will be selected.
 5. **challengeWinners(\_auctionId, \_winners)**: During challenge period, A lender, who is not selected as the winners but should be based on LiBA rules, can challenge the winners result. If the challenge is successful, the challenge period will be renewed.
-6. **finalizeAuction(\_auctionId)**: During finalization period, anyone is able to finalize the auction, and the borrower of the auction will receive the asked fund.
-7. **finalizeBid(\_auctionId)**: After the finalization period or the auction has been finalized, the unselected bider is able to collect celer value in the bid.
-8. **repayAuction(\_auctionId)**: The borrower should repay the fund and interest when the lending duration is able to pass.
-9. **collectCollateral(\_auctionId)**: If the borrower is not able to repay the fund and interest on time, the lender can collect collateral in the auction.
+6. **finalizeAuction(\_auctionId)**: During finalization period, anyone is able to finalize the auction, and the auction asker will receive the asked fund. LiBA will also refund excessive fund from winner bids. Wen the auction is finalized, LiBA will collect feeDeposit from the auction asker. The fee deposit is sum of the reward of each winner bid commitment in PoLC.
+7. **finalizeBid(\_auctionId)**: After the finalization period or the auction has been finalized, the unselected bider is able to collect CELR value and commitment value in the bid.
+8. **repayAuction(\_auctionId)**: The auction asker should repay the fund and interest when the lending duration is about to end. LiBA will refund the feeDeposit to the auction asker, the auction asker also needs to make the payment for auction fee, which is discussed in detail below.
+9. **collectCollateral(\_auctionId)**: If the auction asker is not able to make the repayment on time, the lender can collect collateral associated with the auction.
 
 ## Reward and Fee Calculation
 
@@ -97,7 +97,7 @@ For more details about cEcnonomy and Celer Network, please refer to [Celer Netwo
 
 ### PoLC Reward Calculation
 
-The mining power associated with a commitment is proportional to the asset value and lock duration. i.e. mining power will be the product of asset value and lock duration. For each block, it has a fixed reward. The reward for a commitment by a given block will be the percent of its mining power to the total mining power by the given block.
+The mining power associated with a commitment is proportional to the asset value and lock duration. i.e. mining power will be the product of asset value and lock duration. For each block, it has a fixed reward. The reward for a commitment by a given block will be proportional to the percent of its mining power to the total mining power by the given block.
 
 -   Mi = Vi \* Ti
 -   TMB = sum of Mining power of all commitments, which are locked in the current block
