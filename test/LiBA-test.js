@@ -1,6 +1,7 @@
 const chai = require('chai');
 const chaiAsPromised = require('chai-as-promised');
 const Web3 = require('web3');
+const utils = require('./utils');
 
 const ERC20ExampleToken = artifacts.require('ERC20ExampleToken');
 const LiBA = artifacts.require('LiBA');
@@ -11,6 +12,7 @@ const assert = chai.assert;
 const web3 = new Web3(new Web3.providers.HttpProvider('http://localhost:8545'));
 
 const EMPTY_ADDRESS = '0x0000000000000000000000000000000000000000';
+const DAY = 60 * 60 * 24;
 const AUCTION_DEPOSIT = 100;
 const BID_DURATION = 8;
 const REVEAL_DURATION = 9;
@@ -458,6 +460,7 @@ contract('LiBA', ([provider, bidder0, bidder1, bidder2]) => {
     });
 
     it('should fail to collect collateral for non winner', async () => {
+        await utils.updateTimestamp(DURATION * DAY);
         try {
             await liba.collectCollateral(auctionId, {
                 from: bidder2

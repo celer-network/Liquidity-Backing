@@ -138,11 +138,11 @@ contract LiBA is Ownable, Pausable, TokenUtil, PullPayment, WhitelistedRole {
         validateToken(_collateralAddress, _collateralValue)
     {
         require(supportedTokens[_tokenAddress], "token address must be supported");
-        require(_bidDuration > 0, "bid duration must be larger than zero");
-        require(_revealDuration > 0, "reveal duration must be larger than zero");
-        require(_claimDuration > 0, "claim duration must be larger than zero");
-        require(_challengeDuration > 0, "challenge duration must be larger than zero");
-        require(_finalizeDuration > 0, "finalize duration must be larger than zero");
+        require(_bidDuration > 0);
+        require(_revealDuration > 0);
+        require(_claimDuration > 0);
+        require(_challengeDuration > 0);
+        require(_finalizeDuration > 0);
         require(_value > 0, "value must be larger than zero");
         require(_duration > 0, "duration must be larger than zero");
 
@@ -427,7 +427,7 @@ contract LiBA is Ownable, Pausable, TokenUtil, PullPayment, WhitelistedRole {
     function collectCollateral(uint _auctionId) external whenNotPaused {
         Auction storage auction = auctions[_auctionId];
         require(auction.finalized, "auction must be finalized");
-        require(block.number > auction.lendingStart.add(auction.duration.mul(1 days)),  "must pass auction lending duration");
+        require(block.timestamp > auction.lendingStart.add(auction.duration.mul(1 days)),  "must pass auction lending duration");
         require(_checkWinner(_auctionId, msg.sender), "sender must be a winner");
 
         Bid storage winnerBid = bidsByUser[msg.sender][_auctionId];
