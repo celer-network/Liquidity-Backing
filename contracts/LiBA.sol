@@ -8,12 +8,13 @@ import "openzeppelin-solidity/contracts/token/ERC20/SafeERC20.sol";
 import "openzeppelin-solidity/contracts/payment/PullPayment.sol";
 import "openzeppelin-solidity/contracts/access/roles/WhitelistedRole.sol";
 import "openzeppelin-solidity/contracts/lifecycle/Pausable.sol";
+import "openzeppelin-solidity/contracts/ownership/Ownable.sol";
 
 /**
  * @title LiBA
  * @notice Contract allows service providers to send assets stored in PoLC through auction.
  */
-contract LiBA is Pausable, TokenUtil, PullPayment, WhitelistedRole {
+contract LiBA is Ownable, Pausable, TokenUtil, PullPayment, WhitelistedRole {
     using SafeERC20 for IERC20;
     using SafeMath for uint;
 
@@ -97,6 +98,10 @@ contract LiBA is Pausable, TokenUtil, PullPayment, WhitelistedRole {
 
     function() external payable { }
 
+    function updateEnableWhitelist(bool _enable) external onlyOwner {
+        enableWhitelist = _enable;
+    }
+
     /**
      * @notice Launch a new auction
      * @param _tokenAddress Token address to borrow
@@ -142,7 +147,7 @@ contract LiBA is Pausable, TokenUtil, PullPayment, WhitelistedRole {
         require(_duration > 0, "duration must be larger than zero");
 
         if (_collateralAddress != address(0)) {
-            IERC20(_collateralAddress).safeTransferFrom(msg.sender, address(this), _value);
+            IERC20(_collateralAddress).safeTransferFrom(msg.sender, address(this), _collateralValue);
         }
 
         Auction storage auction = auctions[auctionCount];
@@ -380,7 +385,7 @@ contract LiBA is Pausable, TokenUtil, PullPayment, WhitelistedRole {
         Auction storage auction = auctions[_auctionId];
         require(auction.finalized, "auction must be finalized");
         require(msg.sender == auction.asker, "sender must be the auction asker");
-        require(block.timestamp <= auction.lendingStart + auction.duration.mul(1 days),  "must be within auction lending duration");
+        require(block.timestamp <= auction.lendingStart.add(auction.duration.mul(1 days)),  "must be within auction lending duration");
 
         bool isEth = auction.tokenAddress == address(0);
         IERC20 token = IERC20(auction.tokenAddress);
@@ -421,7 +426,8 @@ contract LiBA is Pausable, TokenUtil, PullPayment, WhitelistedRole {
      */
     function collectCollateral(uint _auctionId) external whenNotPaused {
         Auction storage auction = auctions[_auctionId];
-        require(block.number > auction.finalizeEnd + auction.duration,  "must pass auction lending duration");
+        require(auction.finalized, "auction must be finalized");
+        require(block.number > auction.lendingStart.add(auction.duration.mul(1 days)),  "must pass auction lending duration");
         require(_checkWinner(_auctionId, msg.sender), "sender must be a winner");
 
         Bid storage winnerBid = bidsByUser[msg.sender][_auctionId];
@@ -606,6 +612,7 @@ contract LiBA is Pausable, TokenUtil, PullPayment, WhitelistedRole {
         if (isEth) {
             polc.repayCommitment.value(_value)(_user, _commitmentId, address(this), _value);
         } else {
+            IERC20(_tokenAddress).approve(address(polc), _value);
             polc.repayCommitment(_user, _commitmentId, address(this), _value);
         }
     }
