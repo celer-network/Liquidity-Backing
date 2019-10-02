@@ -1,6 +1,7 @@
 const chai = require('chai');
 const chaiAsPromised = require('chai-as-promised');
 const Web3 = require('web3');
+const utils = require('./utils');
 
 const ERC20ExampleToken = artifacts.require('ERC20ExampleToken');
 const LiBA = artifacts.require('LiBA');
@@ -11,6 +12,7 @@ const assert = chai.assert;
 const web3 = new Web3(new Web3.providers.HttpProvider('http://localhost:8545'));
 
 const EMPTY_ADDRESS = '0x0000000000000000000000000000000000000000';
+const DAY = 60 * 60 * 24;
 const AUCTION_DEPOSIT = 100;
 const BID_DURATION = 8;
 const REVEAL_DURATION = 9;
@@ -380,15 +382,19 @@ contract('LiBA', ([provider, bidder0, bidder1, bidder2]) => {
         assert.equal(balance.toString(), '300000000000000000000000');
     });
 
-    it('should init ERC20 auction successfully', async () => {
+    it('should run ERC20 auction successfully', async () => {
         await celerToken.approve(liba.address, AUCTION_DEPOSIT);
+        await borrowToken.transfer(bidder1, 10000);
         await borrowToken.transfer(bidder2, 10000);
+        await borrowToken.approve(polc.address, 10000, {
+            from: bidder1
+        });
         await borrowToken.approve(polc.address, 10000, {
             from: bidder2
         });
         const receipt = await liba.initAuction(
             borrowToken.address,
-            2,
+            6,
             2,
             1,
             1,
@@ -403,16 +409,22 @@ contract('LiBA', ([provider, bidder0, bidder1, bidder2]) => {
         const { args } = receipt.logs[0];
         auctionId = args.auctionId.toNumber();
 
-        await placeBid(BID0, bidder2, 'NewBid');
-        await commitFund(BID0, bidder2, borrowToken.address);
-        await revealBid(BID0, bidder2);
+        await commitFund(BID0, bidder1, borrowToken.address);
+        await commitFund(BID1, bidder2, borrowToken.address);
+        await placeBid(BID0, bidder1, 'NewBid');
+        await placeBid(BID1, bidder2, 'NewBid');
+        await revealBid(BID1, bidder2);
+        await revealBid(BID0, bidder1);
         await liba.claimWinners(auctionId, [bidder2]);
         await borrowToken.approve(liba.address, 10000);
         await liba.finalizeAuction(auctionId);
         const balance = await borrowToken.balanceOf(provider);
-        assert.equal(balance.toString(), '299999999999999999990100');
+        assert.equal(balance.toString(), '299999999999999999980100');
         await borrowToken.approve(polc.address, 10000);
         await liba.repayAuction(auctionId);
+        await liba.finalizeBid(auctionId, {
+            from: bidder1
+        });
     });
 
     it('should fail to collect collateral for not ended lending duration', async () => {
@@ -458,6 +470,7 @@ contract('LiBA', ([provider, bidder0, bidder1, bidder2]) => {
     });
 
     it('should fail to collect collateral for non winner', async () => {
+        await utils.updateTimestamp(DURATION * DAY);
         try {
             await liba.collectCollateral(auctionId, {
                 from: bidder2
