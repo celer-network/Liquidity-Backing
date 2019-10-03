@@ -525,7 +525,7 @@ contract LiBA is Ownable, Pausable, TokenUtil, PullPayment, WhitelistedRole {
             address winner = winners[i];
             Bid storage winnerBid = bidsByUser[winner][_auctionId];
 
-            // Too much winners
+            // Too many winners
             if (totalValue >= auction.value && i < winners.length) {
                 return true;
             }
