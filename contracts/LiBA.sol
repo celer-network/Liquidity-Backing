@@ -518,26 +518,43 @@ contract LiBA is Ownable, Pausable, TokenUtil, PullPayment, WhitelistedRole {
         Auction storage auction = auctions[_auctionId];
         address[] storage winners = auction.winners;
         bool isHigherRank = false;
+        bool isWinner = false;
         uint totalValue = 0;
 
         for (uint i = 0; i < winners.length; i++) {
             address winner = winners[i];
             Bid storage winnerBid = bidsByUser[winner][_auctionId];
 
+            // Too many winners
             if (totalValue >= auction.value && i < winners.length) {
                 return true;
             }
+
             totalValue = totalValue.add(winnerBid.value);
 
             if (winner == _challenger) {
-                return false;
+                isWinner = true;
             }
 
             if (!isHigherRank) {
                 if (_hasHigherRank(challengerBid, winnerBid)) {
+                    // The winner order is not right
+                    if (!isWinner) {
+                        return true;
+                    }
+
                     isHigherRank = true;
                 }
             }
+        }
+
+        if (isWinner) {
+            return false;
+        }
+
+        // Not enough winners claimed
+        if (totalValue < auction.value) {
+            return true;
         }
 
         return isHigherRank;
