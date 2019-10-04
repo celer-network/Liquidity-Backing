@@ -11,7 +11,7 @@
 
 ## Overview
 
-cEcnonomy is an cryptoeconomics mechanisms to enable off-chain service providers to tap into large amounts of liquidity whenever they need to. It consists Proof of Liquidity Commitment (PoLC) and Liquidity Backing Auction (LiBA). PoLC encourage Network Liquidity Backers (NLB) to lock their digital assets into smart contract for a long time by rewarding them with CELR tokens and therefore establishing a stable and abundant liquidity pool. LiBA enables off-chain service providers to solicit liquidity in PoLC through “crowd lending”.
+cEcnonomy is an cryptoeconomics mechanisms to enable off-chain service providers to tap into large amounts of liquidity whenever they need to. It consists Proof of Liquidity Commitment (PoLC) and Liquidity Backing Auction (LiBA). PoLC encourage Network Liquidity Backers (NLB) to lock their digital assets into smart contract for a long time by rewarding them with CELR tokens and therefore establishing a stable and abundant liquidity pool. LiBA enables off-chain service providers to solicit liquidity in PoLC through “crowd lending”. The initial reward poll will be funded by Celer Network Foundation, and will be funded by LiBA auction fee afterwards.
 
 For more details about cEcnonomy and Celer Network, please refer to [Celer Network's official website](https://www.celer.network/).
 
