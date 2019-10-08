@@ -38,6 +38,7 @@ contract LiBA is Ownable, Pausable, TokenUtil, PullPayment, WhitelistedRole {
         bool finalized;
         address[] bidders;
         address[] winners;
+        address topLoser;
         uint challengeDuration;
         uint finalizeDuration;
         uint bidEnd;
@@ -257,10 +258,12 @@ contract LiBA is Ownable, Pausable, TokenUtil, PullPayment, WhitelistedRole {
      * @notice The auction asker claims winners for the auction during the claim period
      * @param _auctionId Id of the auction
      * @param _winners A list of winner addresses
+     * @param _topLoser The loser who has the highest rank
      */
     function claimWinners(
         uint _auctionId,
-        address[] calldata _winners
+        address[] calldata _winners,
+        address _topLoser
     )
         external
         whenNotPaused
@@ -269,8 +272,10 @@ contract LiBA is Ownable, Pausable, TokenUtil, PullPayment, WhitelistedRole {
         require(block.number > auction.revealEnd, "must be within claim duration");
         require(block.number <= auction.claimEnd, "must be within claim duration");
         require(msg.sender == auction.asker, "sender must be the auction asker");
+        require(!_checkWinner(_winners, _topLoser));
 
         auction.winners = _winners;
+        auction.topLoser = _topLoser;
         emit ClaimWinners(_auctionId, _winners);
     }
 
@@ -279,10 +284,12 @@ contract LiBA is Ownable, Pausable, TokenUtil, PullPayment, WhitelistedRole {
      * is able to challenge the auction during the challenge period
      * @param _auctionId Id of the auction
      * @param _winners A list of winner addresses
+     * @param _topLoser The loser who has the highest rank
      */
     function challengeWinners(
         uint _auctionId,
-        address[] calldata _winners
+        address[] calldata _winners,
+        address _topLoser
     )
         external
         whenNotPaused
@@ -291,8 +298,10 @@ contract LiBA is Ownable, Pausable, TokenUtil, PullPayment, WhitelistedRole {
         require(block.number > auction.claimEnd, "must be within challenge");
         require(block.number <= auction.challengeEnd, "must be within challenge duration");
         require(_validateChallenger(_auctionId, msg.sender), "must be a valid challenger");
+        require(!_checkWinner(_winners, _topLoser));
 
         auction.winners = _winners;
+        auction.topLoser = _topLoser;
         auction.challengeEnd = auction.challengeEnd.add(auction.challengeDuration);
         auction.finalizeEnd = auction.challengeEnd.add(auction.finalizeDuration);
 
@@ -311,6 +320,7 @@ contract LiBA is Ownable, Pausable, TokenUtil, PullPayment, WhitelistedRole {
 
         auction.finalized = true;
         address[] storage winners = auction.winners;
+        Bid storage topLoserBid = bidsByUser[auction.topLoser][_auctionId];
         uint value = 0;
         uint feeDeposit = 0;
 
@@ -321,6 +331,14 @@ contract LiBA is Ownable, Pausable, TokenUtil, PullPayment, WhitelistedRole {
             Bid storage winnerBid = bidsByUser[winner][_auctionId];
             value = value.add(winnerBid.value);
             feeDeposit = feeDeposit.add(polc.calculateReward(winnerBid.commitmentId));
+
+            if winnerBid.rate < topLoserBid.rate {
+                celerToken.safeTransfer(winner, winnerBid.celerValue);
+                winnerBid.celerValue = 0;
+            } else {
+                celerToken.safeTransfer(winner, winnerBid.celerValue.sub(topLoserBid.celerValue));
+                winnerBid.celerValue = topLoserBid.celerValue;
+            }
 
             if (value > auction.value) {
                 uint repayValue = value.sub(auction.value);
@@ -360,7 +378,7 @@ contract LiBA is Ownable, Pausable, TokenUtil, PullPayment, WhitelistedRole {
         Auction storage auction = auctions[_auctionId];
 
         if (auction.finalized) {
-            allowWithdraw = !_checkWinner(_auctionId, msg.sender);
+            allowWithdraw = !_checkWinner(auction.winners, msg.sender);
         } else {
             allowWithdraw = block.number > auction.finalizeEnd;
         }
@@ -391,13 +409,14 @@ contract LiBA is Ownable, Pausable, TokenUtil, PullPayment, WhitelistedRole {
         IERC20 token = IERC20(auction.tokenAddress);
         uint value = msg.value;
         uint actualDuration = block.timestamp.sub(auction.lendingStart).div(1 days);
+        Bid storage topLoserBid = bidsByUser[auction.topLoser][_auctionId];
 
         address[] storage winners = auction.winners;
         for (uint i = 0; i < winners.length; i++) {
             address winner = winners[i];
             Bid storage winnerBid = bidsByUser[winner][_auctionId];
             uint bidValue = winnerBid.value;
-            uint interest = bidValue.mul(winnerBid.rate).mul(actualDuration).div(RATE_PRECISION);
+            uint interest = bidValue.mul(topLoserBid.rate).mul(actualDuration).div(RATE_PRECISION);
             winnerBid.value = 0;
 
             if (isEth) {
@@ -428,7 +447,7 @@ contract LiBA is Ownable, Pausable, TokenUtil, PullPayment, WhitelistedRole {
         Auction storage auction = auctions[_auctionId];
         require(auction.finalized, "auction must be finalized");
         require(block.timestamp > auction.lendingStart.add(auction.duration.mul(1 days)),  "must pass auction lending duration");
-        require(_checkWinner(_auctionId, msg.sender), "sender must be a winner");
+        require(_checkWinner(auction.winners, msg.sender), "sender must be a winner");
 
         Bid storage winnerBid = bidsByUser[msg.sender][_auctionId];
         require(winnerBid.value > 0, "bid value must be larger than zero");
@@ -585,23 +604,20 @@ contract LiBA is Ownable, Pausable, TokenUtil, PullPayment, WhitelistedRole {
     }
 
     /**
-     * @notice Check if the bidder is winner
-     * @param _auctionId Id of the auction
-     * @param _bidder a bidder address
+     * @notice Check if the address is in the winners list
+     * @param _winners a list of winners
+     * @param _addr an address
      */
     function _checkWinner(
-        uint _auctionId,
-        address _bidder
+        uint _winners,
+        address _addr
     )
         private
         view
         returns(bool)
     {
-        Auction storage auction = auctions[_auctionId];
-        address[] storage winners = auction.winners;
-
-        for (uint i = 0; i < winners.length; i++) {
-            if (winners[i] == _bidder) {
+        for (uint i = 0; i < _winners.length; i++) {
+            if (_winners[i] == _addr) {
                 return true;
             }
         }
