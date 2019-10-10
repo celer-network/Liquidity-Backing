@@ -210,17 +210,19 @@ contract LiBA is Ownable, Pausable, TokenUtil, PullPayment, WhitelistedRole {
      * @notice The auction asker claims winners for the auction during the claim period
      * @param _auctionId Id of the auction
      * @param _winners A list of winner addresses
+     * @param _topLoser The loser who has the highest rank
      */
     function claimWinners(
         uint _auctionId,
-        address[] calldata _winners
+        address[] calldata _winners,
+        address _topLoser
     )
         external
         whenNotPaused
     {
         LiBAStruct.Auction storage auction = auctions[_auctionId];
 
-        auction.claimWinners(_winners);
+        auction.claimWinners(_winners, _topLoser);
         emit ClaimWinners(_auctionId, _winners);
     }
 
@@ -229,10 +231,12 @@ contract LiBA is Ownable, Pausable, TokenUtil, PullPayment, WhitelistedRole {
      * is able to challenge the auction during the challenge period
      * @param _auctionId Id of the auction
      * @param _winners A list of winner addresses
+     * @param _topLoser The loser who has the highest rank
      */
     function challengeWinners(
         uint _auctionId,
-        address[] calldata _winners
+        address[] calldata _winners,
+        address _topLoser
     )
         external
         whenNotPaused
@@ -241,6 +245,7 @@ contract LiBA is Ownable, Pausable, TokenUtil, PullPayment, WhitelistedRole {
         require(block.number > auction.claimEnd, "must be within challenge");
         require(block.number <= auction.challengeEnd, "must be within challenge duration");
         require(_validateChallenger(_auctionId, msg.sender), "must be a valid challenger");
+        require(LiBAUtil._validateTopLoser(auction.bidders ,_winners, _topLoser), "invalid top loser");
 
         auction.winners = _winners;
         auction.challengeEnd = auction.challengeEnd.add(auction.challengeDuration);
@@ -290,13 +295,14 @@ contract LiBA is Ownable, Pausable, TokenUtil, PullPayment, WhitelistedRole {
         IERC20 token = IERC20(auction.tokenAddress);
         uint value = msg.value;
         uint actualDuration = block.timestamp.sub(auction.lendingStart).div(1 days);
+        LiBAStruct.Bid storage topLoserBid = bidsByUser[auction.topLoser][_auctionId];
 
         address[] storage winners = auction.winners;
         for (uint i = 0; i < winners.length; i++) {
             address winner = winners[i];
             LiBAStruct.Bid storage winnerBid = bidsByUser[winner][_auctionId];
             uint bidValue = winnerBid.value;
-            uint interest = bidValue.mul(winnerBid.rate).mul(actualDuration).div(RATE_PRECISION);
+            uint interest = bidValue.mul(topLoserBid.rate).mul(actualDuration).div(RATE_PRECISION);
             winnerBid.value = 0;
 
             if (auction.tokenAddress == address(0)) {

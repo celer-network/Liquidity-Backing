@@ -8,6 +8,28 @@ import "openzeppelin-solidity/contracts/math/SafeMath.sol";
 library LiBAUtil {
     using SafeMath for uint;
 
+  /**
+     * @notice Check if the topLoser is valid
+     * @param _bidders a list of bidders
+     * @param _winners a list of winners
+     * @param _topLoser The loser who has the highest rank
+     */
+    function _validateTopLoser(
+        address[] memory _bidders,
+        address[] memory _winners,
+        address _topLoser
+    )
+        internal
+        pure
+        returns(bool)
+    {
+        if (_winners.length == _bidders.length) {
+            return _winners[_winners.length - 1] == _topLoser;
+        }
+
+        return !_checkWinner(_winners, _topLoser);
+    }
+
     /**
      * @notice Check if the address is in the winners list
      * @param _winners a list of winners

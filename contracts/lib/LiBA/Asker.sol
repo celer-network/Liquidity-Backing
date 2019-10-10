@@ -15,18 +15,22 @@ library LiBAAsker {
      * @notice The auction asker claims winners for the auction during the claim period
      * @param _auction auction struct
      * @param _winners A list of winner addresses
+     * @param _topLoser The loser who has the highest rank
      */
     function claimWinners(
         LiBAStruct.Auction storage _auction,
-        address[] calldata _winners
+        address[] calldata _winners,
+        address _topLoser
     )
         external
     {
         require(block.number > _auction.revealEnd, "must be within claim duration");
         require(block.number <= _auction.claimEnd, "must be within claim duration");
         require(msg.sender == _auction.asker, "sender must be the auction asker");
+        require(LiBAUtil._validateTopLoser(_auction.bidders ,_winners, _topLoser), "invalid top loser");
 
         _auction.winners = _winners;
+        _auction.topLoser = _topLoser;
     }
 
     /**
@@ -52,6 +56,7 @@ library LiBAAsker {
 
         _auction.finalized = true;
         address[] storage winners = _auction.winners;
+        LiBAStruct.Bid storage topLoserBid = _bidsByUser[_auction.topLoser][_auctionId];
         uint value = 0;
         uint feeDeposit = 0;
 
@@ -62,6 +67,14 @@ library LiBAAsker {
             LiBAStruct.Bid storage winnerBid = _bidsByUser[winner][_auctionId];
             value = value.add(winnerBid.value);
             feeDeposit = feeDeposit.add(_polc.calculateReward(winnerBid.commitmentId));
+
+            if (winnerBid.rate < topLoserBid.rate) {
+                _celerToken.safeTransfer(winner, winnerBid.celerValue);
+                winnerBid.celerValue = 0;
+            } else {
+                _celerToken.safeTransfer(winner, winnerBid.celerValue.sub(topLoserBid.celerValue));
+                winnerBid.celerValue = topLoserBid.celerValue;
+            }
 
             if (value > _auction.value) {
                 uint repayValue = value.sub(_auction.value);
