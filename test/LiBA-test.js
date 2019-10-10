@@ -4,6 +4,9 @@ const Web3 = require('web3');
 const utils = require('./utils');
 
 const ERC20ExampleToken = artifacts.require('ERC20ExampleToken');
+const LiBAStruct = artifacts.require('LiBAStruct');
+const LiBAAsker = artifacts.require('LiBAAsker');
+const LiBABidder = artifacts.require('LiBABidder');
 const LiBA = artifacts.require('LiBA');
 const PoLC = artifacts.require('PoLC');
 
@@ -114,6 +117,16 @@ contract('LiBA', ([provider, bidder0, bidder1, bidder2]) => {
         celerToken = await ERC20ExampleToken.new();
         borrowToken = await ERC20ExampleToken.new();
         polc = await PoLC.new(celerToken.address, AUCTION_DEPOSIT / 2);
+
+        const libaStruct = await LiBAStruct.new();
+        await LiBAAsker.link('LiBAStruct', libaStruct.address);
+        const libaAsker = await LiBAAsker.new();
+        await LiBABidder.link('LiBAStruct', libaStruct.address);
+        const libaBidder = await LiBABidder.new();
+
+        await LiBA.link('LiBAStruct', libaStruct.address);
+        await LiBA.link('LiBAAsker', libaAsker.address);
+        await LiBA.link('LiBABidder', libaBidder.address);
         liba = await LiBA.new(celerToken.address, polc.address, false);
 
         await polc.setLibaAddress(liba.address);
