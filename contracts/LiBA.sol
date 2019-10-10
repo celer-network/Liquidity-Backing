@@ -2,6 +2,10 @@ pragma solidity ^0.5.0;
 
 import "./lib/IPoLC.sol";
 import "./lib/TokenUtil.sol";
+import "./lib/LiBA/Struct.sol";
+import "./lib/LiBA/Asker.sol";
+import "./lib/LiBA/Bidder.sol";
+import "./lib/LiBA/Util.sol";
 import "openzeppelin-solidity/contracts/math/SafeMath.sol";
 import "openzeppelin-solidity/contracts/token/ERC20/IERC20.sol";
 import "openzeppelin-solidity/contracts/token/ERC20/SafeERC20.sol";
@@ -17,37 +21,8 @@ import "openzeppelin-solidity/contracts/ownership/Ownable.sol";
 contract LiBA is Ownable, Pausable, TokenUtil, PullPayment, WhitelistedRole {
     using SafeERC20 for IERC20;
     using SafeMath for uint;
-
-    struct Bid {
-        bytes32 hash;
-        uint commitmentId;
-        uint rate;
-        uint value;
-        uint celerValue;
-    }
-
-    struct Auction {
-        address payable asker;
-        address tokenAddress;
-        address collateralAddress;
-        uint collateraValue;
-        uint value;
-        uint duration;
-        uint maxRate;
-        uint minValue;
-        bool finalized;
-        address[] bidders;
-        address[] winners;
-        uint challengeDuration;
-        uint finalizeDuration;
-        uint bidEnd;
-        uint revealEnd;
-        uint claimEnd;
-        uint challengeEnd;
-        uint finalizeEnd;
-        uint lendingStart; // The timestamp when lending starts
-        uint feeDeposit;
-    }
+    using LiBABidder for LiBAStruct.Auction;
+    using LiBAAsker for LiBAStruct.Auction;
 
     uint constant private RATE_PRECISION = 100000;
 
@@ -55,8 +30,8 @@ contract LiBA is Ownable, Pausable, TokenUtil, PullPayment, WhitelistedRole {
     uint private auctionCount;
     bool private enableWhitelist;
     IERC20 public celerToken;
-    mapping(uint => Auction) private auctions;
-    mapping(address => mapping(uint => Bid)) public bidsByUser;
+    mapping(uint => LiBAStruct.Auction) private auctions;
+    mapping(address => mapping(uint => LiBAStruct.Bid)) public bidsByUser;
 
     event NewAuction(uint auctionId, address asker);
     event NewBid(uint auctionId, address indexed bidder);
@@ -65,6 +40,7 @@ contract LiBA is Ownable, Pausable, TokenUtil, PullPayment, WhitelistedRole {
     event ClaimWinners(uint indexed auctionId, address[] winners);
     event ChallengeWinners(uint indexed auctionId, address challenger, address[] winners);
     event FinalizeAuction(uint auctionId);
+    event FinalizeBid(uint auctionId, address bidder);
     event RepayAuction(uint auctionId);
     event CollectCollateral(uint auctionId, address winner);
 
@@ -138,11 +114,11 @@ contract LiBA is Ownable, Pausable, TokenUtil, PullPayment, WhitelistedRole {
         validateToken(_collateralAddress, _collateralValue)
     {
         require(supportedTokens[_tokenAddress], "token address must be supported");
-        require(_bidDuration > 0);
-        require(_revealDuration > 0);
-        require(_claimDuration > 0);
-        require(_challengeDuration > 0);
-        require(_finalizeDuration > 0);
+        require(_bidDuration > 0, "bid duration must be larger than zero");
+        require(_revealDuration > 0, "reveal duration must be larger than zero");
+        require(_claimDuration > 0, "claim duration must be larger than zero");
+        require(_challengeDuration > 0, "challenge duration must be larger than zero");
+        require(_finalizeDuration > 0, "finalize duration must be larger than zero");
         require(_value > 0, "value must be larger than zero");
         require(_duration > 0, "duration must be larger than zero");
 
@@ -150,7 +126,7 @@ contract LiBA is Ownable, Pausable, TokenUtil, PullPayment, WhitelistedRole {
             IERC20(_collateralAddress).safeTransferFrom(msg.sender, address(this), _collateralValue);
         }
 
-        Auction storage auction = auctions[auctionCount];
+        LiBAStruct.Auction storage auction = auctions[auctionCount];
         auction.asker = msg.sender;
         auction.tokenAddress = _tokenAddress;
         auction.collateralAddress = _collateralAddress;
@@ -187,10 +163,8 @@ contract LiBA is Ownable, Pausable, TokenUtil, PullPayment, WhitelistedRole {
         external
         whenNotPaused
     {
-        Auction storage auction = auctions[_auctionId];
-        require(block.number <= auction.bidEnd, "must be within bid duration");
-
-        Bid storage bid = bidsByUser[msg.sender][_auctionId];
+        LiBAStruct.Auction storage auction = auctions[_auctionId];
+        LiBAStruct.Bid storage bid = bidsByUser[msg.sender][_auctionId];
 
         if (bid.hash == 0) {
             auction.bidders.push(msg.sender);
@@ -199,10 +173,7 @@ contract LiBA is Ownable, Pausable, TokenUtil, PullPayment, WhitelistedRole {
             emit UpdateBid(_auctionId, msg.sender);
         }
 
-        bid.hash = _hash;
-        bid.celerValue = _celerValue;
-        // Previous celer token will be forfeited if update bid
-        celerToken.safeTransferFrom(msg.sender, address(this), _celerValue);
+        auction.placeBid(bid, celerToken, _hash, _celerValue);
     }
 
     /**
@@ -228,28 +199,10 @@ contract LiBA is Ownable, Pausable, TokenUtil, PullPayment, WhitelistedRole {
         external
         whenNotPaused
     {
-        Auction storage auction = auctions[_auctionId];
-        require(block.number > auction.bidEnd, "must be within reveal duration");
-        require(block.number <= auction.revealEnd, "must be within reveal duration");
-        require(_rate <= auction.maxRate, "rate must be smaller than maxRate");
-        require(_value >= auction.minValue, "value must be larger than minValue");
+        LiBAStruct.Auction storage auction = auctions[_auctionId];
+        LiBAStruct.Bid storage bid = bidsByUser[msg.sender][_auctionId];
 
-        Bid storage bid = bidsByUser[msg.sender][_auctionId];
-        bytes32 hash = keccak256(abi.encodePacked(_rate, _value, _celerValue, _salt));
-        require(hash == bid.hash, "hash must be same as the bid hash");
-
-        uint celerRefund = bid.celerValue.sub(_celerValue);
-        bid.celerValue = _celerValue;
-        if (celerRefund > 0) {
-            celerToken.safeTransfer(msg.sender, celerRefund);
-        }
-
-        bid.commitmentId = _commitmentId;
-        bid.rate = _rate;
-        bid.value = _value;
-        bid.hash = bytes32(0);
-        polc.lendCommitment(msg.sender, _commitmentId, auction.tokenAddress, _value);
-
+        auction.revealBid(bid, polc, celerToken, _rate, _value, _celerValue, _salt, _commitmentId);
         emit RevealBid(_auctionId, msg.sender);
     }
 
@@ -265,12 +218,9 @@ contract LiBA is Ownable, Pausable, TokenUtil, PullPayment, WhitelistedRole {
         external
         whenNotPaused
     {
-        Auction storage auction = auctions[_auctionId];
-        require(block.number > auction.revealEnd, "must be within claim duration");
-        require(block.number <= auction.claimEnd, "must be within claim duration");
-        require(msg.sender == auction.asker, "sender must be the auction asker");
+        LiBAStruct.Auction storage auction = auctions[_auctionId];
 
-        auction.winners = _winners;
+        auction.claimWinners(_winners);
         emit ClaimWinners(_auctionId, _winners);
     }
 
@@ -287,7 +237,7 @@ contract LiBA is Ownable, Pausable, TokenUtil, PullPayment, WhitelistedRole {
         external
         whenNotPaused
     {
-        Auction storage auction = auctions[_auctionId];
+        LiBAStruct.Auction storage auction = auctions[_auctionId];
         require(block.number > auction.claimEnd, "must be within challenge");
         require(block.number <= auction.challengeEnd, "must be within challenge duration");
         require(_validateChallenger(_auctionId, msg.sender), "must be a valid challenger");
@@ -304,48 +254,11 @@ contract LiBA is Ownable, Pausable, TokenUtil, PullPayment, WhitelistedRole {
      * @param _auctionId Id of the auction
      */
     function finalizeAuction(uint _auctionId) external whenNotPaused {
-        Auction storage auction = auctions[_auctionId];
-        require(block.number > auction.challengeEnd,  "must be within finalize duration");
-        require(block.number <= auction.finalizeEnd,  "must be within finalize duration");
-        require(!auction.finalized, "auction must not be finalized");
+        LiBAStruct.Auction storage auction = auctions[_auctionId];
 
-        auction.finalized = true;
-        address[] storage winners = auction.winners;
-        uint value = 0;
-        uint feeDeposit = 0;
-
-        uint i = 0;
-        // calculating the exact auction value from winner bids
-        for (; i < winners.length; i++) {
-            address winner = winners[i];
-            Bid storage winnerBid = bidsByUser[winner][_auctionId];
-            value = value.add(winnerBid.value);
-            feeDeposit = feeDeposit.add(polc.calculateReward(winnerBid.commitmentId));
-
-            if (value > auction.value) {
-                uint repayValue = value.sub(auction.value);
-                _repayCommitment(auction.tokenAddress, winner, winnerBid.commitmentId, repayValue);
-                winnerBid.value = winnerBid.value.sub(repayValue);
-                value = auction.value;
-                break;
-            }
-        }
-
-        // return rest of winners fund
-        for (; i < winners.length; i++) {
-            address winner = winners[i];
-            Bid storage winnerBid = bidsByUser[winner][_auctionId];
-            _repayCommitment(auction.tokenAddress, winner, winnerBid.commitmentId, winnerBid.value);
-            celerToken.safeTransfer(winner, winnerBid.celerValue);
-            winnerBid.celerValue = 0;
-            winnerBid.rate = 0;
-            winnerBid.value = 0;
-        }
-
-        celerToken.safeTransferFrom(msg.sender, address(this), feeDeposit);
-        _transfer(auction.tokenAddress, auction.asker, value);
-        auction.lendingStart = block.timestamp;
-        auction.feeDeposit = feeDeposit;
+        auction.finalizeAuction(bidsByUser, polc, celerToken, _auctionId);
+        celerToken.safeTransferFrom(msg.sender, address(this), auction.feeDeposit);
+        _transfer(auction.tokenAddress, auction.asker, auction.value);
 
         emit FinalizeAuction(_auctionId);
     }
@@ -356,24 +269,11 @@ contract LiBA is Ownable, Pausable, TokenUtil, PullPayment, WhitelistedRole {
      * @param _auctionId Id of the auction
      */
     function finalizeBid(uint _auctionId) external whenNotPaused {
-        bool allowWithdraw = false;
-        Auction storage auction = auctions[_auctionId];
+        LiBAStruct.Auction storage auction = auctions[_auctionId];
+        LiBAStruct.Bid storage bid = bidsByUser[msg.sender][_auctionId];
 
-        if (auction.finalized) {
-            allowWithdraw = !_checkWinner(_auctionId, msg.sender);
-        } else {
-            allowWithdraw = block.number > auction.finalizeEnd;
-        }
-        require(allowWithdraw, "you are not allowed to withdraw currently");
-
-        Bid storage bid = bidsByUser[msg.sender][_auctionId];
-        require(bid.value > 0, "you do not have valid bid");
-
-        _repayCommitment(auction.tokenAddress, msg.sender, bid.commitmentId, bid.value);
-        celerToken.safeTransfer(msg.sender, bid.celerValue);
-        bid.celerValue = 0;
-        bid.rate = 0;
-        bid.value = 0;
+        auction.finalizeBid(bid, celerToken, polc);
+        emit FinalizeBid(_auctionId, msg.sender);
     }
 
     /**
@@ -382,12 +282,11 @@ contract LiBA is Ownable, Pausable, TokenUtil, PullPayment, WhitelistedRole {
      * @param _auctionId Id of the auction
      */
     function repayAuction(uint _auctionId) external payable whenNotPaused {
-        Auction storage auction = auctions[_auctionId];
+        LiBAStruct.Auction storage auction = auctions[_auctionId];
         require(auction.finalized, "auction must be finalized");
         require(msg.sender == auction.asker, "sender must be the auction asker");
         require(block.timestamp <= auction.lendingStart.add(auction.duration.mul(1 days)),  "must be within auction lending duration");
 
-        bool isEth = auction.tokenAddress == address(0);
         IERC20 token = IERC20(auction.tokenAddress);
         uint value = msg.value;
         uint actualDuration = block.timestamp.sub(auction.lendingStart).div(1 days);
@@ -395,12 +294,12 @@ contract LiBA is Ownable, Pausable, TokenUtil, PullPayment, WhitelistedRole {
         address[] storage winners = auction.winners;
         for (uint i = 0; i < winners.length; i++) {
             address winner = winners[i];
-            Bid storage winnerBid = bidsByUser[winner][_auctionId];
+            LiBAStruct.Bid storage winnerBid = bidsByUser[winner][_auctionId];
             uint bidValue = winnerBid.value;
             uint interest = bidValue.mul(winnerBid.rate).mul(actualDuration).div(RATE_PRECISION);
             winnerBid.value = 0;
 
-            if (isEth) {
+            if (auction.tokenAddress == address(0)) {
                 value = value.sub(bidValue).sub(interest);
                 polc.repayCommitment.value(bidValue)(winner, winnerBid.commitmentId, auction.asker, bidValue);
                 _asyncTransfer(winner, interest);
@@ -412,6 +311,7 @@ contract LiBA is Ownable, Pausable, TokenUtil, PullPayment, WhitelistedRole {
 
         if (auction.collateraValue > 0) {
             _transfer(auction.collateralAddress, auction.asker, auction.collateraValue);
+            auction.collateraValue = 0;
         }
 
         uint borrowFee = polc.calculateAuctionFee(auction.tokenAddress, value, actualDuration);
@@ -425,16 +325,10 @@ contract LiBA is Ownable, Pausable, TokenUtil, PullPayment, WhitelistedRole {
      * @param _auctionId Id of the auction
      */
     function collectCollateral(uint _auctionId) external whenNotPaused {
-        Auction storage auction = auctions[_auctionId];
-        require(auction.finalized, "auction must be finalized");
-        require(block.timestamp > auction.lendingStart.add(auction.duration.mul(1 days)),  "must pass auction lending duration");
-        require(_checkWinner(_auctionId, msg.sender), "sender must be a winner");
+        LiBAStruct.Auction storage auction = auctions[_auctionId];
+        LiBAStruct.Bid storage bid = bidsByUser[msg.sender][_auctionId];
 
-        Bid storage winnerBid = bidsByUser[msg.sender][_auctionId];
-        require(winnerBid.value > 0, "bid value must be larger than zero");
-
-        uint collateralReward = auction.collateraValue.mul(winnerBid.value).div(auction.value);
-        winnerBid.value = 0;
+        uint collateralReward = auction.collectCollateral(bid);
         _transfer(auction.collateralAddress, msg.sender, collateralReward);
         emit CollectCollateral(_auctionId, msg.sender);
     }
@@ -459,7 +353,7 @@ contract LiBA is Ownable, Pausable, TokenUtil, PullPayment, WhitelistedRole {
             uint minValue
         )
     {
-        Auction storage auction = auctions[_auctionId];
+        LiBAStruct.Auction storage auction = auctions[_auctionId];
 
         asker = auction.asker;
         tokenAddress = auction.tokenAddress;
@@ -489,7 +383,7 @@ contract LiBA is Ownable, Pausable, TokenUtil, PullPayment, WhitelistedRole {
             bool finalized
         )
     {
-        Auction storage auction = auctions[_auctionId];
+        LiBAStruct.Auction storage auction = auctions[_auctionId];
 
         bidEnd = auction.bidEnd;
         revealEnd = auction.revealEnd;
@@ -508,14 +402,16 @@ contract LiBA is Ownable, Pausable, TokenUtil, PullPayment, WhitelistedRole {
         uint _auctionId,
         address _challenger
     )
-        private
+        internal
         view
         returns(bool)
     {
-        Bid storage challengerBid = bidsByUser[_challenger][_auctionId];
-        require(challengerBid.value > 0, "must be valid bid");
+        LiBAStruct.Bid storage challengerBid = bidsByUser[_challenger][_auctionId];
+        if (challengerBid.value == 0) {
+            return false;
+        }
 
-        Auction storage auction = auctions[_auctionId];
+        LiBAStruct.Auction storage auction = auctions[_auctionId];
         address[] storage winners = auction.winners;
         bool isHigherRank = false;
         bool isWinner = false;
@@ -523,7 +419,7 @@ contract LiBA is Ownable, Pausable, TokenUtil, PullPayment, WhitelistedRole {
 
         for (uint i = 0; i < winners.length; i++) {
             address winner = winners[i];
-            Bid storage winnerBid = bidsByUser[winner][_auctionId];
+            LiBAStruct.Bid storage winnerBid = bidsByUser[winner][_auctionId];
 
             // Too many winners
             if (totalValue >= auction.value && i < winners.length) {
@@ -566,10 +462,10 @@ contract LiBA is Ownable, Pausable, TokenUtil, PullPayment, WhitelistedRole {
      * @param _bid1 A bid
      */
     function _hasHigherRank(
-        Bid storage _bid0,
-        Bid storage _bid1
+        LiBAStruct.Bid storage _bid0,
+        LiBAStruct.Bid storage _bid1
     )
-        private
+        internal
         view
         returns(bool)
     {
@@ -582,55 +478,5 @@ contract LiBA is Ownable, Pausable, TokenUtil, PullPayment, WhitelistedRole {
         }
 
         return _bid0.celerValue > _bid1.celerValue;
-    }
-
-    /**
-     * @notice Check if the bidder is winner
-     * @param _auctionId Id of the auction
-     * @param _bidder a bidder address
-     */
-    function _checkWinner(
-        uint _auctionId,
-        address _bidder
-    )
-        private
-        view
-        returns(bool)
-    {
-        Auction storage auction = auctions[_auctionId];
-        address[] storage winners = auction.winners;
-
-        for (uint i = 0; i < winners.length; i++) {
-            if (winners[i] == _bidder) {
-                return true;
-            }
-        }
-
-        return false;
-    }
-
-    /**
-     * @notice Helper function to repay the fund in commitment
-     * @param _tokenAddress Token address
-     * @param _user Owner of the commitment
-     * @param _commitmentId Commitment ID
-     * @param _value Value to repay
-     */
-    function _repayCommitment(
-        address _tokenAddress,
-        address _user,
-        uint _commitmentId,
-        uint _value
-    )
-        private
-    {
-        bool isEth = _tokenAddress == address(0);
-
-        if (isEth) {
-            polc.repayCommitment.value(_value)(_user, _commitmentId, address(this), _value);
-        } else {
-            IERC20(_tokenAddress).approve(address(polc), _value);
-            polc.repayCommitment(_user, _commitmentId, address(this), _value);
-        }
     }
 }
