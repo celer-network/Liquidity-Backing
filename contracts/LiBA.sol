@@ -2,10 +2,10 @@ pragma solidity ^0.5.0;
 
 import "./lib/IPoLC.sol";
 import "./lib/TokenUtil.sol";
-import "./LiBA/Struct.sol";
-import "./LiBA/Asker.sol";
-import "./LiBA/Bidder.sol";
-import "./LiBA/Util.sol";
+import "./lib/LiBA/Struct.sol";
+import "./lib/LiBA/Asker.sol";
+import "./lib/LiBA/Bidder.sol";
+import "./lib/LiBA/Util.sol";
 import "openzeppelin-solidity/contracts/math/SafeMath.sol";
 import "openzeppelin-solidity/contracts/token/ERC20/IERC20.sol";
 import "openzeppelin-solidity/contracts/token/ERC20/SafeERC20.sol";
