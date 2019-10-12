@@ -23,6 +23,10 @@ library LiBAUtil {
         pure
         returns(bool)
     {
+        if (_topLoser == address(0)) {
+            return false;
+        }
+
         if (_winners.length == _bidders.length) {
             return _winners[_winners.length - 1] == _topLoser;
         }

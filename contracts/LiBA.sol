@@ -37,8 +37,8 @@ contract LiBA is Ownable, Pausable, TokenUtil, PullPayment, WhitelistedRole {
     event NewBid(uint auctionId, address indexed bidder);
     event UpdateBid(uint auctionId, address bidder);
     event RevealBid(uint indexed auctionId, address bidder);
-    event ClaimWinners(uint indexed auctionId, address[] winners);
-    event ChallengeWinners(uint indexed auctionId, address challenger, address[] winners);
+    event ClaimWinners(uint indexed auctionId, address[] winners, address topLoser);
+    event ChallengeWinners(uint indexed auctionId, address challenger, address[] winners, address topLoser);
     event FinalizeAuction(uint auctionId);
     event FinalizeBid(uint auctionId, address bidder);
     event RepayAuction(uint auctionId);
@@ -223,7 +223,7 @@ contract LiBA is Ownable, Pausable, TokenUtil, PullPayment, WhitelistedRole {
         LiBAStruct.Auction storage auction = auctions[_auctionId];
 
         auction.claimWinners(_winners, _topLoser);
-        emit ClaimWinners(_auctionId, _winners);
+        emit ClaimWinners(_auctionId, _winners, _topLoser);
     }
 
     /**
@@ -251,7 +251,7 @@ contract LiBA is Ownable, Pausable, TokenUtil, PullPayment, WhitelistedRole {
         auction.challengeEnd = auction.challengeEnd.add(auction.challengeDuration);
         auction.finalizeEnd = auction.challengeEnd.add(auction.finalizeDuration);
 
-        emit ChallengeWinners(_auctionId, msg.sender, _winners);
+        emit ChallengeWinners(_auctionId, msg.sender, _winners, _topLoser);
     }
 
     /**
@@ -294,16 +294,22 @@ contract LiBA is Ownable, Pausable, TokenUtil, PullPayment, WhitelistedRole {
 
         IERC20 token = IERC20(auction.tokenAddress);
         uint value = msg.value;
+        uint totalCelerValue = 0;
         uint actualDuration = block.timestamp.sub(auction.lendingStart).div(1 days);
         LiBAStruct.Bid storage topLoserBid = bidsByUser[auction.topLoser][_auctionId];
-
         address[] storage winners = auction.winners;
+
         for (uint i = 0; i < winners.length; i++) {
             address winner = winners[i];
             LiBAStruct.Bid storage winnerBid = bidsByUser[winner][_auctionId];
             uint bidValue = winnerBid.value;
+            if (bidValue == 0) {
+                break;
+            }
+
             uint interest = bidValue.mul(topLoserBid.rate).mul(actualDuration).div(RATE_PRECISION);
             winnerBid.value = 0;
+            totalCelerValue = totalCelerValue.add(winnerBid.celerValue);
 
             if (auction.tokenAddress == address(0)) {
                 value = value.sub(bidValue).sub(interest);
@@ -320,7 +326,8 @@ contract LiBA is Ownable, Pausable, TokenUtil, PullPayment, WhitelistedRole {
             auction.collateraValue = 0;
         }
 
-        uint borrowFee = polc.calculateAuctionFee(auction.tokenAddress, value, actualDuration);
+        uint borrowFee = polc.calculateAuctionFee(auction.tokenAddress, auction.value, actualDuration);
+        borrowFee = borrowFee.sub(totalCelerValue);
         celerToken.safeTransfer(auction.asker, auction.feeDeposit);
         celerToken.safeTransferFrom(auction.asker, address(polc), borrowFee);
         emit RepayAuction(_auctionId);
