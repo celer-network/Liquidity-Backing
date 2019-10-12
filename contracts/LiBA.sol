@@ -297,10 +297,9 @@ contract LiBA is Ownable, Pausable, TokenUtil, PullPayment, WhitelistedRole {
         uint totalCelerValue = 0;
         uint actualDuration = block.timestamp.sub(auction.lendingStart).div(1 days);
         LiBAStruct.Bid storage topLoserBid = bidsByUser[auction.topLoser][_auctionId];
-        address[] storage winners = auction.winners;
 
-        for (uint i = 0; i < winners.length; i++) {
-            address winner = winners[i];
+        for (uint i = 0; i < auction.winners.length; i++) {
+            address winner = auction.winners[i];
             LiBAStruct.Bid storage winnerBid = bidsByUser[winner][_auctionId];
             uint bidValue = winnerBid.value;
             if (bidValue == 0) {
