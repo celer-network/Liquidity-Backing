@@ -395,7 +395,7 @@ contract('LiBA', ([provider, bidder0, bidder1, bidder2]) => {
     });
 
     it('should repay auction successfully', async () => {
-        const value = BID1.value + (BID1.value * BID1.rate) / 100;
+        const value = BID1.value + (BID1.value * BID0.rate) / 100;
         const receipt = await liba.repayAuction(auctionId, { value });
         const { event, args } = receipt.logs[0];
         assert.equal(event, 'RepayAuction');
