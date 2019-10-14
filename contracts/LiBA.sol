@@ -90,6 +90,7 @@ contract LiBA is Ownable, Pausable, TokenUtil, PullPayment, WhitelistedRole {
      * @param _duration Duration for the lending
      * @param _maxRate Maximum rate accepted
      * @param _minValue Minimum value accepted
+     * @param _minCelerValue Minimum celer value when bidding
      * @param _collateralAddress Collateral token address
      * @param _collateralValue Collateral value
      */
@@ -104,6 +105,7 @@ contract LiBA is Ownable, Pausable, TokenUtil, PullPayment, WhitelistedRole {
         uint _duration,
         uint _maxRate,
         uint _minValue,
+        uint _minCelerValue,
         address _collateralAddress,
         uint _collateralValue
     )
@@ -137,6 +139,7 @@ contract LiBA is Ownable, Pausable, TokenUtil, PullPayment, WhitelistedRole {
         auction.duration = _duration;
         auction.maxRate = _maxRate;
         auction.minValue = _minValue;
+        auction.minCelerValue = _minCelerValue;
         auction.bidEnd = block.number.add(_bidDuration);
         auction.revealEnd = auction.bidEnd.add(_revealDuration);
         auction.claimEnd = auction.revealEnd.add(_claimDuration);
