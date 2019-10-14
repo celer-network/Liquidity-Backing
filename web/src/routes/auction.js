@@ -148,14 +148,16 @@ class Auction extends React.Component {
 
     claimWinners = () => {
         const { auctionId } = this.state;
-        const winners = this.getWinners();
+        const { winners, topLoser } = this.getWinners();
 
-        this.contracts.LiBA.methods.claimWinners(auctionId, winners).send();
+        this.contracts.LiBA.methods
+            .claimWinners(auctionId, winners, topLoser)
+            .send();
     };
 
     challengeWinners = () => {
         const { auctionId, winners } = this.state;
-        const calculatedWinners = this.getWinners();
+        const { winners: calculatedWinners, topLoser } = this.getWinners();
 
         if (_.isEqual(winners, calculatedWinners)) {
             notification.error({
@@ -165,7 +167,7 @@ class Auction extends React.Component {
         }
 
         this.contracts.LiBA.methods
-            .challengeWinners(auctionId, calculatedWinners)
+            .challengeWinners(auctionId, calculatedWinners, topLoser)
             .send();
     };
 

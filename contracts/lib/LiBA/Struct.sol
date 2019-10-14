@@ -21,6 +21,7 @@ library LiBAStruct {
         bool finalized;
         address[] bidders;
         address[] winners;
+        address topLoser;
         uint challengeDuration;
         uint finalizeDuration;
         uint bidEnd;

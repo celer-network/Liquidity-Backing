@@ -55,7 +55,8 @@ export const getCurrentPeriod = (network, auction, auctionPeriods) => {
 };
 
 export const getWinners = (auction, bids) => {
-    const result = [];
+    const winners = [];
+    let topLoser;
     let remainingValue = auction.value.value;
     bids.sort(compareBid);
 
@@ -63,15 +64,20 @@ export const getWinners = (auction, bids) => {
         const [bidder] = bid.args;
         const { value } = bid.value;
 
-        remainingValue -= value;
-        result.push(bidder);
-
         if (remainingValue < 0) {
+            topLoser = bidder;
             return false;
         }
+
+        remainingValue -= value;
+        winners.push(bidder);
     });
 
-    return result;
+    if (!topLoser) {
+        topLoser = _.last(winners);
+    }
+
+    return { winners, topLoser };
 };
 
 export const calculateRepay = (bids, winners) => {

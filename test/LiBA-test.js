@@ -291,7 +291,9 @@ contract('LiBA', ([provider, bidder0, bidder1, bidder2]) => {
 
     it('should fail to claim winner for wrong asker', async () => {
         try {
-            await liba.claimWinners(auctionId, [bidder0], { from: bidder0 });
+            await liba.claimWinners(auctionId, [bidder0], bidder1, {
+                from: bidder0
+            });
         } catch (e) {
             assert.isAbove(
                 e.message.search('sender must be the auction asker'),
@@ -304,7 +306,7 @@ contract('LiBA', ([provider, bidder0, bidder1, bidder2]) => {
     });
 
     it('should claim winner successfully', async () => {
-        const receipt = await liba.claimWinners(auctionId, [bidder0], {
+        const receipt = await liba.claimWinners(auctionId, [bidder0], bidder1, {
             from: provider
         });
         const { event, args } = receipt.logs[0];
@@ -314,7 +316,9 @@ contract('LiBA', ([provider, bidder0, bidder1, bidder2]) => {
 
     it('should fail to claim winner for passing claim duration', async () => {
         try {
-            await liba.claimWinners(auctionId, [bidder0], { from: provider });
+            await liba.claimWinners(auctionId, [bidder0], bidder1, {
+                from: provider
+            });
         } catch (e) {
             assert.isAbove(
                 e.message.search('must be within claim duration'),
@@ -327,9 +331,14 @@ contract('LiBA', ([provider, bidder0, bidder1, bidder2]) => {
     });
 
     it('should challenge winner successfully', async () => {
-        const receipt = await liba.challengeWinners(auctionId, [bidder1], {
-            from: bidder1
-        });
+        const receipt = await liba.challengeWinners(
+            auctionId,
+            [bidder1],
+            bidder0,
+            {
+                from: bidder1
+            }
+        );
         const { event, args } = receipt.logs[0];
         assert.equal(event, 'ChallengeWinners');
         assert.deepEqual(args.challenger, bidder1);
@@ -338,7 +347,7 @@ contract('LiBA', ([provider, bidder0, bidder1, bidder2]) => {
 
     it('should fail to challenge winner for invalid challenger', async () => {
         try {
-            await liba.challengeWinners(auctionId, [bidder0], {
+            await liba.challengeWinners(auctionId, [bidder0], bidder1, {
                 from: bidder0
             });
         } catch (e) {
@@ -367,7 +376,7 @@ contract('LiBA', ([provider, bidder0, bidder1, bidder2]) => {
 
     it('should fail to challenge winner for passing challenge duration', async () => {
         try {
-            await liba.challengeWinners(auctionId, [bidder1], {
+            await liba.challengeWinners(auctionId, [bidder1], bidder0, {
                 from: bidder1
             });
         } catch (e) {
@@ -386,7 +395,7 @@ contract('LiBA', ([provider, bidder0, bidder1, bidder2]) => {
     });
 
     it('should repay auction successfully', async () => {
-        const value = BID1.value + (BID1.value * BID1.rate) / 100;
+        const value = BID1.value + (BID1.value * BID0.rate) / 100;
         const receipt = await liba.repayAuction(auctionId, { value });
         const { event, args } = receipt.logs[0];
         assert.equal(event, 'RepayAuction');
@@ -428,7 +437,7 @@ contract('LiBA', ([provider, bidder0, bidder1, bidder2]) => {
         await placeBid(BID1, bidder2, 'NewBid');
         await revealBid(BID1, bidder2);
         await revealBid(BID0, bidder1);
-        await liba.claimWinners(auctionId, [bidder2]);
+        await liba.claimWinners(auctionId, [bidder2], bidder1);
         await borrowToken.approve(liba.address, 10000);
         await liba.finalizeAuction(auctionId);
         const balance = await borrowToken.balanceOf(provider);
@@ -463,7 +472,7 @@ contract('LiBA', ([provider, bidder0, bidder1, bidder2]) => {
         await placeBid(BID0, bidder1, 'NewBid');
         await commitFund(BID0, bidder1);
         await revealBid(BID0, bidder1);
-        await liba.claimWinners(auctionId, [bidder1]);
+        await liba.claimWinners(auctionId, [bidder1], bidder1);
         await borrowToken.approve(liba.address, 10000);
         await liba.finalizeAuction(auctionId);
 
