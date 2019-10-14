@@ -29,7 +29,6 @@ library LiBABidder {
         external
     {
         require(block.number <= _auction.bidEnd, "must be within bid duration");
-        require(_celerValue >= _auction.minCelerValue, "celer value must be larger or equal than min celer value");
 
         _bid.hash = _hash;
         _bid.celerValue = _celerValue;

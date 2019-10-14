@@ -127,7 +127,7 @@ contract('LiBA', ([provider, bidder0, bidder1, bidder2]) => {
         await LiBA.link('LiBAStruct', libaStruct.address);
         await LiBA.link('LiBAAsker', libaAsker.address);
         await LiBA.link('LiBABidder', libaBidder.address);
-        liba = await LiBA.new(celerToken.address, polc.address, false);
+        liba = await LiBA.new(celerToken.address, polc.address, false, 10);
 
         await polc.setLibaAddress(liba.address);
         await liba.updateSupportedToken(borrowToken.address, true);
@@ -531,7 +531,7 @@ contract('LiBA', ([provider, bidder0, bidder1, bidder2]) => {
     });
 
     it('should fail to init auction for missing from whitelist', async () => {
-        liba = await LiBA.new(celerToken.address, polc.address, true);
+        liba = await LiBA.new(celerToken.address, polc.address, true, 10);
         await celerToken.approve(liba.address, AUCTION_DEPOSIT);
 
         try {

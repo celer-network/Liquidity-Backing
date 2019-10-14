@@ -29,6 +29,7 @@ contract LiBA is Ownable, Pausable, TokenUtil, PullPayment, WhitelistedRole {
     IPoLC private polc;
     uint private auctionCount;
     bool private enableWhitelist;
+    uint public minCelerValue; // Minimum celer value required when bidding
     IERC20 public celerToken;
     mapping(uint => LiBAStruct.Auction) private auctions;
     mapping(address => mapping(uint => LiBAStruct.Bid)) public bidsByUser;
@@ -47,13 +48,15 @@ contract LiBA is Ownable, Pausable, TokenUtil, PullPayment, WhitelistedRole {
     constructor(
         address _celerTokenAddress,
         address _polcAddress,
-        bool _enableWhitelist
+        bool _enableWhitelist,
+        uint _minCelerValue
     )
         public
     {
         celerToken = IERC20(_celerTokenAddress);
         polc = IPoLC(_polcAddress);
         enableWhitelist = _enableWhitelist;
+        minCelerValue = _minCelerValue;
 
         // Enable eth support by default
         supportedTokens[address(0)] = true;
@@ -90,7 +93,6 @@ contract LiBA is Ownable, Pausable, TokenUtil, PullPayment, WhitelistedRole {
      * @param _duration Duration for the lending
      * @param _maxRate Maximum rate accepted
      * @param _minValue Minimum value accepted
-     * @param _minCelerValue Minimum celer value when bidding
      * @param _collateralAddress Collateral token address
      * @param _collateralValue Collateral value
      */
@@ -105,7 +107,6 @@ contract LiBA is Ownable, Pausable, TokenUtil, PullPayment, WhitelistedRole {
         uint _duration,
         uint _maxRate,
         uint _minValue,
-        uint _minCelerValue,
         address _collateralAddress,
         uint _collateralValue
     )
@@ -139,7 +140,6 @@ contract LiBA is Ownable, Pausable, TokenUtil, PullPayment, WhitelistedRole {
         auction.duration = _duration;
         auction.maxRate = _maxRate;
         auction.minValue = _minValue;
-        auction.minCelerValue = _minCelerValue;
         auction.bidEnd = block.number.add(_bidDuration);
         auction.revealEnd = auction.bidEnd.add(_revealDuration);
         auction.claimEnd = auction.revealEnd.add(_claimDuration);
@@ -166,6 +166,8 @@ contract LiBA is Ownable, Pausable, TokenUtil, PullPayment, WhitelistedRole {
         external
         whenNotPaused
     {
+        require(_celerValue >= minCelerValue, "celer value must be larger or equal than min celer value");
+
         LiBAStruct.Auction storage auction = auctions[_auctionId];
         LiBAStruct.Bid storage bid = bidsByUser[msg.sender][_auctionId];
 

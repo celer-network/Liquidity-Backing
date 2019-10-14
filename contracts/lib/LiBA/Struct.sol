@@ -18,7 +18,6 @@ library LiBAStruct {
         uint duration;
         uint maxRate;
         uint minValue;
-        uint minCelerValue;
         bool finalized;
         address[] bidders;
         address[] winners;
