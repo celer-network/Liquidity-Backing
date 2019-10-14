@@ -42,7 +42,8 @@ module.exports = function(deployer, network, accounts) {
                 LiBA,
                 ERC20ExampleToken.address,
                 PoLC.address,
-                false
+                false,
+                10
             );
         })
         .then(() => {
