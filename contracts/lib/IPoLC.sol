@@ -1,4 +1,4 @@
-pragma solidity ^0.5.0;
+pragma solidity ^0.5.8;
 
 contract IPoLC {
     function calculateAuctionFee(address _tokenAddress, uint _value, uint _duration) external view returns (uint);
