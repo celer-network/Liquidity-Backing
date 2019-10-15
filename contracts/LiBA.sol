@@ -356,6 +356,19 @@ contract LiBA is Ownable, Pausable, TokenUtil, PullPayment, WhitelistedRole {
     }
 
     /**
+     * @notice Transfer defaulted auction deposit fee to polc reward pool
+     * @param _auctionId Id of the auction
+     */
+    function transferFeeDeposit(uint _auctionId) external {
+        LiBAStruct.Auction storage auction = auctions[_auctionId];
+        require(block.timestamp > auction.lendingStart.add(auction.duration.mul(1 days)),  "must pass auction lending duration");
+        require(auction.feeDeposit > 0,  "must have positive fee deposit");
+
+        celerToken.safeTransfer(address(polc), auction.feeDeposit);
+        auction.feeDeposit = 0;
+    }
+
+    /**
      * @notice Get auction info
      * @param _auctionId Id of the auction
      */
