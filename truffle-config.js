@@ -16,7 +16,12 @@ const ropstenProvider = process.env.SOLIDITY_COVERAGE
     : infuraProvider('ropsten');
 
 module.exports = {
-    'contracts_build_directory': './web/src/contracts',
+    compilers: {
+        solc: {
+            version: '0.5.1'
+        }
+    },
+    contracts_build_directory: './web/src/contracts',
     networks: {
         development: {
             host: 'localhost',

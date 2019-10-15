@@ -1,4 +1,4 @@
-pragma solidity ^0.5.8;
+pragma solidity ^0.5.1;
 
 import "./lib/IPoLC.sol";
 import "./lib/TokenUtil.sol";
