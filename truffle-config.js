@@ -18,7 +18,7 @@ const ropstenProvider = process.env.SOLIDITY_COVERAGE
 module.exports = {
     compilers: {
         solc: {
-            version: '0.5.1'
+            version: '0.5.12'
         }
     },
     contracts_build_directory: './web/src/contracts',
