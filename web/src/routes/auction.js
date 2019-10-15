@@ -166,8 +166,15 @@ class Auction extends React.Component {
             return;
         }
 
+        const challenger = _.difference(calculatedWinners, winners)[0];
+
         this.contracts.LiBA.methods
-            .challengeWinners(auctionId, calculatedWinners, topLoser)
+            .challengeWinners(
+                auctionId,
+                challenger,
+                calculatedWinners,
+                topLoser
+            )
             .send();
     };
 
