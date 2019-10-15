@@ -1,4 +1,4 @@
-pragma solidity ^0.5.0;
+pragma solidity ^0.5.1;
 
 library LiBAStruct {
     struct Bid {

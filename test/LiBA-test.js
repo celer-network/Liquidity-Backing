@@ -333,6 +333,7 @@ contract('LiBA', ([provider, bidder0, bidder1, bidder2]) => {
     it('should challenge winner successfully', async () => {
         const receipt = await liba.challengeWinners(
             auctionId,
+            bidder1,
             [bidder1],
             bidder0,
             {
@@ -347,9 +348,15 @@ contract('LiBA', ([provider, bidder0, bidder1, bidder2]) => {
 
     it('should fail to challenge winner for invalid challenger', async () => {
         try {
-            await liba.challengeWinners(auctionId, [bidder0], bidder1, {
-                from: bidder0
-            });
+            await liba.challengeWinners(
+                auctionId,
+                bidder1,
+                [bidder0],
+                bidder1,
+                {
+                    from: bidder0
+                }
+            );
         } catch (e) {
             assert.isAbove(e.message.search('must be a valid challenger'), -1);
             return;
@@ -376,9 +383,15 @@ contract('LiBA', ([provider, bidder0, bidder1, bidder2]) => {
 
     it('should fail to challenge winner for passing challenge duration', async () => {
         try {
-            await liba.challengeWinners(auctionId, [bidder1], bidder0, {
-                from: bidder1
-            });
+            await liba.challengeWinners(
+                auctionId,
+                bidder1,
+                [bidder1],
+                bidder0,
+                {
+                    from: bidder1
+                }
+            );
         } catch (e) {
             assert.isAbove(e.message.search('must be within challenge'), -1);
             return;

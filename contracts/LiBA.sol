@@ -1,4 +1,4 @@
-pragma solidity ^0.5.0;
+pragma solidity ^0.5.1;
 
 import "./lib/IPoLC.sol";
 import "./lib/TokenUtil.sol";
@@ -235,11 +235,13 @@ contract LiBA is Ownable, Pausable, TokenUtil, PullPayment, WhitelistedRole {
      * @notice A potential winner, who is not claimed as one of the winners,
      * is able to challenge the auction during the challenge period
      * @param _auctionId Id of the auction
+     * @param _challenger Address for challenger, who may have higher score than current winners
      * @param _winners A list of winner addresses
      * @param _topLoser The loser who has the highest rank
      */
     function challengeWinners(
         uint _auctionId,
+        address _challenger,
         address[] calldata _winners,
         address _topLoser
     )
@@ -249,14 +251,14 @@ contract LiBA is Ownable, Pausable, TokenUtil, PullPayment, WhitelistedRole {
         LiBAStruct.Auction storage auction = auctions[_auctionId];
         require(block.number > auction.claimEnd, "must be within challenge");
         require(block.number <= auction.challengeEnd, "must be within challenge duration");
-        require(_validateChallenger(_auctionId, msg.sender), "must be a valid challenger");
+        require(_validateChallenger(_auctionId, _challenger), "must be a valid challenger");
         require(LiBAUtil._validateTopLoser(auction.bidders ,_winners, _topLoser), "invalid top loser");
 
         auction.winners = _winners;
         auction.challengeEnd = auction.challengeEnd.add(auction.challengeDuration);
         auction.finalizeEnd = auction.challengeEnd.add(auction.finalizeDuration);
 
-        emit ChallengeWinners(_auctionId, msg.sender, _winners, _topLoser);
+        emit ChallengeWinners(_auctionId, _challenger, _winners, _topLoser);
     }
 
     /**
