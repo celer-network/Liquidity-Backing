@@ -21,7 +21,7 @@ const BID_DURATION = 8;
 const REVEAL_DURATION = 9;
 const CLAIM_DURATION = 2;
 const CHALLENGE_DURATION = 2;
-const FINALIZE_DURATION = 2;
+const FINALIZE_DURATION = 4;
 const VALUE = 100;
 const DURATION = 2;
 const MAX_RATE = 10;
@@ -77,7 +77,7 @@ contract('LiBA', ([provider, bidder0, bidder1, bidder2]) => {
 
     const commitFund = async (bid, bidder, tokenAddress = EMPTY_ADDRESS) => {
         const isEmptyAddress = tokenAddress === EMPTY_ADDRESS;
-        const receipt = await polc.commitFund(tokenAddress, 100, bid.value, {
+        const receipt = await polc.commitFund(tokenAddress, 1, bid.value, {
             value: isEmptyAddress ? bid.value : 0,
             from: bidder
         });
@@ -139,7 +139,6 @@ contract('LiBA', ([provider, bidder0, bidder1, bidder2]) => {
     });
 
     it('should init auction successfully', async () => {
-        await celerToken.approve(liba.address, AUCTION_DEPOSIT);
         await borrowToken.approve(liba.address, VALUE);
         const receipt = await liba.initAuction(
             EMPTY_ADDRESS,
@@ -372,7 +371,7 @@ contract('LiBA', ([provider, bidder0, bidder1, bidder2]) => {
             });
         } catch (e) {
             assert.isAbove(
-                e.message.search('must be within finalize duration'),
+                e.message.search('must be after challenge duration'),
                 -1
             );
             return;
@@ -401,6 +400,7 @@ contract('LiBA', ([provider, bidder0, bidder1, bidder2]) => {
     });
 
     it('should finalize auction successfully', async () => {
+        await celerToken.approve(liba.address, AUCTION_DEPOSIT);
         const receipt = await liba.finalizeAuction(auctionId);
         const { event, args } = receipt.logs[0];
         assert.equal(event, 'FinalizeAuction');
@@ -541,6 +541,13 @@ contract('LiBA', ([provider, bidder0, bidder1, bidder2]) => {
         }
 
         assert.fail('should have thrown before');
+    });
+
+    it('should transfer feeDeposit successfully', async () => {
+        const receipt = await liba.transferFeeDeposit(auctionId);
+        const { event, args } = receipt.logs[0];
+        assert.equal(event, 'TransferFeeDeposit');
+        assert.equal(args.auctionId, auctionId);
     });
 
     it('should fail to init auction for missing from whitelist', async () => {

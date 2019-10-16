@@ -24,7 +24,7 @@ library LiBAAsker {
     )
         external
     {
-        require(block.number > _auction.revealEnd, "must be within claim duration");
+        require(block.number > _auction.revealEnd, "must be after reveal duration");
         require(block.number <= _auction.claimEnd, "must be within claim duration");
         require(msg.sender == _auction.asker, "sender must be the auction asker");
         require(LiBAUtil._validateTopLoser(_auction.bidders ,_winners, _topLoser), "invalid top loser");
@@ -50,7 +50,7 @@ library LiBAAsker {
     )
         external
     {
-        require(block.number > _auction.challengeEnd,  "must be within finalize duration");
+        require(block.number > _auction.challengeEnd,  "must be after challenge duration");
         require(block.number <= _auction.finalizeEnd,  "must be within finalize duration");
         require(!_auction.finalized, "auction must not be finalized");
 
@@ -66,7 +66,7 @@ library LiBAAsker {
             address winner = winners[i];
             LiBAStruct.Bid storage winnerBid = _bidsByUser[winner][_auctionId];
             value = value.add(winnerBid.value);
-            feeDeposit = feeDeposit.add(_polc.calculateReward(winnerBid.commitmentId));
+            feeDeposit = feeDeposit.add(_polc.calculateReward(winner, winnerBid.commitmentId));
 
             if (winnerBid.rate < topLoserBid.rate) {
                 _celerToken.safeTransfer(winner, winnerBid.celerValue);
