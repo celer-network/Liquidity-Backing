@@ -44,6 +44,7 @@ contract LiBA is Ownable, Pausable, TokenUtil, PullPayment, WhitelistedRole {
     event FinalizeBid(uint auctionId, address bidder);
     event RepayAuction(uint auctionId);
     event CollectCollateral(uint auctionId, address winner);
+    event TransferFeeDeposit(uint auctionId);
 
     constructor(
         address _celerTokenAddress,
@@ -249,7 +250,7 @@ contract LiBA is Ownable, Pausable, TokenUtil, PullPayment, WhitelistedRole {
         whenNotPaused
     {
         LiBAStruct.Auction storage auction = auctions[_auctionId];
-        require(block.number > auction.claimEnd, "must be within challenge");
+        require(block.number > auction.claimEnd, "must be after claim duration");
         require(block.number <= auction.challengeEnd, "must be within challenge duration");
         require(_validateChallenger(_auctionId, _challenger), "must be a valid challenger");
         require(LiBAUtil._validateTopLoser(auction.bidders ,_winners, _topLoser), "invalid top loser");
@@ -366,6 +367,7 @@ contract LiBA is Ownable, Pausable, TokenUtil, PullPayment, WhitelistedRole {
 
         celerToken.safeTransfer(address(polc), auction.feeDeposit);
         auction.feeDeposit = 0;
+        emit TransferFeeDeposit(_auctionId);
     }
 
     /**

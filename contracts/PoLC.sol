@@ -163,7 +163,7 @@ contract PoLC is Ownable, Pausable, IPoLC, TokenUtil {
         require(commitment.locked, "commiment must be locked to get reward");
         require(!commitment.rewardWithdrawn, "commiment reward has been withdrawn");
 
-        uint totalReward = calculateReward(_commitmentId);
+        uint totalReward = calculateReward(msg.sender, _commitmentId);
         commitment.rewardWithdrawn = true;
         celerToken.safeTransfer(msg.sender, totalReward);
         emit WithdrawReward(_commitmentId);
@@ -266,15 +266,17 @@ contract PoLC is Ownable, Pausable, IPoLC, TokenUtil {
 
     /**
      * @notice Calculate reward for a commitment
+     * @param _user User address
      * @param _commitmentId ID of the commitment
      */
     function calculateReward(
+        address _user,
         uint _commitmentId
     )
         public
         returns (uint)
     {
-        Commitment storage commitment = commitmentsByUser[msg.sender][_commitmentId];
+        Commitment storage commitment = commitmentsByUser[_user][_commitmentId];
         uint totalReward = 0;
         uint power = commitment.committedValue.mul(
             commitment.lockEnd.sub(commitment.lockStart)
