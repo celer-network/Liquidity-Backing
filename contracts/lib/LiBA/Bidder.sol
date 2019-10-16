@@ -62,7 +62,7 @@ library LiBABidder {
     )
         external
     {
-        require(block.number > _auction.bidEnd, "must be within reveal duration");
+        require(block.number > _auction.bidEnd, "must be after bid duration");
         require(block.number <= _auction.revealEnd, "must be within reveal duration");
         require(_rate <= _auction.maxRate, "rate must be smaller than maxRate");
         require(_value >= _auction.minValue, "value must be larger than minValue");

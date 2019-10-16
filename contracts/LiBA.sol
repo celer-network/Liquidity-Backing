@@ -44,6 +44,7 @@ contract LiBA is Ownable, Pausable, TokenUtil, PullPayment, WhitelistedRole {
     event FinalizeBid(uint auctionId, address bidder);
     event RepayAuction(uint auctionId);
     event CollectCollateral(uint auctionId, address winner);
+    event TransferFeeDeposit(uint auctionId);
 
     constructor(
         address _celerTokenAddress,
@@ -249,7 +250,7 @@ contract LiBA is Ownable, Pausable, TokenUtil, PullPayment, WhitelistedRole {
         whenNotPaused
     {
         LiBAStruct.Auction storage auction = auctions[_auctionId];
-        require(block.number > auction.claimEnd, "must be within challenge");
+        require(block.number > auction.claimEnd, "must be after claim duration");
         require(block.number <= auction.challengeEnd, "must be within challenge duration");
         require(_validateChallenger(_auctionId, _challenger), "must be a valid challenger");
         require(LiBAUtil._validateTopLoser(auction.bidders ,_winners, _topLoser), "invalid top loser");
@@ -333,6 +334,7 @@ contract LiBA is Ownable, Pausable, TokenUtil, PullPayment, WhitelistedRole {
         }
 
         celerToken.safeTransfer(auction.asker, auction.feeDeposit);
+        auction.feeDeposit = 0;
         uint borrowFee = polc.calculateAuctionFee(auction.tokenAddress, auction.value, actualDuration);
         if (totalCelerValue < borrowFee){
             borrowFee = borrowFee.sub(totalCelerValue);
@@ -353,6 +355,20 @@ contract LiBA is Ownable, Pausable, TokenUtil, PullPayment, WhitelistedRole {
         uint collateralReward = auction.collectCollateral(bid);
         _transfer(auction.collateralAddress, msg.sender, collateralReward);
         emit CollectCollateral(_auctionId, msg.sender);
+    }
+
+    /**
+     * @notice Transfer defaulted auction deposit fee to polc reward pool
+     * @param _auctionId Id of the auction
+     */
+    function transferFeeDeposit(uint _auctionId) external {
+        LiBAStruct.Auction storage auction = auctions[_auctionId];
+        require(block.timestamp > auction.lendingStart.add(auction.duration.mul(1 days)),  "must pass auction lending duration");
+        require(auction.feeDeposit > 0,  "must have positive fee deposit");
+
+        celerToken.safeTransfer(address(polc), auction.feeDeposit);
+        auction.feeDeposit = 0;
+        emit TransferFeeDeposit(_auctionId);
     }
 
     /**
