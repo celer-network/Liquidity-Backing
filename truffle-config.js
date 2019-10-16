@@ -2,13 +2,11 @@ require('dotenv').config();
 
 const HDWalletProvider = require('truffle-hdwallet-provider');
 
-const providerWithMnemonic = (mnemonic, rpcEndpoint) =>
-    new HDWalletProvider(mnemonic, rpcEndpoint);
-
 const infuraProvider = network =>
-    providerWithMnemonic(
-        process.env.MNEMONIC || 'test',
-        `https://${network}.infura.io/${process.env.INFURA_API_KEY}`
+    new HDWalletProvider(
+        process.env.PRIVATEKEY ||
+            '0x4f3edf983ac636a65a842ce7c78d9aa706d3b113bce9c46f30d7d21715b23b1d',
+        `https://${network}.infura.io/v3/ce581be62b43483b8627f4f9f2ad40d6`
     );
 
 const ropstenProvider = process.env.SOLIDITY_COVERAGE
