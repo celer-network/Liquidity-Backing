@@ -334,6 +334,7 @@ contract LiBA is Ownable, Pausable, TokenUtil, PullPayment, WhitelistedRole {
         }
 
         celerToken.safeTransfer(auction.asker, auction.feeDeposit);
+        auction.feeDeposit = 0;
         uint borrowFee = polc.calculateAuctionFee(auction.tokenAddress, auction.value, actualDuration);
         if (totalCelerValue < borrowFee){
             borrowFee = borrowFee.sub(totalCelerValue);
