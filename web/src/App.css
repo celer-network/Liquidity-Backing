@@ -29,3 +29,8 @@
 .ant-input-number {
     width: 315px;
 }
+
+.dropdown-filter {
+  display: inline-block !important;
+  line-height: 2.5;
+}

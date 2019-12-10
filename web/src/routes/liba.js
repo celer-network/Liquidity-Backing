@@ -5,9 +5,10 @@ import { drizzleConnect } from 'drizzle-react';
 import { Link } from 'dva/router';
 import { Button, Card, List, Statistic, Row, Col, Icon } from 'antd';
 
+import Filter from '../components/filter';
 import AuctionForm from '../components/liba/auction-form';
 import { getUnitByAddress, formatCurrencyValue } from '../utils/unit';
-import { getAuctionPeriod, getCurrentPeriod } from '../utils/liba';
+import { getAuctionPeriod, getCurrentPeriod, ALL_PERIODS } from '../utils/liba';
 
 const tabList = [
     {
@@ -86,6 +87,13 @@ class LiBA extends React.Component {
             </List.Item>
         );
     };
+    
+    renderFilters = () => {
+        // const { LiBA } = this.props;
+        const periodOptions = ALL_PERIODS.map(period => [period, period]);
+
+        return (<Filter name="period" options={periodOptions} />)
+    }
 
     renderAuctions = () => {
         const { accounts, LiBA } = this.props;
@@ -131,6 +139,7 @@ class LiBA extends React.Component {
                     </Button>
                 }
             >
+                {this.renderFilters()}
                 {this.renderAuctions()}
                 <AuctionForm
                     network={network}
