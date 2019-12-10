@@ -358,8 +358,7 @@ class Auction extends React.Component {
         
         const action = currentPeriod.toLowerCase()
         const blockLeft = auctionPeriod.value[action + 'End'] - blockNumber;
-        console.log(auctionPeriod[action + 'End'])
-        
+
         return (
             <>
                 <Steps size="small" current={currentStep}>
