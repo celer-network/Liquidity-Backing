@@ -7,7 +7,7 @@ import { Button, Card, List, Statistic, Row, Col, Icon } from 'antd';
 
 import AuctionForm from '../components/liba/auction-form';
 import { getUnitByAddress, formatCurrencyValue } from '../utils/unit';
-import { getCurrentPeriod } from '../utils/liba';
+import { getAuctionPeriod, getCurrentPeriod } from '../utils/liba';
 
 const tabList = [
     {
@@ -64,9 +64,8 @@ class LiBA extends React.Component {
                             <Statistic
                                 title="Period"
                                 value={getCurrentPeriod(
-                                    network,
-                                    auction,
-                                    LiBA.getAuctionPeriod
+                                    getAuctionPeriod(LiBA.getAuctionPeriod, auction),
+                                    _.get(network, 'block.number')
                                 )}
                             />
                         </Col>
