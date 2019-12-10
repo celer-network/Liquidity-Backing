@@ -206,8 +206,9 @@ contract PoLC is Ownable, Pausable, IPoLC, TokenUtil {
         if (totalPower == 0) {
             return blockReward.mul(_duration);
         }
-
-        return _value.mul(_duration).mul(_duration).mul(blockReward).div(totalPower);
+        
+        uint currentPower = _value.mul(_duration).mul(_duration);
+        return currentPower.mul(_duration).mul(blockReward).div(totalPower);
     }
 
     /**
