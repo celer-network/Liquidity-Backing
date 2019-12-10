@@ -1,6 +1,6 @@
 import formatDistanceToNow from 'date-fns/formatDistanceToNow'
 
-const BLOCK_INTERVAL = 15;
+const BLOCK_INTERVAL = 15000;
 
 export const currencyFieldOptions = unit => ({
     formatter: value => (value ? `${value}${unit}` : ''),
@@ -20,12 +20,11 @@ export const blockFieldOptions = {
             return '';
         }
         
-        console.log(value)
         const timeEstimate = formatDistanceToNow(new Date(Date.now() + value * BLOCK_INTERVAL))
         
-        return `${value}block(${timeEstimate})`
+        return `${value}blocks(${timeEstimate})`
     },
-    parser: value => value.replace(/[a-z]/g, '').replace(/\([\w\s]+\)/, '')
+    parser: value => value.replace(/[a-z]/g, '').replace(/\([\w\s]+\)?/, '')
 };
 
 export const rateFieldOptions = {

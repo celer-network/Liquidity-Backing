@@ -12,12 +12,14 @@ export const FINALIZED = 'Finalized';
 export const EXPIRED = 'Expired';
 export const UNKNOWN = 'Unknown';
 
-export const getCurrentPeriod = (network, auction, auctionPeriods) => {
-    const blockNumber = _.get(network, 'block.number');
-    const auctionPeriod = _.find(
+export const getAuctionPeriod = (auctionPeriods, auction) => {
+    return _.find(
         auctionPeriods,
         auctionPeriod => auctionPeriod.args[0] === auction.args[0]
     );
+}
+
+export const getCurrentPeriod = (auctionPeriod, blockNumber) => {
     const {
         bidEnd,
         revealEnd,

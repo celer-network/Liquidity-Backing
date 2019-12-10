@@ -13,6 +13,7 @@ import {
     List,
     Row,
     Col,
+    Divider,
     notification
 } from 'antd';
 
@@ -21,6 +22,7 @@ import BidForm from '../components/auction/bid-form';
 import RevealForm from '../components/auction/reveal-form';
 import { formatCurrencyValue, getUnitByAddress } from '../utils/unit';
 import {
+    getAuctionPeriod,
     getCurrentPeriod,
     getWinners,
     calculateRepay,
@@ -33,6 +35,7 @@ import {
     FINALIZED
 } from '../utils/liba';
 import { EMPTY_ADDRESS } from '../utils/constant';
+import { blockFieldOptions } from '../utils/form';
 
 const { Step } = Steps;
 
@@ -90,8 +93,7 @@ class Auction extends React.Component {
     }
 
     static getDerivedStateFromProps(props) {
-        const { match, LiBA = {}, network } = props;
-
+        const { match, LiBA = {} } = props;
         const auctions = _.values(LiBA.getAuction);
         const auction = _.find(
             auctions,
@@ -102,19 +104,13 @@ class Auction extends React.Component {
             return {};
         }
 
-        const currentPeriod = getCurrentPeriod(
-            network,
-            auction,
-            LiBA.getAuctionPeriod
-        );
-        const currentStep = _.indexOf(steps, currentPeriod);
         const auctionId = auction.args[0];
         const bids = _.filter(
             LiBA.bidsByUser,
             bid => bid.args[1] === auctionId
         );
 
-        return { auction, auctionId, bids, currentStep, currentPeriod };
+        return { auction, auctionId, bids };
     }
 
     takeAction = () => {
@@ -305,9 +301,9 @@ class Auction extends React.Component {
                 <Col span={12}>
                     <Statistic title="Max Rate" value={`${maxRate} %`} />
                 </Col>
-                {collateralValue > 0 && (
+                {collateralValue > 0 && 
+                (
                     <>
-                        (
                         <Col span={12}>
                             <Statistic
                                 title="Collateral Address"
@@ -348,6 +344,35 @@ class Auction extends React.Component {
         );
     };
 
+    renderProgress = () => {
+        const { LiBA = {}, network } = this.props;
+        const { auction } = this.state;
+        const auctionPeriod = getAuctionPeriod(LiBA.getAuctionPeriod, auction);
+        const blockNumber = _.get(network, 'block.number');
+        const currentPeriod = getCurrentPeriod(auctionPeriod, blockNumber);
+        const currentStep = _.indexOf(steps, currentPeriod);
+
+        if (currentStep === -1) {
+            return (<Alert type="warning" message={currentPeriod} showIcon />);
+        }
+        
+        const action = currentPeriod.toLowerCase()
+        const blockLeft = auctionPeriod.value[action + 'End'] - blockNumber;
+
+        return (
+            <>
+                <Steps size="small" current={currentStep}>
+                    {_.map(steps, step => (
+                        <Step key={step} title={step} />
+                    ))}
+                </Steps>
+                
+                <Divider>{blockFieldOptions.formatter(blockLeft)} left to {action}</Divider>
+            </>
+        );
+    }
+    
+    
     render() {
         const { network } = this.props;
         const {
@@ -362,20 +387,9 @@ class Auction extends React.Component {
             return <Skeleton />;
         }
 
-        let alertMsg;
-        if (currentStep === -1)
-            alertMsg = <Alert message={currentPeriod} type="info" showIcon />;
-
         return (
             <Card title="Auction" actions={this.renderAction()}>
-                {alertMsg || (
-                    <Steps size="small" current={currentStep}>
-                        {_.map(steps, step => (
-                            <Step key={step} title={step} />
-                        ))}
-                    </Steps>
-                )}
-
+                {this.renderProgress()}
                 {this.renderAuctionDetail()}
                 <BidForm
                     auction={auction}
