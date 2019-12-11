@@ -1,7 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import web3 from 'web3';
-import { Modal } from 'antd';
+import { Modal, Alert } from 'antd';
 
 import Form from '../form';
 import {
@@ -86,7 +86,7 @@ class BidForm extends React.Component {
             },
             {
                 name: 'celerValue',
-                label: 'Celer Value',
+                label: 'CELR Value',
                 field: 'number',
                 fieldOptions: {
                     ...celerFieldOptions,
@@ -123,6 +123,7 @@ class BidForm extends React.Component {
                 onOk={this.onSubmit}
                 onCancel={onClose}
             >
+                <Alert type="warning" message="Once the bid is placed, you have to reveal it, or you will lose staked CELR" showIcon/>
                 <Form ref={this.form} items={formItems} />
             </Modal>
         );

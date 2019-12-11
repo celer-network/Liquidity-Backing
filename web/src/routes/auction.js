@@ -93,7 +93,7 @@ class Auction extends React.Component {
     }
 
     static getDerivedStateFromProps(props) {
-        const { match, LiBA = {} } = props;
+        const { match, LiBA = {}, network } = props;
         const auctions = _.values(LiBA.getAuction);
         const auction = _.find(
             auctions,
@@ -104,13 +104,17 @@ class Auction extends React.Component {
             return {};
         }
 
+        const auctionPeriod = getAuctionPeriod(LiBA.getAuctionPeriod, auction);
+        const blockNumber = _.get(network, 'block.number');
+        const currentPeriod = getCurrentPeriod(auctionPeriod, blockNumber);
+        const currentStep = _.indexOf(steps, currentPeriod);
         const auctionId = auction.args[0];
         const bids = _.filter(
             LiBA.bidsByUser,
             bid => bid.args[1] === auctionId
         );
 
-        return { auction, auctionId, bids };
+        return { auction, auctionId, bids, auctionPeriod, blockNumber, currentPeriod, currentStep };
     }
 
     takeAction = () => {
@@ -345,12 +349,7 @@ class Auction extends React.Component {
     };
 
     renderProgress = () => {
-        const { LiBA = {}, network } = this.props;
-        const { auction } = this.state;
-        const auctionPeriod = getAuctionPeriod(LiBA.getAuctionPeriod, auction);
-        const blockNumber = _.get(network, 'block.number');
-        const currentPeriod = getCurrentPeriod(auctionPeriod, blockNumber);
-        const currentStep = _.indexOf(steps, currentPeriod);
+        const { auctionPeriod, blockNumber, currentPeriod, currentStep } = this.state;
 
         if (currentStep === -1) {
             return (<Alert type="warning" message={currentPeriod} showIcon />);
