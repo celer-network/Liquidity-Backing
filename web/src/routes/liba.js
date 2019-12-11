@@ -122,7 +122,7 @@ class LiBA extends React.Component {
         return (
             <Card
                 tabList={tabList}
-                title="LiBA"
+                title="Auctions"
                 activeTabKey={tab}
                 onTabChange={this.onTabChange}
                 extra={
