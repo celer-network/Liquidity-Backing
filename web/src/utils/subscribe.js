@@ -1,7 +1,7 @@
 const POLL_INTERVAL = 1000;
 
 export const subscribeEvent = (account, contracts, dispatch) => {
-    const { PoLC, LiBA } = contracts;
+    const { PoLC, LiBA, ERC20ExampleToken } = contracts;
 
     PoLC.events.NewCommitment(
         {
@@ -47,12 +47,35 @@ export const subscribeEvent = (account, contracts, dispatch) => {
                 return;
             }
 
+
             const { auctionId } = event.returnValues;
             dispatch({
                 type: 'LiBA/addBid',
                 payload: { auctionId }
             });
         }
+    );
+    
+    ERC20ExampleToken.events.Approval(
+        {
+            filter: {
+                owner: account,
+                spender: LiBA.address
+            }
+            
+        },
+        (err, event) => {
+            if (err) {
+                return;
+            }
+
+
+            const { value } = event.returnValues;
+            dispatch({
+                type: 'network/save',
+                payload: { CelrValue: value }
+            });
+        } 
     );
 };
 
