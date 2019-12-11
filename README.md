@@ -1,4 +1,4 @@
-# cEconomy
+# Liquidity Backing
 
 [![CircleCI](https://circleci.com/gh/celer-network/cEconomy.svg?style=svg&circle-token=6900e01ac56042ac8161df6d2f9523d9ba4a3be9)](https://circleci.com/gh/celer-network/cEconomy)
 
@@ -7,13 +7,12 @@
 -   [Core Concepts](#core-concepts)
 -   [Release Features](#release-features)
 -   [User Flow](#user-flow)
--   [Reward and Fee Calculation](#reward-and-fee-calculation)
 
 ## Overview
 
-cEcnonomy is an cryptoeconomics mechanisms to enable off-chain service providers to tap into large amounts of liquidity whenever they need to. It consists Proof of Liquidity Commitment (PoLC) and Liquidity Backing Auction (LiBA). PoLC encourage Network Liquidity Backers (NLB) to lock their digital assets into smart contract for a long time by rewarding them with CELR tokens and therefore establishing a stable and abundant liquidity pool. LiBA enables off-chain service providers to solicit liquidity in PoLC through “crowd lending”.
+Liquidity Backing is an cryptoeconomics mechanisms to enable off-chain service providers to tap into large amounts of liquidity whenever they need to. It consists Proof of Liquidity Commitment (PoLC) and Liquidity Backing Auction (LiBA). PoLC encourage Network Liquidity Backers (NLB) to lock their digital assets into smart contract for a long time by rewarding them with CELR tokens and therefore establishing a stable and abundant liquidity pool. LiBA enables off-chain service providers to solicit liquidity in PoLC through “crowd lending”. The initial reward poll will be funded by Celer Network Foundation, and will be funded by LiBA auction fee afterwards.
 
-For more details about cEcnonomy and Celer Network, please refer to [Celer Network's official website](https://www.celer.network/).
+For more details about Liquidity Backing, please refer to [CelerCore technical documentation](https://www.celer.network/docs/celercore/liquidity/problem.html).
 
 ## Latest Deployments
 
@@ -29,17 +28,6 @@ For more details about cEcnonomy and Celer Network, please refer to [Celer Netwo
 -   Contract address: [0x66804e13b02d2d2d4174ae3b538bf968411bb6c1](https://ropsten.etherscan.io/address/0x66804e13b02d2d2d4174ae3b538bf968411bb6c1)
 -   Deployed code: [LiBA.sol](https://github.com/celer-network/cEconomy/blob/v0.11.0/contracts/CelerChannel.sol)
 
-### Alpha Mainnet
-
-#### PoLC
-
--   Contract address: [0x66804e13b02d2d2d4174ae3b538bf968411bb6c1](https://ropsten.etherscan.io/address/0x66804e13b02d2d2d4174ae3b538bf968411bb6c1)
--   Deployed code: [PoLC.sol](https://github.com/celer-network/cEconomy/blob/v0.11.0/contracts/CelerChannel.sol)
-
-#### LiBA
-
--   Contract address: [0x66804e13b02d2d2d4174ae3b538bf968411bb6c1](https://ropsten.etherscan.io/address/0x66804e13b02d2d2d4174ae3b538bf968411bb6c1)
--   Deployed code: [LiBA.sol](https://github.com/celer-network/cEconomy/blob/v0.11.0/contracts/CelerChannel.sol)
 
 ## Core Concepts
 
@@ -79,33 +67,3 @@ For more details about cEcnonomy and Celer Network, please refer to [Celer Netwo
 7. **finalizeBid(\_auctionId)**: After the finalization period or the auction has been finalized, the unselected bider is able to collect CELR value and commitment value in the bid.
 8. **repayAuction(\_auctionId)**: The auction asker should repay the fund and interest when the lending duration is about to end. LiBA will refund the feeDeposit to the auction asker, the auction asker also needs to make the payment for auction fee, which is discussed in detail below.
 9. **collectCollateral(\_auctionId)**: If the auction asker is not able to make the repayment on time, the lender can collect collateral associated with the auction.
-
-## Reward and Fee Calculation
-
-### Term Definitions
-
--   Mining power of a commitment i -- Mi
--   Asset value of a commitment i -- Vi
--   Duration of a commitment i -- Ti
--   Reward by a block -- R
--   Reward for a commitment i by a given block -- Ri
--   Total mining power by a given block -- TMB
--   Total mining power for a duration -- TMD
--   Auction fee paid by a borrower -- AF
--   Auction value -- AV
--   Auction duration -- AD
-
-### PoLC Reward Calculation
-
-The mining power associated with a commitment is proportional to the asset value and lock duration. i.e. mining power will be the product of asset value and lock duration. For each block, it has a fixed reward. The reward for a commitment by a given block will be proportional to the percent of its mining power to the total mining power by the given block.
-
--   Mi = Vi \* Ti
--   TMB = sum of Mining power of all commitments, which are locked in the current block
--   Ri = R \* Mi / TMB
-
-### LiBA Auction Fee Calculation
-
-The auction fee paid by a borrower is proportional to the value and duration of the intended loan. Another factor is total liquidity in PoLC, which can be represented by total mining power. If there is abundant liquidity in PoLC, the auction fee will be cheaper. Lastly, the auction fee needs to cover the total reward paid by PoLC in order to attract liquidity.
-
--   TMD = sum of TMB for blocks in the duration
--   AF = AV \* AD / TMD \* R \* AD
