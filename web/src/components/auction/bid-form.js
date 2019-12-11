@@ -28,7 +28,7 @@ class BidForm extends React.Component {
                 return;
             }
 
-            const { celerValue, value, rate, salt } = values;
+            const { celerValue, value, rate, passcode } = values;
             const adjustedRate = rate * 1000;
 
             this.contracts.LiBA.methods.placeBid.cacheSend(
@@ -37,7 +37,7 @@ class BidForm extends React.Component {
                     adjustedRate,
                     web3.utils.toWei(value.toString(), 'ether'),
                     web3.utils.toWei(celerValue.toString(), 'ether'),
-                    salt
+                    passcode
                 ),
                 web3.utils.toWei(celerValue.toString(), 'ether')
             );
@@ -101,7 +101,7 @@ class BidForm extends React.Component {
                 ]
             },
             {
-                name: 'salt',
+                name: 'passcode',
                 field: 'number',
                 fieldOptions: {
                     placeholder: 'A random number used to hide your bid info'
@@ -109,7 +109,7 @@ class BidForm extends React.Component {
                 rules: [
                     minValueRule(0),
                     {
-                        message: 'Please enter a salt!',
+                        message: 'Please enter a passcode!',
                         required: true
                     }
                 ]
