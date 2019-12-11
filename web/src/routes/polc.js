@@ -152,7 +152,7 @@ class PoLC extends React.Component {
 
         return (
             <Card
-                title="PoLC"
+                title="Fund"
                 extra={
                     <Button type="primary" onClick={this.toggleModal}>
                         Commit fund

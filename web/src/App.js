@@ -56,10 +56,10 @@ class App extends React.Component {
                         selectedKeys={[pathname.slice(1)]}
                     >
                         <Menu.Item key="polc">
-                            <Link to="/polc">PoLC</Link>
+                            <Link to="/polc">Fund</Link>
                         </Menu.Item>
                         <Menu.Item key="liba">
-                            <Link to="/liba">LiBA</Link>
+                            <Link to="/liba">Auctions</Link>
                         </Menu.Item>
                         <Menu.Item className="approve-celr">
                             <Button
