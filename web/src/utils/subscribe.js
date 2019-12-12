@@ -47,7 +47,6 @@ export const subscribeEvent = (account, contracts, dispatch) => {
                 return;
             }
 
-
             const { auctionId } = event.returnValues;
             dispatch({
                 type: 'LiBA/addBid',
@@ -55,28 +54,24 @@ export const subscribeEvent = (account, contracts, dispatch) => {
             });
         }
     );
-    
+
     ERC20ExampleToken.events.Approval(
         {
             filter: {
                 owner: account,
                 spender: LiBA.address
             }
-            
         },
         (err, event) => {
             if (err) {
                 return;
             }
 
-
-            const { value } = event.returnValues;
-            dispatch({
-                type: 'network/save',
-                payload: { CelrValue: value }
-            });
-        } 
+            getCelrAllowance(account, contracts);
+        }
     );
+
+    getCelrAllowance(account, contracts);
 };
 
 export const subscribeChainInfo = (web3, dispatch) => {
@@ -98,4 +93,9 @@ export const subscribeChainInfo = (web3, dispatch) => {
             }
         });
     }, POLL_INTERVAL);
+};
+
+const getCelrAllowance = (account, contracts) => {
+    const { ERC20ExampleToken, LiBA } = contracts;
+    ERC20ExampleToken.methods.allowance.cacheCall(account, LiBA.address);
 };
