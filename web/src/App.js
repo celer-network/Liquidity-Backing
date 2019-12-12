@@ -1,11 +1,13 @@
 import * as React from 'react';
 import PropTypes from 'prop-types';
+import _ from 'lodash';
 import { drizzleConnect } from 'drizzle-react';
 import { withRouter, Link } from 'dva/router';
 import { Card, Layout, Menu, Button } from 'antd';
 import { AccountData } from 'drizzle-react-components';
 
 import ApproveCELRForm from './components/approve-celr';
+import AccountInfo from './components/account-info';
 import { subscribeEvent, subscribeChainInfo } from './utils/subscribe';
 import { getNetworkConfig } from './utils/network';
 
@@ -41,25 +43,24 @@ class App extends React.Component {
 
     render() {
         const { isModalVisible } = this.state;
-        const { children, location } = this.props;
+        const { children, location, CelrToken } = this.props;
         const { pathname } = location;
+        const celerAllowance = _.values(CelrToken.allowance)[0] || {};
 
         return (
             <Layout>
                 <Sider>
-                    <Card className="account-data" title="Account info">
-                        <AccountData accountIndex={0} units={'ether'} />
-                    </Card>
+                    <AccountInfo celrValue={celerAllowance.value} />
                     <Menu
                         theme="dark"
                         mode="inline"
                         selectedKeys={[pathname.slice(1)]}
                     >
                         <Menu.Item key="polc">
-                            <Link to="/polc">PoLC</Link>
+                            <Link to="/polc">Fund</Link>
                         </Menu.Item>
                         <Menu.Item key="liba">
-                            <Link to="/liba">LiBA</Link>
+                            <Link to="/liba">Auctions</Link>
                         </Menu.Item>
                         <Menu.Item className="approve-celr">
                             <Button
@@ -99,10 +100,11 @@ App.contextTypes = {
 };
 
 function mapStateToProps(state) {
-    const { accounts } = state;
+    const { accounts, contracts } = state;
 
     return {
-        accounts
+        accounts,
+        CelrToken: contracts.ERC20ExampleToken
     };
 }
 

@@ -6,12 +6,12 @@
     height: 100%;
 }
 
-.account-data .ant-card-head {
+.account-info .ant-card-head {
     height: 65px;
 }
 
-.account-data h4,
-.account-data p {
+.account-info h4,
+.account-info p {
     overflow: hidden;
     text-overflow: ellipsis;
 }

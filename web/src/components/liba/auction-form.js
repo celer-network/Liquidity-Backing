@@ -12,6 +12,7 @@ import {
     dayFieldOptions
 } from '../../utils/form';
 import { getUnitByAddress } from '../../utils/unit';
+import { RATE_PRECISION, RATE_BASE } from '../../utils/constant';
 
 class AuctionForm extends React.Component {
     constructor(props, context) {
@@ -56,7 +57,7 @@ class AuctionForm extends React.Component {
                 finalizeDuration,
                 web3.utils.toWei(value.toString(), 'ether'),
                 duration,
-                maxRate,
+                maxRate * RATE_BASE,
                 web3.utils.toWei(minValue.toString(), 'ether'),
                 collateralAddress,
                 web3.utils.toWei(collateralValue.toString(), 'ether')
@@ -129,8 +130,8 @@ class AuctionForm extends React.Component {
                 field: 'number',
                 fieldOptions: {
                     ...rateFieldOptions,
-                    step: 0.001,
-                    precision: 3,
+                    step: 0.1,
+                    precision: RATE_PRECISION,
                     placeholder: 'The maximum interest rate'
                 },
                 rules: [

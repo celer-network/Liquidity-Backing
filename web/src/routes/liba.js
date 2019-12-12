@@ -65,7 +65,10 @@ class LiBA extends React.Component {
                             <Statistic
                                 title="Period"
                                 value={getCurrentPeriod(
-                                    getAuctionPeriod(LiBA.getAuctionPeriod, auction),
+                                    getAuctionPeriod(
+                                        LiBA.getAuctionPeriod,
+                                        auction
+                                    ),
                                     _.get(network, 'block.number')
                                 )}
                             />
@@ -130,7 +133,7 @@ class LiBA extends React.Component {
         return (
             <Card
                 tabList={tabList}
-                title="LiBA"
+                title="Auctions"
                 activeTabKey={tab}
                 onTabChange={this.onTabChange}
                 extra={

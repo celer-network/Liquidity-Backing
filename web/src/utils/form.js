@@ -1,17 +1,17 @@
-import formatDistanceToNow from 'date-fns/formatDistanceToNow'
+import formatDistanceToNow from 'date-fns/formatDistanceToNow';
 
 const BLOCK_INTERVAL = 15000;
 
 export const currencyFieldOptions = unit => ({
     formatter: value => (value ? `${value}${unit}` : ''),
-    parser: value => value.replace(/[A-Z]/g, '')
+    parser: value => value.replace(/[\D]/g, '')
 });
 
 export const celerFieldOptions = currencyFieldOptions('CELR');
 
 export const dayFieldOptions = {
     formatter: value => (value ? `${value}day` : ''),
-    parser: value => value.replace(/[a-z]/g, '')
+    parser: value => value.replace(/[\D]/g, '')
 };
 
 export const blockFieldOptions = {
@@ -19,17 +19,19 @@ export const blockFieldOptions = {
         if (!value) {
             return '';
         }
-        
-        const timeEstimate = formatDistanceToNow(new Date(Date.now() + value * BLOCK_INTERVAL))
-        
-        return `${value}blocks(${timeEstimate})`
+
+        const timeEstimate = formatDistanceToNow(
+            new Date(Date.now() + value * BLOCK_INTERVAL)
+        );
+
+        return `${value}blocks(${timeEstimate})`;
     },
-    parser: value => value.replace(/[a-z]/g, '').replace(/\([\w\s]+\)?/, '')
+    parser: value => value.replace(/\([\w\s]+\)?/, '').replace(/[\D]/g, '')
 };
 
 export const rateFieldOptions = {
     formatter: value => (value ? `${value}%` : ''),
-    parser: value => value.replace(/[%]/g, '')
+    parser: value => value.replace(/[^\d.]/g, '')
 };
 
 export const minValueRule = minValue => ({
