@@ -24,7 +24,7 @@ contract LiBA is Ownable, Pausable, TokenUtil, PullPayment, WhitelistedRole {
     using LiBABidder for LiBAStruct.Auction;
     using LiBAAsker for LiBAStruct.Auction;
 
-    uint constant private RATE_PRECISION = 100000;
+    uint constant private RATE_PRECISION = 1000;
 
     IPoLC private polc;
     uint private auctionCount;
