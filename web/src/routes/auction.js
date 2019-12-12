@@ -34,7 +34,7 @@ import {
     EXPIRED,
     FINALIZED
 } from '../utils/liba';
-import { EMPTY_ADDRESS } from '../utils/constant';
+import { EMPTY_ADDRESS, RATE_BASE } from '../utils/constant';
 import { blockFieldOptions } from '../utils/form';
 
 const { Step } = Steps;
@@ -114,7 +114,15 @@ class Auction extends React.Component {
             bid => bid.args[1] === auctionId
         );
 
-        return { auction, auctionId, bids, auctionPeriod, blockNumber, currentPeriod, currentStep };
+        return {
+            auction,
+            auctionId,
+            bids,
+            auctionPeriod,
+            blockNumber,
+            currentPeriod,
+            currentStep
+        };
     }
 
     takeAction = () => {
@@ -303,10 +311,12 @@ class Auction extends React.Component {
                     />
                 </Col>
                 <Col span={12}>
-                    <Statistic title="Max Rate" value={`${maxRate} %`} />
+                    <Statistic
+                        title="Max Rate"
+                        value={`${maxRate / RATE_BASE} %`}
+                    />
                 </Col>
-                {collateralValue > 0 && 
-                (
+                {collateralValue > 0 && (
                     <>
                         <Col span={12}>
                             <Statistic
@@ -349,13 +359,18 @@ class Auction extends React.Component {
     };
 
     renderProgress = () => {
-        const { auctionPeriod, blockNumber, currentPeriod, currentStep } = this.state;
+        const {
+            auctionPeriod,
+            blockNumber,
+            currentPeriod,
+            currentStep
+        } = this.state;
 
         if (currentStep === -1) {
-            return (<Alert type="warning" message={currentPeriod} showIcon />);
+            return <Alert type="warning" message={currentPeriod} showIcon />;
         }
-        
-        const action = currentPeriod.toLowerCase()
+
+        const action = currentPeriod.toLowerCase();
         const blockLeft = auctionPeriod.value[action + 'End'] - blockNumber;
 
         return (
@@ -365,13 +380,14 @@ class Auction extends React.Component {
                         <Step key={step} title={step} />
                     ))}
                 </Steps>
-                
-                <Divider>{blockFieldOptions.formatter(blockLeft)} left to {action}</Divider>
+
+                <Divider>
+                    {blockFieldOptions.formatter(blockLeft)} left to {action}
+                </Divider>
             </>
         );
-    }
-    
-    
+    };
+
     render() {
         const { network } = this.props;
         const {
