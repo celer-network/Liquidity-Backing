@@ -1,6 +1,6 @@
 # Liquidity Backing
 
-[![CircleCI](https://circleci.com/gh/celer-network/cEconomy.svg?style=svg&circle-token=6900e01ac56042ac8161df6d2f9523d9ba4a3be9)](https://circleci.com/gh/celer-network/cEconomy)
+[![CircleCI](https://circleci.com/gh/celer-network/Liquidity-Backing.svg?style=svg&circle-token=6900e01ac56042ac8161df6d2f9523d9ba4a3be9)](https://circleci.com/gh/celer-network/Liquidity-Backing)
 
 -   [Overview](#overview)
 -   [Latest Deployments](#latest-deployments)
@@ -33,7 +33,6 @@ For more details about Liquidity Backing, please refer to [CelerCore technical d
 
 -   **Off-chain Service Provider(OSP)**: Service provider running Celer node
 -   **Network Liquidity Backer(NLB)**: Users who lock fund into PoLC and lend out through LiBA
--   **Collateral Commitment Contract(CCC)**: Contract holding locked digital assets
 
 ## Release Features
 
