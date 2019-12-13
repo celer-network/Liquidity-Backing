@@ -14,6 +14,7 @@ import {
     Row,
     Col,
     Divider,
+    Result,
     notification
 } from 'antd';
 
@@ -287,6 +288,40 @@ class Auction extends React.Component {
             minValue
         } = auction.value;
         const unit = getUnitByAddress(network.supportedTokens, tokenAddress);
+        const defaultValues = JSON.parse(
+            localStorage.getItem(`auction${auction.args[0]}`) || '{}'
+        );
+        let ownBidResult;
+
+        if (_.isEmpty(defaultValues)) {
+            ownBidResult = (
+                <Result status="warning" title="You have not placed bid yet" />
+            );
+        } else {
+            ownBidResult = (
+                <Row>
+                    <Col span={12}>
+                        <Statistic title="Value" value={defaultValues.value} />
+                    </Col>
+                    <Col span={12}>
+                        <Statistic title="Rate" value={defaultValues.rate} />
+                    </Col>{' '}
+                    <Col span={12}>
+                        <Statistic
+                            title="Celer Value"
+                            value={defaultValues.celerValue}
+                        />
+                    </Col>{' '}
+                    <Col span={12}>
+                        <Statistic
+                            title="Passcode"
+                            value={defaultValues.passcode}
+                        />
+                    </Col>
+                </Row>
+            );
+        }
+
         return (
             <Row style={{ marginTop: '10px' }}>
                 <Col span={24}>
@@ -335,6 +370,9 @@ class Auction extends React.Component {
 
                 <Col span={24}>
                     <Tabs>
+                        <Tabs.TabPane tab="Your Bid" key="own">
+                            {ownBidResult}
+                        </Tabs.TabPane>
                         <Tabs.TabPane tab="Bids" key="bids">
                             <BidTable
                                 auction={auction}

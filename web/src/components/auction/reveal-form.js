@@ -13,6 +13,7 @@ import {
     minValueRule
 } from '../../utils/form';
 import { getUnitByAddress, formatCurrencyValue } from '../../utils/unit';
+import { RATE_PRECISION, RATE_BASE } from '../../utils/constant';
 
 class RevealForm extends React.Component {
     constructor(props, context) {
@@ -30,15 +31,14 @@ class RevealForm extends React.Component {
                 return;
             }
 
-            const { celerValue, value, rate, salt, commitmentID } = values;
-            const adjustedRate = rate * 1000;
+            const { celerValue, value, rate, passcode, commitmentID } = values;
 
             this.contracts.LiBA.methods.revealBid.cacheSend(
                 auction.args[0],
-                adjustedRate,
+                rate * RATE_BASE,
                 web3.utils.toWei(value.toString(), 'ether'),
                 web3.utils.toWei(celerValue.toString(), 'ether'),
-                salt,
+                passcode,
                 parseInt(commitmentID)
             );
             onClose();
@@ -60,11 +60,15 @@ class RevealForm extends React.Component {
 
             return [id, `ID: ${id}, Available Value: ${availableValue}`];
         });
+        const defaultValues = JSON.parse(
+            localStorage.getItem(`auction${auction.args[0]}`) || '{}'
+        );
 
         const formItems = [
             {
                 name: 'value',
                 field: 'number',
+                initialValue: defaultValues.value,
                 fieldOptions: {
                     ...currencyFieldOptions(unit),
                     placeholder: 'The amount of token to lend'
@@ -80,10 +84,11 @@ class RevealForm extends React.Component {
             {
                 name: 'rate',
                 field: 'number',
+                initialValue: defaultValues.rate,
                 fieldOptions: {
                     ...rateFieldOptions,
-                    step: 0.001,
-                    precision: 3,
+                    step: 0.1,
+                    precision: RATE_PRECISION,
                     placeholder: 'The lending interest rate'
                 },
                 rules: [
@@ -98,6 +103,7 @@ class RevealForm extends React.Component {
                 name: 'celerValue',
                 label: 'Celer Value',
                 field: 'number',
+                initialValue: defaultValues.celerValue,
                 fieldOptions: {
                     ...celerFieldOptions,
                     placeholder: 'The amount of celer token for bidding'
@@ -111,15 +117,16 @@ class RevealForm extends React.Component {
                 ]
             },
             {
-                name: 'salt',
+                name: 'passcode',
                 field: 'number',
+                initialValue: defaultValues.passcode,
                 fieldOptions: {
                     placeholder: 'The random number entered for bidding'
                 },
                 rules: [
                     minValueRule(0),
                     {
-                        message: 'Please enter a salt!',
+                        message: 'Please enter a passcode!',
                         required: true
                     }
                 ]
