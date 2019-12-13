@@ -29,3 +29,12 @@
 .ant-input-number {
     width: 315px;
 }
+
+.dropdown-filter {
+    display: inline-block;
+    margin-right: 10px;
+}
+
+.dropdown-filter .ant-form-item-control-wrapper {
+    display: inline-block;
+}

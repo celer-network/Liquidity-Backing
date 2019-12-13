@@ -11,6 +11,7 @@ export const FINALIZE = 'Finalize';
 export const FINALIZED = 'Finalized';
 export const EXPIRED = 'Expired';
 export const UNKNOWN = 'Unknown';
+export const ALL_PERIODS = [BID, REVEAL, CLAIM, CHALLENGE, FINALIZE, FINALIZED, EXPIRED];
 
 export const getAuctionPeriod = (auctionPeriods, auction) => {
     return _.find(
