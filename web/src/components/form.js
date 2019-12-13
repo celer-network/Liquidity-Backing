@@ -48,6 +48,7 @@ class CustomizeForm extends React.Component {
         const { form, formItemLayout, items } = this.props;
         const { getFieldDecorator } = form;
 
+        console.log(items);
         return _.map(items, item => {
             const {
                 field = 'input',
