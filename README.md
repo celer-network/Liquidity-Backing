@@ -10,7 +10,7 @@
 
 ## Overview
 
-Liquidity Backing is an cryptoeconomics mechanisms to enable off-chain service providers to tap into large amounts of liquidity whenever they need to. It consists Proof of Liquidity Commitment (PoLC) and Liquidity Backing Auction (LiBA). PoLC encourage Network Liquidity Backers (NLB) to lock their digital assets into smart contract for a long time by rewarding them with CELR tokens and therefore establishing a stable and abundant liquidity pool. LiBA enables off-chain service providers to solicit liquidity in PoLC through “crowd lending”. The initial reward poll will be funded by Celer Network Foundation, and will be funded by LiBA auction fee afterwards.
+Liquidity Backing is a cryptoeconomics mechanism to enable off-chain service providers (OSP) to tap into large amounts of liquidity to support and expand their off-chain payment relay services. It consists of Proof of Liquidity Commitment (PoLC) and Liquidity Backing Auction (LiBA) processes. PoLC encourages Network Liquidity Backers (NLB) to lock their digital assets into a smart contract for a long time by rewarding them with CELR tokens and therefore establishing a stable and abundant liquidity pool. LiBA enables OSPs to solicit liquidity in PoLC through crowdlending whenever they need to. 
 
 For more details about Liquidity Backing, please refer to [CelerCore technical documentation](https://www.celer.network/docs/celercore/liquidity/problem.html).
 
