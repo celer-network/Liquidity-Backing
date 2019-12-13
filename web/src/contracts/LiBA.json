@@ -26,8 +26,7 @@
       ],
       "payable": false,
       "stateMutability": "nonpayable",
-      "type": "constructor",
-      "signature": "constructor"
+      "type": "constructor"
     },
     {
       "anonymous": false,
@@ -58,8 +57,7 @@
         }
       ],
       "name": "ChallengeWinners",
-      "type": "event",
-      "signature": "0x4885058c6c60dcb140cb69c8dcc9ea4c73ba0ff2fcd8dd700bb51fbf95a61052"
+      "type": "event"
     },
     {
       "anonymous": false,
@@ -84,8 +82,7 @@
         }
       ],
       "name": "ClaimWinners",
-      "type": "event",
-      "signature": "0x674af3ce1d137983de1b36c797c080e56f5022a446472dd3753923bb3166ce71"
+      "type": "event"
     },
     {
       "anonymous": false,
@@ -104,8 +101,7 @@
         }
       ],
       "name": "CollectCollateral",
-      "type": "event",
-      "signature": "0x8996516a5fb708155f021fb9e400552fd89c461805c8ef6f5cc988c76e2d7340"
+      "type": "event"
     },
     {
       "anonymous": false,
@@ -124,8 +120,7 @@
         }
       ],
       "name": "DrainToken",
-      "type": "event",
-      "signature": "0xac6572a44b29fc3e82672a2d68efd9bd694204ee2274bc37ee5c4cebcf3fa1ef"
+      "type": "event"
     },
     {
       "anonymous": false,
@@ -138,8 +133,7 @@
         }
       ],
       "name": "FinalizeAuction",
-      "type": "event",
-      "signature": "0xb6ef3d4ebcd3039be8832ad856398d49f705465e36b6ac4478eacf0424caecc9"
+      "type": "event"
     },
     {
       "anonymous": false,
@@ -158,8 +152,7 @@
         }
       ],
       "name": "FinalizeBid",
-      "type": "event",
-      "signature": "0xf53b31b6993014e4a698a5a80a49dcc38074ce468ebf6531035ad640add2cc09"
+      "type": "event"
     },
     {
       "anonymous": false,
@@ -178,8 +171,7 @@
         }
       ],
       "name": "NewAuction",
-      "type": "event",
-      "signature": "0x70cc9a54dba93435423ae6e31b4603f6b94f0db76f9d0aeecb990abb11879418"
+      "type": "event"
     },
     {
       "anonymous": false,
@@ -198,8 +190,7 @@
         }
       ],
       "name": "NewBid",
-      "type": "event",
-      "signature": "0x45401769c1d58f70bd6b63e1a66bfc17d712ce0dc4ffb8d2dd0ad7177d56a386"
+      "type": "event"
     },
     {
       "anonymous": false,
@@ -218,8 +209,7 @@
         }
       ],
       "name": "OwnershipTransferred",
-      "type": "event",
-      "signature": "0x8be0079c531659141344cd1fd0a4f28419497f9722a3daafe3b4186f6b6457e0"
+      "type": "event"
     },
     {
       "anonymous": false,
@@ -232,8 +222,7 @@
         }
       ],
       "name": "Paused",
-      "type": "event",
-      "signature": "0x62e78cea01bee320cd4e420270b5ea74000d11b0c9f74754ebdbfc544b05a258"
+      "type": "event"
     },
     {
       "anonymous": false,
@@ -246,8 +235,7 @@
         }
       ],
       "name": "PauserAdded",
-      "type": "event",
-      "signature": "0x6719d08c1888103bea251a4ed56406bd0c3e69723c8a1686e017e7bbe159b6f8"
+      "type": "event"
     },
     {
       "anonymous": false,
@@ -260,8 +248,7 @@
         }
       ],
       "name": "PauserRemoved",
-      "type": "event",
-      "signature": "0xcd265ebaf09df2871cc7bd4133404a235ba12eff2041bb89d9c714a2621c7c7e"
+      "type": "event"
     },
     {
       "anonymous": false,
@@ -274,8 +261,7 @@
         }
       ],
       "name": "RepayAuction",
-      "type": "event",
-      "signature": "0x1bcb6cd336f3258c0b58f390ff189e85a575119e00b32868045249b45b4032f4"
+      "type": "event"
     },
     {
       "anonymous": false,
@@ -294,8 +280,7 @@
         }
       ],
       "name": "RevealBid",
-      "type": "event",
-      "signature": "0xe2ea6de1801ba7490a1beaacfe87f2d1fdd7b2aedef9e7c4ab6b3d5b9d52c4f7"
+      "type": "event"
     },
     {
       "anonymous": false,
@@ -308,8 +293,7 @@
         }
       ],
       "name": "TransferFeeDeposit",
-      "type": "event",
-      "signature": "0xfdda1afd0888c485b0229c87446b0a3c4fd2a9fd851a2c7c7f9ee9a5d30d18f3"
+      "type": "event"
     },
     {
       "anonymous": false,
@@ -322,8 +306,7 @@
         }
       ],
       "name": "Unpaused",
-      "type": "event",
-      "signature": "0x5db9ee0a495bf2e6ff9c91a7834c1ba4fdd244a5e8aa4e537bd38aeae4b073aa"
+      "type": "event"
     },
     {
       "anonymous": false,
@@ -342,8 +325,7 @@
         }
       ],
       "name": "UpdateBid",
-      "type": "event",
-      "signature": "0x31780e3ce440b5efdf2d87f18af70c1ebc1f4aee829175d3b772c9e4f65b0989"
+      "type": "event"
     },
     {
       "anonymous": false,
@@ -362,8 +344,7 @@
         }
       ],
       "name": "UpdateSupportedToken",
-      "type": "event",
-      "signature": "0xd71e43dae5ba4386463c0ef49b6f19fc82aea6a936b4242ef04b99730c0ed4c3"
+      "type": "event"
     },
     {
       "anonymous": false,
@@ -376,8 +357,7 @@
         }
       ],
       "name": "WhitelistAdminAdded",
-      "type": "event",
-      "signature": "0x22380c05984257a1cb900161c713dd71d39e74820f1aea43bd3f1bdd20961299"
+      "type": "event"
     },
     {
       "anonymous": false,
@@ -390,8 +370,7 @@
         }
       ],
       "name": "WhitelistAdminRemoved",
-      "type": "event",
-      "signature": "0x0a8eb35e5ca14b3d6f28e4abf2f128dbab231a58b56e89beb5d636115001e165"
+      "type": "event"
     },
     {
       "anonymous": false,
@@ -404,8 +383,7 @@
         }
       ],
       "name": "WhitelistedAdded",
-      "type": "event",
-      "signature": "0xee1504a83b6d4a361f4c1dc78ab59bfa30d6a3b6612c403e86bb01ef2984295f"
+      "type": "event"
     },
     {
       "anonymous": false,
@@ -418,8 +396,7 @@
         }
       ],
       "name": "WhitelistedRemoved",
-      "type": "event",
-      "signature": "0x270d9b30cf5b0793bbfd54c9d5b94aeb49462b8148399000265144a8722da6b6"
+      "type": "event"
     },
     {
       "payable": true,
@@ -439,8 +416,7 @@
       "outputs": [],
       "payable": false,
       "stateMutability": "nonpayable",
-      "type": "function",
-      "signature": "0x82dc1ec4"
+      "type": "function"
     },
     {
       "constant": false,
@@ -455,8 +431,7 @@
       "outputs": [],
       "payable": false,
       "stateMutability": "nonpayable",
-      "type": "function",
-      "signature": "0x7362d9c8"
+      "type": "function"
     },
     {
       "constant": false,
@@ -471,8 +446,7 @@
       "outputs": [],
       "payable": false,
       "stateMutability": "nonpayable",
-      "type": "function",
-      "signature": "0x10154bad"
+      "type": "function"
     },
     {
       "constant": true,
@@ -518,8 +492,7 @@
       ],
       "payable": false,
       "stateMutability": "view",
-      "type": "function",
-      "signature": "0xa0fdb395"
+      "type": "function"
     },
     {
       "constant": true,
@@ -534,8 +507,7 @@
       ],
       "payable": false,
       "stateMutability": "view",
-      "type": "function",
-      "signature": "0xc6c21e9d"
+      "type": "function"
     },
     {
       "constant": false,
@@ -555,8 +527,7 @@
       "outputs": [],
       "payable": false,
       "stateMutability": "nonpayable",
-      "type": "function",
-      "signature": "0x9d4323be"
+      "type": "function"
     },
     {
       "constant": true,
@@ -571,8 +542,7 @@
       ],
       "payable": false,
       "stateMutability": "view",
-      "type": "function",
-      "signature": "0x8f32d59b"
+      "type": "function"
     },
     {
       "constant": true,
@@ -593,8 +563,7 @@
       ],
       "payable": false,
       "stateMutability": "view",
-      "type": "function",
-      "signature": "0x46fbf68e"
+      "type": "function"
     },
     {
       "constant": true,
@@ -615,8 +584,7 @@
       ],
       "payable": false,
       "stateMutability": "view",
-      "type": "function",
-      "signature": "0xbb5f747b"
+      "type": "function"
     },
     {
       "constant": true,
@@ -637,8 +605,7 @@
       ],
       "payable": false,
       "stateMutability": "view",
-      "type": "function",
-      "signature": "0x3af32abf"
+      "type": "function"
     },
     {
       "constant": true,
@@ -653,8 +620,7 @@
       ],
       "payable": false,
       "stateMutability": "view",
-      "type": "function",
-      "signature": "0x3292e5dd"
+      "type": "function"
     },
     {
       "constant": true,
@@ -669,8 +635,7 @@
       ],
       "payable": false,
       "stateMutability": "view",
-      "type": "function",
-      "signature": "0x8da5cb5b"
+      "type": "function"
     },
     {
       "constant": false,
@@ -679,8 +644,7 @@
       "outputs": [],
       "payable": false,
       "stateMutability": "nonpayable",
-      "type": "function",
-      "signature": "0x8456cb59"
+      "type": "function"
     },
     {
       "constant": true,
@@ -695,8 +659,7 @@
       ],
       "payable": false,
       "stateMutability": "view",
-      "type": "function",
-      "signature": "0x5c975abb"
+      "type": "function"
     },
     {
       "constant": true,
@@ -717,8 +680,7 @@
       ],
       "payable": false,
       "stateMutability": "view",
-      "type": "function",
-      "signature": "0xe2982c21"
+      "type": "function"
     },
     {
       "constant": false,
@@ -733,8 +695,7 @@
       "outputs": [],
       "payable": false,
       "stateMutability": "nonpayable",
-      "type": "function",
-      "signature": "0x291d9549"
+      "type": "function"
     },
     {
       "constant": false,
@@ -743,8 +704,7 @@
       "outputs": [],
       "payable": false,
       "stateMutability": "nonpayable",
-      "type": "function",
-      "signature": "0x715018a6"
+      "type": "function"
     },
     {
       "constant": false,
@@ -753,8 +713,7 @@
       "outputs": [],
       "payable": false,
       "stateMutability": "nonpayable",
-      "type": "function",
-      "signature": "0x6ef8d66d"
+      "type": "function"
     },
     {
       "constant": false,
@@ -763,8 +722,7 @@
       "outputs": [],
       "payable": false,
       "stateMutability": "nonpayable",
-      "type": "function",
-      "signature": "0x4c5a628c"
+      "type": "function"
     },
     {
       "constant": false,
@@ -773,8 +731,7 @@
       "outputs": [],
       "payable": false,
       "stateMutability": "nonpayable",
-      "type": "function",
-      "signature": "0xd6cd9473"
+      "type": "function"
     },
     {
       "constant": true,
@@ -795,8 +752,7 @@
       ],
       "payable": false,
       "stateMutability": "view",
-      "type": "function",
-      "signature": "0x68c4ac26"
+      "type": "function"
     },
     {
       "constant": false,
@@ -811,8 +767,7 @@
       "outputs": [],
       "payable": false,
       "stateMutability": "nonpayable",
-      "type": "function",
-      "signature": "0xf2fde38b"
+      "type": "function"
     },
     {
       "constant": false,
@@ -821,8 +776,7 @@
       "outputs": [],
       "payable": false,
       "stateMutability": "nonpayable",
-      "type": "function",
-      "signature": "0x3f4ba83a"
+      "type": "function"
     },
     {
       "constant": false,
@@ -842,8 +796,7 @@
       "outputs": [],
       "payable": false,
       "stateMutability": "nonpayable",
-      "type": "function",
-      "signature": "0xe71ef4fe"
+      "type": "function"
     },
     {
       "constant": false,
@@ -858,8 +811,7 @@
       "outputs": [],
       "payable": false,
       "stateMutability": "nonpayable",
-      "type": "function",
-      "signature": "0x31b3eb94"
+      "type": "function"
     },
     {
       "constant": false,
@@ -874,8 +826,7 @@
       "outputs": [],
       "payable": false,
       "stateMutability": "nonpayable",
-      "type": "function",
-      "signature": "0x2cb57c48"
+      "type": "function"
     },
     {
       "constant": false,
@@ -945,8 +896,7 @@
       "outputs": [],
       "payable": true,
       "stateMutability": "payable",
-      "type": "function",
-      "signature": "0x38bc2f8e"
+      "type": "function"
     },
     {
       "constant": false,
@@ -971,8 +921,7 @@
       "outputs": [],
       "payable": false,
       "stateMutability": "nonpayable",
-      "type": "function",
-      "signature": "0x423bf7c8"
+      "type": "function"
     },
     {
       "constant": false,
@@ -1012,8 +961,7 @@
       "outputs": [],
       "payable": false,
       "stateMutability": "nonpayable",
-      "type": "function",
-      "signature": "0x23902d4a"
+      "type": "function"
     },
     {
       "constant": false,
@@ -1038,8 +986,7 @@
       "outputs": [],
       "payable": false,
       "stateMutability": "nonpayable",
-      "type": "function",
-      "signature": "0x2b7a9bb1"
+      "type": "function"
     },
     {
       "constant": false,
@@ -1069,8 +1016,7 @@
       "outputs": [],
       "payable": false,
       "stateMutability": "nonpayable",
-      "type": "function",
-      "signature": "0x37d0aa09"
+      "type": "function"
     },
     {
       "constant": false,
@@ -1085,8 +1031,7 @@
       "outputs": [],
       "payable": false,
       "stateMutability": "nonpayable",
-      "type": "function",
-      "signature": "0xe8083863"
+      "type": "function"
     },
     {
       "constant": false,
@@ -1101,8 +1046,7 @@
       "outputs": [],
       "payable": false,
       "stateMutability": "nonpayable",
-      "type": "function",
-      "signature": "0xcb6cbe8f"
+      "type": "function"
     },
     {
       "constant": false,
@@ -1117,8 +1061,7 @@
       "outputs": [],
       "payable": true,
       "stateMutability": "payable",
-      "type": "function",
-      "signature": "0xb9fe564b"
+      "type": "function"
     },
     {
       "constant": false,
@@ -1133,8 +1076,7 @@
       "outputs": [],
       "payable": false,
       "stateMutability": "nonpayable",
-      "type": "function",
-      "signature": "0xe73e35dd"
+      "type": "function"
     },
     {
       "constant": false,
@@ -1149,8 +1091,7 @@
       "outputs": [],
       "payable": false,
       "stateMutability": "nonpayable",
-      "type": "function",
-      "signature": "0x461893a9"
+      "type": "function"
     },
     {
       "constant": true,
@@ -1206,8 +1147,7 @@
       ],
       "payable": false,
       "stateMutability": "view",
-      "type": "function",
-      "signature": "0x78bd7935"
+      "type": "function"
     },
     {
       "constant": true,
@@ -1253,8 +1193,7 @@
       ],
       "payable": false,
       "stateMutability": "view",
-      "type": "function",
-      "signature": "0x636f9766"
+      "type": "function"
     }
   ],
   "metadata": "{\"compiler\":{\"version\":\"0.5.12+commit.7709ece9\"},\"language\":\"Solidity\",\"output\":{\"abi\":[{\"inputs\":[{\"internalType\":\"address\",\"name\":\"_celerTokenAddress\",\"type\":\"address\"},{\"internalType\":\"address\",\"name\":\"_polcAddress\",\"type\":\"address\"},{\"internalType\":\"bool\",\"name\":\"_enableWhitelist\",\"type\":\"bool\"},{\"internalType\":\"uint256\",\"name\":\"_minCelerValue\",\"type\":\"uint256\"}],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"constructor\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"uint256\",\"name\":\"auctionId\",\"type\":\"uint256\"},{\"indexed\":false,\"internalType\":\"address\",\"name\":\"challenger\",\"type\":\"address\"},{\"indexed\":false,\"internalType\":\"address[]\",\"name\":\"winners\",\"type\":\"address[]\"},{\"indexed\":false,\"internalType\":\"address\",\"name\":\"topLoser\",\"type\":\"address\"}],\"name\":\"ChallengeWinners\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"uint256\",\"name\":\"auctionId\",\"type\":\"uint256\"},{\"indexed\":false,\"internalType\":\"address[]\",\"name\":\"winners\",\"type\":\"address[]\"},{\"indexed\":false,\"internalType\":\"address\",\"name\":\"topLoser\",\"type\":\"address\"}],\"name\":\"ClaimWinners\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"auctionId\",\"type\":\"uint256\"},{\"indexed\":false,\"internalType\":\"address\",\"name\":\"winner\",\"type\":\"address\"}],\"name\":\"CollectCollateral\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"address\",\"name\":\"tokenAddress\",\"type\":\"address\"},{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"amount\",\"type\":\"uint256\"}],\"name\":\"DrainToken\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"auctionId\",\"type\":\"uint256\"}],\"name\":\"FinalizeAuction\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"auctionId\",\"type\":\"uint256\"},{\"indexed\":false,\"internalType\":\"address\",\"name\":\"bidder\",\"type\":\"address\"}],\"name\":\"FinalizeBid\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"auctionId\",\"type\":\"uint256\"},{\"indexed\":false,\"internalType\":\"address\",\"name\":\"asker\",\"type\":\"address\"}],\"name\":\"NewAuction\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"auctionId\",\"type\":\"uint256\"},{\"indexed\":true,\"internalType\":\"address\",\"name\":\"bidder\",\"type\":\"address\"}],\"name\":\"NewBid\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"address\",\"name\":\"previousOwner\",\"type\":\"address\"},{\"indexed\":true,\"internalType\":\"address\",\"name\":\"newOwner\",\"type\":\"address\"}],\"name\":\"OwnershipTransferred\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"address\",\"name\":\"account\",\"type\":\"address\"}],\"name\":\"Paused\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"address\",\"name\":\"account\",\"type\":\"address\"}],\"name\":\"PauserAdded\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"address\",\"name\":\"account\",\"type\":\"address\"}],\"name\":\"PauserRemoved\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"auctionId\",\"type\":\"uint256\"}],\"name\":\"RepayAuction\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"uint256\",\"name\":\"auctionId\",\"type\":\"uint256\"},{\"indexed\":false,\"internalType\":\"address\",\"name\":\"bidder\",\"type\":\"address\"}],\"name\":\"RevealBid\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"auctionId\",\"type\":\"uint256\"}],\"name\":\"TransferFeeDeposit\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"address\",\"name\":\"account\",\"type\":\"address\"}],\"name\":\"Unpaused\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"auctionId\",\"type\":\"uint256\"},{\"indexed\":false,\"internalType\":\"address\",\"name\":\"bidder\",\"type\":\"address\"}],\"name\":\"UpdateBid\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"address\",\"name\":\"tokenAddress\",\"type\":\"address\"},{\"indexed\":false,\"internalType\":\"bool\",\"name\":\"supported\",\"type\":\"bool\"}],\"name\":\"UpdateSupportedToken\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"address\",\"name\":\"account\",\"type\":\"address\"}],\"name\":\"WhitelistAdminAdded\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"address\",\"name\":\"account\",\"type\":\"address\"}],\"name\":\"WhitelistAdminRemoved\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"address\",\"name\":\"account\",\"type\":\"address\"}],\"name\":\"WhitelistedAdded\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"address\",\"name\":\"account\",\"type\":\"address\"}],\"name\":\"WhitelistedRemoved\",\"type\":\"event\"},{\"payable\":true,\"stateMutability\":\"payable\",\"type\":\"fallback\"},{\"constant\":false,\"inputs\":[{\"internalType\":\"address\",\"name\":\"account\",\"type\":\"address\"}],\"name\":\"addPauser\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"internalType\":\"address\",\"name\":\"account\",\"type\":\"address\"}],\"name\":\"addWhitelistAdmin\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"internalType\":\"address\",\"name\":\"account\",\"type\":\"address\"}],\"name\":\"addWhitelisted\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"name\":\"bidsByUser\",\"outputs\":[{\"internalType\":\"bytes32\",\"name\":\"hash\",\"type\":\"bytes32\"},{\"internalType\":\"uint256\",\"name\":\"commitmentId\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"rate\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"value\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"celerValue\",\"type\":\"uint256\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"celerToken\",\"outputs\":[{\"internalType\":\"contract IERC20\",\"name\":\"\",\"type\":\"address\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"_auctionId\",\"type\":\"uint256\"},{\"internalType\":\"address\",\"name\":\"_challenger\",\"type\":\"address\"},{\"internalType\":\"address[]\",\"name\":\"_winners\",\"type\":\"address[]\"},{\"internalType\":\"address\",\"name\":\"_topLoser\",\"type\":\"address\"}],\"name\":\"challengeWinners\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"_auctionId\",\"type\":\"uint256\"},{\"internalType\":\"address[]\",\"name\":\"_winners\",\"type\":\"address[]\"},{\"internalType\":\"address\",\"name\":\"_topLoser\",\"type\":\"address\"}],\"name\":\"claimWinners\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"_auctionId\",\"type\":\"uint256\"}],\"name\":\"collectCollateral\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"internalType\":\"address\",\"name\":\"_tokenAddress\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"_amount\",\"type\":\"uint256\"}],\"name\":\"drainToken\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"_auctionId\",\"type\":\"uint256\"}],\"name\":\"finalizeAuction\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"_auctionId\",\"type\":\"uint256\"}],\"name\":\"finalizeBid\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"_auctionId\",\"type\":\"uint256\"}],\"name\":\"getAuction\",\"outputs\":[{\"internalType\":\"address\",\"name\":\"asker\",\"type\":\"address\"},{\"internalType\":\"address\",\"name\":\"tokenAddress\",\"type\":\"address\"},{\"internalType\":\"address\",\"name\":\"collateralAddress\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"collateraValue\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"value\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"duration\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"maxRate\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"minValue\",\"type\":\"uint256\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"_auctionId\",\"type\":\"uint256\"}],\"name\":\"getAuctionPeriod\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"bidEnd\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"revealEnd\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"claimEnd\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"challengeEnd\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"finalizeEnd\",\"type\":\"uint256\"},{\"internalType\":\"bool\",\"name\":\"finalized\",\"type\":\"bool\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"internalType\":\"address\",\"name\":\"_tokenAddress\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"_bidDuration\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"_revealDuration\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"_claimDuration\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"_challengeDuration\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"_finalizeDuration\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"_value\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"_duration\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"_maxRate\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"_minValue\",\"type\":\"uint256\"},{\"internalType\":\"address\",\"name\":\"_collateralAddress\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"_collateralValue\",\"type\":\"uint256\"}],\"name\":\"initAuction\",\"outputs\":[],\"payable\":true,\"stateMutability\":\"payable\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"isOwner\",\"outputs\":[{\"internalType\":\"bool\",\"name\":\"\",\"type\":\"bool\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[{\"internalType\":\"address\",\"name\":\"account\",\"type\":\"address\"}],\"name\":\"isPauser\",\"outputs\":[{\"internalType\":\"bool\",\"name\":\"\",\"type\":\"bool\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[{\"internalType\":\"address\",\"name\":\"account\",\"type\":\"address\"}],\"name\":\"isWhitelistAdmin\",\"outputs\":[{\"internalType\":\"bool\",\"name\":\"\",\"type\":\"bool\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[{\"internalType\":\"address\",\"name\":\"account\",\"type\":\"address\"}],\"name\":\"isWhitelisted\",\"outputs\":[{\"internalType\":\"bool\",\"name\":\"\",\"type\":\"bool\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"minCelerValue\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"owner\",\"outputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[],\"name\":\"pause\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"paused\",\"outputs\":[{\"internalType\":\"bool\",\"name\":\"\",\"type\":\"bool\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[{\"internalType\":\"address\",\"name\":\"dest\",\"type\":\"address\"}],\"name\":\"payments\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"_auctionId\",\"type\":\"uint256\"},{\"internalType\":\"bytes32\",\"name\":\"_hash\",\"type\":\"bytes32\"},{\"internalType\":\"uint256\",\"name\":\"_celerValue\",\"type\":\"uint256\"}],\"name\":\"placeBid\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"internalType\":\"address\",\"name\":\"account\",\"type\":\"address\"}],\"name\":\"removeWhitelisted\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[],\"name\":\"renounceOwnership\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[],\"name\":\"renouncePauser\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[],\"name\":\"renounceWhitelistAdmin\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[],\"name\":\"renounceWhitelisted\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"_auctionId\",\"type\":\"uint256\"}],\"name\":\"repayAuction\",\"outputs\":[],\"payable\":true,\"stateMutability\":\"payable\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"_auctionId\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"_rate\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"_value\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"_celerValue\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"_salt\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"_commitmentId\",\"type\":\"uint256\"}],\"name\":\"revealBid\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"}],\"name\":\"supportedTokens\",\"outputs\":[{\"internalType\":\"bool\",\"name\":\"\",\"type\":\"bool\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"_auctionId\",\"type\":\"uint256\"}],\"name\":\"transferFeeDeposit\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"internalType\":\"address\",\"name\":\"newOwner\",\"type\":\"address\"}],\"name\":\"transferOwnership\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[],\"name\":\"unpause\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"internalType\":\"bool\",\"name\":\"_enable\",\"type\":\"bool\"}],\"name\":\"updateEnableWhitelist\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"internalType\":\"address\",\"name\":\"_tokenAddress\",\"type\":\"address\"},{\"internalType\":\"bool\",\"name\":\"_supported\",\"type\":\"bool\"}],\"name\":\"updateSupportedToken\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"internalType\":\"address payable\",\"name\":\"payee\",\"type\":\"address\"}],\"name\":\"withdrawPayments\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"}],\"devdoc\":{\"methods\":{\"challengeWinners(uint256,address,address[],address)\":{\"params\":{\"_auctionId\":\"Id of the auction\",\"_challenger\":\"Address for challenger, who may have higher score than current winners\",\"_topLoser\":\"The loser who has the highest rank\",\"_winners\":\"A list of winner addresses\"}},\"claimWinners(uint256,address[],address)\":{\"params\":{\"_auctionId\":\"Id of the auction\",\"_topLoser\":\"The loser who has the highest rank\",\"_winners\":\"A list of winner addresses\"}},\"collectCollateral(uint256)\":{\"params\":{\"_auctionId\":\"Id of the auction\"}},\"drainToken(address,uint256)\":{\"details\":\"This is for emergency situations.\",\"params\":{\"_amount\":\"drained token amount\",\"_tokenAddress\":\"address of token to drain\"}},\"finalizeAuction(uint256)\":{\"params\":{\"_auctionId\":\"Id of the auction\"}},\"finalizeBid(uint256)\":{\"params\":{\"_auctionId\":\"Id of the auction\"}},\"getAuction(uint256)\":{\"params\":{\"_auctionId\":\"Id of the auction\"}},\"getAuctionPeriod(uint256)\":{\"params\":{\"_auctionId\":\"Id of the auction\"}},\"initAuction(address,uint256,uint256,uint256,uint256,uint256,uint256,uint256,uint256,uint256,address,uint256)\":{\"params\":{\"_bidDuration\":\"Duration for bidding\",\"_challengeDuration\":\"Duration for challenging\",\"_claimDuration\":\"Duration for claiming\",\"_collateralAddress\":\"Collateral token address\",\"_collateralValue\":\"Collateral value\",\"_duration\":\"Duration for the lending\",\"_finalizeDuration\":\"Duration for finalizing\",\"_maxRate\":\"Maximum rate accepted\",\"_minValue\":\"Minimum value accepted\",\"_revealDuration\":\"Duration for revealing\",\"_tokenAddress\":\"Token address to borrow\",\"_value\":\"Total value asked\"}},\"isOwner()\":{\"return\":\"true if `msg.sender` is the owner of the contract.\"},\"owner()\":{\"return\":\"the address of the owner.\"},\"pause()\":{\"details\":\"called by the owner to pause, triggers stopped state\"},\"paused()\":{\"return\":\"true if the contract is paused, false otherwise.\"},\"payments(address)\":{\"details\":\"Returns the credit owed to an address.\",\"params\":{\"dest\":\"The creditor's address.\"}},\"placeBid(uint256,bytes32,uint256)\":{\"params\":{\"_auctionId\":\"Id of the auction\",\"_celerValue\":\"Potential celer value for bidding, it can be larger than actual celer value\",\"_hash\":\"Hash calculated from desired rate, value, celerValue and salt\"}},\"renounceOwnership()\":{\"details\":\"Allows the current owner to relinquish control of the contract.\"},\"repayAuction(uint256)\":{\"params\":{\"_auctionId\":\"Id of the auction\"}},\"revealBid(uint256,uint256,uint256,uint256,uint256,uint256)\":{\"params\":{\"_auctionId\":\"Id of the auction\",\"_celerValue\":\"Celer value for bidding\",\"_commitmentId\":\"Commitment Id in PoLC belong to the sender\",\"_rate\":\"Interest rate for bidding\",\"_salt\":\"A random value used for hash\",\"_value\":\"Value for bidding\"}},\"transferFeeDeposit(uint256)\":{\"params\":{\"_auctionId\":\"Id of the auction\"}},\"transferOwnership(address)\":{\"details\":\"Allows the current owner to transfer control of the contract to a newOwner.\",\"params\":{\"newOwner\":\"The address to transfer ownership to.\"}},\"unpause()\":{\"details\":\"called by the owner to unpause, returns to normal state\"},\"updateSupportedToken(address,bool)\":{\"params\":{\"_supported\":\"If the token is supported\",\"_tokenAddress\":\"Token address\"}},\"withdrawPayments(address)\":{\"details\":\"Withdraw accumulated balance.\",\"params\":{\"payee\":\"Whose balance will be withdrawn.\"}}},\"title\":\"LiBA\"},\"userdoc\":{\"methods\":{\"challengeWinners(uint256,address,address[],address)\":{\"notice\":\"A potential winner, who is not claimed as one of the winners, is able to challenge the auction during the challenge period\"},\"claimWinners(uint256,address[],address)\":{\"notice\":\"The auction asker claims winners for the auction during the claim period\"},\"collectCollateral(uint256)\":{\"notice\":\"Collect the collateral of the auction if lending is not repaid\"},\"drainToken(address,uint256)\":{\"notice\":\"Onwer drains one type of tokens when the contract is paused\"},\"finalizeAuction(uint256)\":{\"notice\":\"Finalize the auction by withdrawing money from PoLC commitments during finalize period\"},\"finalizeBid(uint256)\":{\"notice\":\"Finalize the bid for bidders, who are not selected as winners, or the asker fails to finalize the auction before finalize period\"},\"getAuction(uint256)\":{\"notice\":\"Get auction info\"},\"getAuctionPeriod(uint256)\":{\"notice\":\"Get auction period\"},\"initAuction(address,uint256,uint256,uint256,uint256,uint256,uint256,uint256,uint256,uint256,address,uint256)\":{\"notice\":\"Launch a new auction\"},\"placeBid(uint256,bytes32,uint256)\":{\"notice\":\"Bid for an auction during the bidding period. If called more than once, it will update the existing bid for the sender. However, when the bid is updated, the previous Celer value will be forfeited\"},\"renounceOwnership()\":{\"notice\":\"Renouncing to ownership will leave the contract without an owner. It will not be possible to call the functions with the `onlyOwner` modifier anymore.\"},\"repayAuction(uint256)\":{\"notice\":\"Repay the auction with original assets and interests after lending ends It will send collateral back to asker if there is any\"},\"revealBid(uint256,uint256,uint256,uint256,uint256,uint256)\":{\"notice\":\"Reveal the bid of current user for an auction during the revealing period. It will calculate hash based on rate, value, celer value, and salt, and check if it is same as the hash provided in the bidding period. It will also check if commitment in PoLC has enough fund\"},\"transferFeeDeposit(uint256)\":{\"notice\":\"Transfer defaulted auction deposit fee to polc reward pool\"},\"updateSupportedToken(address,bool)\":{\"notice\":\"Update a token in the supported list\"}},\"notice\":\"Contract allows service providers to send assets stored in PoLC through auction.\"}},\"settings\":{\"compilationTarget\":{\"/Users/Frank/mygit/celer/cEconomy/contracts/LiBA.sol\":\"LiBA\"},\"evmVersion\":\"byzantium\",\"libraries\":{},\"optimizer\":{\"enabled\":false,\"runs\":200},\"remappings\":[]},\"sources\":{\"/Users/Frank/mygit/celer/cEconomy/contracts/LiBA.sol\":{\"keccak256\":\"0xfb88a47244dcea1901ecb996a28eae49285d768a0adc3c89491bc67a866a5c13\",\"urls\":[\"bzz-raw://2a4acfaddb6074b09141e78cad7866c487f08cc402af082f16011e1911d1751d\",\"dweb:/ipfs/Qmc4SYkSbD46o5MH6Vo3tbjnUezKfFbYfigb1v9ifxNEna\"]},\"/Users/Frank/mygit/celer/cEconomy/contracts/lib/IPoLC.sol\":{\"keccak256\":\"0x5cae89c251e0a256b885565f08b34930832b1c9f1458b84c7b1be6c1f948a988\",\"urls\":[\"bzz-raw://6ff18756e83263f809baaadcc3af51ebfb4c403927d53b4db5aff5dc1442eb34\",\"dweb:/ipfs/Qmevnj4Ak3HcFQsYAm6ayEUibXJPvMkkMV4eTtLNB3axGR\"]},\"/Users/Frank/mygit/celer/cEconomy/contracts/lib/LiBA/Asker.sol\":{\"keccak256\":\"0xb7b5497f24af51bac329e3f973bda8e213c7359d5f691f7a683a89059101f719\",\"urls\":[\"bzz-raw://171ad847b1e2c3f230abf581be39086544ecf61fceb84eb277245795124c0e99\",\"dweb:/ipfs/QmX4RuF4e8pk5DK8XxwwDEUgiVGVCF32BKdv1gSsg34cgK\"]},\"/Users/Frank/mygit/celer/cEconomy/contracts/lib/LiBA/Bidder.sol\":{\"keccak256\":\"0x478c298ec35fc233b190ce796ce44a2e48dac17dff630a3912031f1156ad827e\",\"urls\":[\"bzz-raw://f332d0e998b715d9e1c8e80e2f216ecc248413ca8cb6cd103dd575164b20a989\",\"dweb:/ipfs/QmTM7qtZaeWvz5Ss7Afr31VxrWtmQFKii88TKTVqAKMKKE\"]},\"/Users/Frank/mygit/celer/cEconomy/contracts/lib/LiBA/Struct.sol\":{\"keccak256\":\"0xb9eaf2386a96762a802b7a78d49b4057df12eb18a0a9f99708f2a1ab8527a8fa\",\"urls\":[\"bzz-raw://3396453ada048cdd5ee16773a240fa0d043e331eb1daabf30feec2daabcfff50\",\"dweb:/ipfs/QmeYJ6bF3xJhVRiywLivmDarxNQ89Y8MXvxk7vd3BmJJmQ\"]},\"/Users/Frank/mygit/celer/cEconomy/contracts/lib/LiBA/Util.sol\":{\"keccak256\":\"0xf9419f91363ca225a9d2105e968472bf003b9df29bd0cab9a241f412276dc079\",\"urls\":[\"bzz-raw://a1d2a289f05f753e606b69f6f97ff7283f6331cc10357714c5f7dcf9384bce5a\",\"dweb:/ipfs/QmQEsf46shYNjaptPXvBEWSJrXv62Jmj7npbP5wjDPZfv1\"]},\"/Users/Frank/mygit/celer/cEconomy/contracts/lib/TokenUtil.sol\":{\"keccak256\":\"0xe6a325950d0402a5254c6c3e6fd4ad2c65b3770ddf5da6eee26a65435cbc3991\",\"urls\":[\"bzz-raw://3d48ac812f5d5e989d06a1365718ba289f6946c763eb190264a27b176cdd93ac\",\"dweb:/ipfs/QmepGLgfkqf1yPqEUHamyma5LWGidqFVMnQAefhjihZK5N\"]},\"openzeppelin-solidity/contracts/access/Roles.sol\":{\"keccak256\":\"0x659ba0f9a3392cd50a8a5fafaf5dfd8c6a0878f6a4613bceff4e90dceddcd865\",\"urls\":[\"bzz-raw://4ca6617349a9b36fd82e9442a8e445ce9021a174e4399d1457ddc894ee3f5df3\",\"dweb:/ipfs/QmcmyB4cNazZ1sw963Afaijt67M9bDgwmGXCgQajGTD4tm\"]},\"openzeppelin-solidity/contracts/access/roles/PauserRole.sol\":{\"keccak256\":\"0x6506133e295a7199df2ac5dfc52853d9d767f68450b6d0193e9d8056b164ce86\",\"urls\":[\"bzz-raw://9c03592a9e6b1377e401b74eccf175a250232b5a341347d3fc5cb50e9bc86ba2\",\"dweb:/ipfs/QmYAr1yXT89hNUMJ37aiBpD9HtYfBDqmueVCzphRuuU7oZ\"]},\"openzeppelin-solidity/contracts/access/roles/WhitelistAdminRole.sol\":{\"keccak256\":\"0x296248d0db94ffd742e1918944172d8c6f0eda2395330f7e33c058884620efdc\",\"urls\":[\"bzz-raw://bbedb198a9c62231d4d544c62ce1fe10b6df9ade250bb99e69dfd6bb000784bb\",\"dweb:/ipfs/QmcmHNuJBMbmFZSLfcX8g3rwUsntpPkJgihuGFrjBuapQN\"]},\"openzeppelin-solidity/contracts/access/roles/WhitelistedRole.sol\":{\"keccak256\":\"0xfd5715327c3f75b7056fdf2e9dbb9b22559549af0381cc85859c9dcd8f101000\",\"urls\":[\"bzz-raw://d181d8bf50be0de500326314ccbff56373908eee5041e709fff3d37505418275\",\"dweb:/ipfs/QmXLXQtAtYAiKihMngJPN7TFHJJDhiBL9AHuoUuVdtrgNF\"]},\"openzeppelin-solidity/contracts/lifecycle/Pausable.sol\":{\"keccak256\":\"0x3b0ed31deeba7e3c6cfbbe8092a6b427084ee390800a06acdea5c17c8185d606\",\"urls\":[\"bzz-raw://bbdbf9d3754fcdcc85aec0432fabcec914317b1c2081b43753442ed53853a34a\",\"dweb:/ipfs/QmVHWQBn5xQkQEHhyGNEeS5gjjALZEk5ZfcjFt7kL6MoLy\"]},\"openzeppelin-solidity/contracts/math/SafeMath.sol\":{\"keccak256\":\"0x965012d27b4262d7a41f5028cbb30c51ebd9ecd4be8fb30380aaa7a3c64fbc8b\",\"urls\":[\"bzz-raw://1eb493553b27efd46c231a836a83ce50d215639feb97b4aac9f301d0fd034ff5\",\"dweb:/ipfs/QmbMdvSXcqGKxeeYvzF3VrWpoHQyVzMXBhzhAokF2Gdymv\"]},\"openzeppelin-solidity/contracts/ownership/Ownable.sol\":{\"keccak256\":\"0x980de387a1a020a498f53d00f89fecebb12c949a17e8f160093c0303ede2b786\",\"urls\":[\"bzz-raw://f07a2c393caa85f62f0aaa461e3edd50aa59371d4209778ba0558d7f8b4b856c\",\"dweb:/ipfs/QmeN3ZiYGSjCnQFeYaJNgoXjF9eDue1g3e9pqManRkeBtV\"]},\"openzeppelin-solidity/contracts/ownership/Secondary.sol\":{\"keccak256\":\"0xaf8e346aed4d07781d02ed118d6637c7190def5bafe2aa5c374bdbff137e5a14\",\"urls\":[\"bzz-raw://551c1bf8d65c1e44683c89ae5275542a918a1a9df0934bda8fd165a26f803952\",\"dweb:/ipfs/QmVSDTUh4kmPVaj1EZWcJG4jx11a59wXY1bWqcUrpoWQ2M\"]},\"openzeppelin-solidity/contracts/payment/PullPayment.sol\":{\"keccak256\":\"0x02cc8a99170a41421a3912169312291ddac50853cb0aeafbe054262e844e1945\",\"urls\":[\"bzz-raw://b302fa58759d6fd503676b2d9515a270081218d2283c78d4247c45fe14bef652\",\"dweb:/ipfs/QmcDZ3R3aWRyxSA2SPDXM9PTb1LjLKxQkModpHgrfBZNQv\"]},\"openzeppelin-solidity/contracts/payment/escrow/Escrow.sol\":{\"keccak256\":\"0xa595351c39e37511ac79d02b9e8e7e9f9169edb48e45507756d6818f6300bb85\",\"urls\":[\"bzz-raw://b2a8ee1f89d72b6b2022a87e1f878cb2a2a61748a6c53e288170953aeb00ff05\",\"dweb:/ipfs/QmSjHBUSPrbwzNk1gsSTwbxknSgy8bKwhHTHY3eNvLZx6R\"]},\"openzeppelin-solidity/contracts/token/ERC20/IERC20.sol\":{\"keccak256\":\"0x079c4e23ee448f529e43bfa3c4e8fb4be52cd0318ee923a276835bedf45b93d8\",\"urls\":[\"bzz-raw://ee762ff5b7746e41d27dcbcea00c7a3034b58adb1b45ddadddb5b721aff450df\",\"dweb:/ipfs/QmdxqtgEFZjHCoiYyz6pUAQ5iBm7As25jcyEbZoTaAgyDa\"]},\"openzeppelin-solidity/contracts/token/ERC20/SafeERC20.sol\":{\"keccak256\":\"0x7b8ac1266b66d7218a5f81ec381c3fd5cf55a6673369356c6e7c409fa21f987a\",\"urls\":[\"bzz-raw://7b0063d8f31296f787ba1b64b7e68b63e2e2ca53b77341be689ad7f83550b4f5\",\"dweb:/ipfs/QmV7ED65vpqJCKFxupqHSUJHJvPQGtQQt7P8Acwp9zZn17\"]},\"openzeppelin-solidity/contracts/utils/Address.sol\":{\"keccak256\":\"0x5c731061b804fa256fc8c05150eafe5d20b6bb94541a8f187912bf84f7033f34\",\"urls\":[\"bzz-raw://a3c2d9f046beebab7fb41b1b124a6a124a36f510f7c67365861402ac831bdc71\",\"dweb:/ipfs/QmUtASRgitregbKH83anopLtF9vFQe3BKeAjhUa6F7t9YV\"]}},\"version\":1}",
@@ -40505,7 +40444,7 @@
     }
   },
   "schemaVersion": "3.0.6",
-  "updatedAt": "2019-12-12T20:20:40.168Z",
+  "updatedAt": "2019-12-13T23:04:39.024Z",
   "devdoc": {
     "methods": {
       "challengeWinners(uint256,address,address[],address)": {

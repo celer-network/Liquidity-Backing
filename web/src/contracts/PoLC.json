@@ -16,8 +16,7 @@
       ],
       "payable": false,
       "stateMutability": "nonpayable",
-      "type": "constructor",
-      "signature": "constructor"
+      "type": "constructor"
     },
     {
       "anonymous": false,
@@ -36,8 +35,7 @@
         }
       ],
       "name": "DrainToken",
-      "type": "event",
-      "signature": "0xac6572a44b29fc3e82672a2d68efd9bd694204ee2274bc37ee5c4cebcf3fa1ef"
+      "type": "event"
     },
     {
       "anonymous": false,
@@ -56,8 +54,7 @@
         }
       ],
       "name": "NewCommitment",
-      "type": "event",
-      "signature": "0x5de665a21cada463a82f66cb64dba20f9af6b604608d81f5c37080469404ce57"
+      "type": "event"
     },
     {
       "anonymous": false,
@@ -76,8 +73,7 @@
         }
       ],
       "name": "OwnershipTransferred",
-      "type": "event",
-      "signature": "0x8be0079c531659141344cd1fd0a4f28419497f9722a3daafe3b4186f6b6457e0"
+      "type": "event"
     },
     {
       "anonymous": false,
@@ -90,8 +86,7 @@
         }
       ],
       "name": "Paused",
-      "type": "event",
-      "signature": "0x62e78cea01bee320cd4e420270b5ea74000d11b0c9f74754ebdbfc544b05a258"
+      "type": "event"
     },
     {
       "anonymous": false,
@@ -104,8 +99,7 @@
         }
       ],
       "name": "PauserAdded",
-      "type": "event",
-      "signature": "0x6719d08c1888103bea251a4ed56406bd0c3e69723c8a1686e017e7bbe159b6f8"
+      "type": "event"
     },
     {
       "anonymous": false,
@@ -118,8 +112,7 @@
         }
       ],
       "name": "PauserRemoved",
-      "type": "event",
-      "signature": "0xcd265ebaf09df2871cc7bd4133404a235ba12eff2041bb89d9c714a2621c7c7e"
+      "type": "event"
     },
     {
       "anonymous": false,
@@ -132,8 +125,7 @@
         }
       ],
       "name": "Unpaused",
-      "type": "event",
-      "signature": "0x5db9ee0a495bf2e6ff9c91a7834c1ba4fdd244a5e8aa4e537bd38aeae4b073aa"
+      "type": "event"
     },
     {
       "anonymous": false,
@@ -152,8 +144,7 @@
         }
       ],
       "name": "UpdateSupportedToken",
-      "type": "event",
-      "signature": "0xd71e43dae5ba4386463c0ef49b6f19fc82aea6a936b4242ef04b99730c0ed4c3"
+      "type": "event"
     },
     {
       "anonymous": false,
@@ -166,8 +157,7 @@
         }
       ],
       "name": "WithdrawFund",
-      "type": "event",
-      "signature": "0xd03e026b842138eab06c2418a5fc2eb6c68ba2c6a0d2768b0e4024d8d3196a89"
+      "type": "event"
     },
     {
       "anonymous": false,
@@ -180,8 +170,7 @@
         }
       ],
       "name": "WithdrawReward",
-      "type": "event",
-      "signature": "0x57b16428e0995660a2371bfccc1866c98df04182d095c00b50648af066dd1ec9"
+      "type": "event"
     },
     {
       "constant": false,
@@ -196,8 +185,7 @@
       "outputs": [],
       "payable": false,
       "stateMutability": "nonpayable",
-      "type": "function",
-      "signature": "0x82dc1ec4"
+      "type": "function"
     },
     {
       "constant": true,
@@ -258,8 +246,7 @@
       ],
       "payable": false,
       "stateMutability": "view",
-      "type": "function",
-      "signature": "0x2ecf4103"
+      "type": "function"
     },
     {
       "constant": false,
@@ -279,8 +266,7 @@
       "outputs": [],
       "payable": false,
       "stateMutability": "nonpayable",
-      "type": "function",
-      "signature": "0x9d4323be"
+      "type": "function"
     },
     {
       "constant": true,
@@ -295,8 +281,7 @@
       ],
       "payable": false,
       "stateMutability": "view",
-      "type": "function",
-      "signature": "0x8f32d59b"
+      "type": "function"
     },
     {
       "constant": true,
@@ -317,8 +302,7 @@
       ],
       "payable": false,
       "stateMutability": "view",
-      "type": "function",
-      "signature": "0x46fbf68e"
+      "type": "function"
     },
     {
       "constant": true,
@@ -333,8 +317,7 @@
       ],
       "payable": false,
       "stateMutability": "view",
-      "type": "function",
-      "signature": "0x8da5cb5b"
+      "type": "function"
     },
     {
       "constant": false,
@@ -343,8 +326,7 @@
       "outputs": [],
       "payable": false,
       "stateMutability": "nonpayable",
-      "type": "function",
-      "signature": "0x8456cb59"
+      "type": "function"
     },
     {
       "constant": true,
@@ -359,8 +341,7 @@
       ],
       "payable": false,
       "stateMutability": "view",
-      "type": "function",
-      "signature": "0x5c975abb"
+      "type": "function"
     },
     {
       "constant": false,
@@ -369,8 +350,7 @@
       "outputs": [],
       "payable": false,
       "stateMutability": "nonpayable",
-      "type": "function",
-      "signature": "0x715018a6"
+      "type": "function"
     },
     {
       "constant": false,
@@ -379,8 +359,7 @@
       "outputs": [],
       "payable": false,
       "stateMutability": "nonpayable",
-      "type": "function",
-      "signature": "0x6ef8d66d"
+      "type": "function"
     },
     {
       "constant": true,
@@ -401,8 +380,7 @@
       ],
       "payable": false,
       "stateMutability": "view",
-      "type": "function",
-      "signature": "0x68c4ac26"
+      "type": "function"
     },
     {
       "constant": false,
@@ -417,8 +395,7 @@
       "outputs": [],
       "payable": false,
       "stateMutability": "nonpayable",
-      "type": "function",
-      "signature": "0xf2fde38b"
+      "type": "function"
     },
     {
       "constant": false,
@@ -427,8 +404,7 @@
       "outputs": [],
       "payable": false,
       "stateMutability": "nonpayable",
-      "type": "function",
-      "signature": "0x3f4ba83a"
+      "type": "function"
     },
     {
       "constant": false,
@@ -448,8 +424,7 @@
       "outputs": [],
       "payable": false,
       "stateMutability": "nonpayable",
-      "type": "function",
-      "signature": "0xe71ef4fe"
+      "type": "function"
     },
     {
       "constant": false,
@@ -474,8 +449,7 @@
       "outputs": [],
       "payable": true,
       "stateMutability": "payable",
-      "type": "function",
-      "signature": "0xda4e509d"
+      "type": "function"
     },
     {
       "constant": false,
@@ -490,8 +464,7 @@
       "outputs": [],
       "payable": false,
       "stateMutability": "nonpayable",
-      "type": "function",
-      "signature": "0x0cee1725"
+      "type": "function"
     },
     {
       "constant": false,
@@ -506,8 +479,7 @@
       "outputs": [],
       "payable": false,
       "stateMutability": "nonpayable",
-      "type": "function",
-      "signature": "0x523a3f08"
+      "type": "function"
     },
     {
       "constant": false,
@@ -522,8 +494,7 @@
       "outputs": [],
       "payable": false,
       "stateMutability": "nonpayable",
-      "type": "function",
-      "signature": "0x15465d0b"
+      "type": "function"
     },
     {
       "constant": true,
@@ -554,8 +525,7 @@
       ],
       "payable": false,
       "stateMutability": "view",
-      "type": "function",
-      "signature": "0x01f2e9a8"
+      "type": "function"
     },
     {
       "constant": false,
@@ -585,8 +555,7 @@
       "outputs": [],
       "payable": false,
       "stateMutability": "nonpayable",
-      "type": "function",
-      "signature": "0x657275ab"
+      "type": "function"
     },
     {
       "constant": false,
@@ -616,8 +585,7 @@
       "outputs": [],
       "payable": true,
       "stateMutability": "payable",
-      "type": "function",
-      "signature": "0xe090d045"
+      "type": "function"
     },
     {
       "constant": false,
@@ -643,8 +611,7 @@
       ],
       "payable": false,
       "stateMutability": "nonpayable",
-      "type": "function",
-      "signature": "0x1852e8d9"
+      "type": "function"
     }
   ],
   "metadata": "{\"compiler\":{\"version\":\"0.5.12+commit.7709ece9\"},\"language\":\"Solidity\",\"output\":{\"abi\":[{\"inputs\":[{\"internalType\":\"address\",\"name\":\"_celerTokenAddress\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"_blockReward\",\"type\":\"uint256\"}],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"constructor\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"address\",\"name\":\"tokenAddress\",\"type\":\"address\"},{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"amount\",\"type\":\"uint256\"}],\"name\":\"DrainToken\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"commitmentId\",\"type\":\"uint256\"},{\"indexed\":true,\"internalType\":\"address\",\"name\":\"user\",\"type\":\"address\"}],\"name\":\"NewCommitment\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"address\",\"name\":\"previousOwner\",\"type\":\"address\"},{\"indexed\":true,\"internalType\":\"address\",\"name\":\"newOwner\",\"type\":\"address\"}],\"name\":\"OwnershipTransferred\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"address\",\"name\":\"account\",\"type\":\"address\"}],\"name\":\"Paused\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"address\",\"name\":\"account\",\"type\":\"address\"}],\"name\":\"PauserAdded\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"address\",\"name\":\"account\",\"type\":\"address\"}],\"name\":\"PauserRemoved\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"address\",\"name\":\"account\",\"type\":\"address\"}],\"name\":\"Unpaused\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"address\",\"name\":\"tokenAddress\",\"type\":\"address\"},{\"indexed\":false,\"internalType\":\"bool\",\"name\":\"supported\",\"type\":\"bool\"}],\"name\":\"UpdateSupportedToken\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"commitmentId\",\"type\":\"uint256\"}],\"name\":\"WithdrawFund\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"commitmentId\",\"type\":\"uint256\"}],\"name\":\"WithdrawReward\",\"type\":\"event\"},{\"constant\":false,\"inputs\":[{\"internalType\":\"address\",\"name\":\"account\",\"type\":\"address\"}],\"name\":\"addPauser\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[{\"internalType\":\"address\",\"name\":\"_tokenAddress\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"_value\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"_duration\",\"type\":\"uint256\"}],\"name\":\"calculateAuctionFee\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"internalType\":\"address\",\"name\":\"_user\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"_commitmentId\",\"type\":\"uint256\"}],\"name\":\"calculateReward\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"internalType\":\"address\",\"name\":\"_tokenAddress\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"_duration\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"_value\",\"type\":\"uint256\"}],\"name\":\"commitFund\",\"outputs\":[],\"payable\":true,\"stateMutability\":\"payable\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"name\":\"commitmentsByUser\",\"outputs\":[{\"internalType\":\"address\",\"name\":\"tokenAddress\",\"type\":\"address\"},{\"internalType\":\"bool\",\"name\":\"locked\",\"type\":\"bool\"},{\"internalType\":\"uint256\",\"name\":\"lockStart\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"lockEnd\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"committedValue\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"availableValue\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"lendingValue\",\"type\":\"uint256\"},{\"internalType\":\"bool\",\"name\":\"rewardWithdrawn\",\"type\":\"bool\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"internalType\":\"address\",\"name\":\"_tokenAddress\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"_amount\",\"type\":\"uint256\"}],\"name\":\"drainToken\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"isOwner\",\"outputs\":[{\"internalType\":\"bool\",\"name\":\"\",\"type\":\"bool\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[{\"internalType\":\"address\",\"name\":\"account\",\"type\":\"address\"}],\"name\":\"isPauser\",\"outputs\":[{\"internalType\":\"bool\",\"name\":\"\",\"type\":\"bool\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"internalType\":\"address\",\"name\":\"_user\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"_commitmentId\",\"type\":\"uint256\"},{\"internalType\":\"address\",\"name\":\"_tokenAddress\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"_value\",\"type\":\"uint256\"}],\"name\":\"lendCommitment\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"owner\",\"outputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[],\"name\":\"pause\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"paused\",\"outputs\":[{\"internalType\":\"bool\",\"name\":\"\",\"type\":\"bool\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[],\"name\":\"renounceOwnership\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[],\"name\":\"renouncePauser\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"internalType\":\"address\",\"name\":\"_user\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"_commitmentId\",\"type\":\"uint256\"},{\"internalType\":\"address\",\"name\":\"_borrower\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"_value\",\"type\":\"uint256\"}],\"name\":\"repayCommitment\",\"outputs\":[],\"payable\":true,\"stateMutability\":\"payable\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"internalType\":\"address\",\"name\":\"_libaAddress\",\"type\":\"address\"}],\"name\":\"setLibaAddress\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"}],\"name\":\"supportedTokens\",\"outputs\":[{\"internalType\":\"bool\",\"name\":\"\",\"type\":\"bool\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"internalType\":\"address\",\"name\":\"newOwner\",\"type\":\"address\"}],\"name\":\"transferOwnership\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[],\"name\":\"unpause\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"internalType\":\"address\",\"name\":\"_tokenAddress\",\"type\":\"address\"},{\"internalType\":\"bool\",\"name\":\"_supported\",\"type\":\"bool\"}],\"name\":\"updateSupportedToken\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"_commitmentId\",\"type\":\"uint256\"}],\"name\":\"withdrawFund\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"_commitmentId\",\"type\":\"uint256\"}],\"name\":\"withdrawReward\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"}],\"devdoc\":{\"methods\":{\"calculateAuctionFee(address,uint256,uint256)\":{\"params\":{\"_duration\":\"Duration for the borrowing\",\"_tokenAddress\":\"Token address\",\"_value\":\"Value to borrow\"}},\"calculateReward(address,uint256)\":{\"params\":{\"_commitmentId\":\"ID of the commitment\",\"_user\":\"User address\"}},\"commitFund(address,uint256,uint256)\":{\"params\":{\"_duration\":\"lock-in duration by days\",\"_tokenAddress\":\"Address of the locked token. For ETH, it will be 0\",\"_value\":\"committed token value\"}},\"drainToken(address,uint256)\":{\"details\":\"This is for emergency situations.\",\"params\":{\"_amount\":\"drained token amount\",\"_tokenAddress\":\"address of token to drain\"}},\"isOwner()\":{\"return\":\"true if `msg.sender` is the owner of the contract.\"},\"lendCommitment(address,uint256,address,uint256)\":{\"params\":{\"_commitmentId\":\"ID of the commitment\",\"_tokenAddress\":\"Address of token intended to lend\",\"_user\":\"User address\",\"_value\":\"Value to lend\"}},\"owner()\":{\"return\":\"the address of the owner.\"},\"pause()\":{\"details\":\"called by the owner to pause, triggers stopped state\"},\"paused()\":{\"return\":\"true if the contract is paused, false otherwise.\"},\"renounceOwnership()\":{\"details\":\"Allows the current owner to relinquish control of the contract.\"},\"repayCommitment(address,uint256,address,uint256)\":{\"params\":{\"_commitmentId\":\"ID of the commitment\",\"_user\":\"User address\",\"_value\":\"value to repay\"}},\"setLibaAddress(address)\":{\"params\":{\"_libaAddress\":\"Liba address\"}},\"transferOwnership(address)\":{\"details\":\"Allows the current owner to transfer control of the contract to a newOwner.\",\"params\":{\"newOwner\":\"The address to transfer ownership to.\"}},\"unpause()\":{\"details\":\"called by the owner to unpause, returns to normal state\"},\"updateSupportedToken(address,bool)\":{\"params\":{\"_supported\":\"If the token is supported\",\"_tokenAddress\":\"Token address\"}},\"withdrawFund(uint256)\":{\"params\":{\"_commitmentId\":\"ID of the commitment\"}},\"withdrawReward(uint256)\":{\"params\":{\"_commitmentId\":\"ID of the commitment\"}}},\"title\":\"PoLC\"},\"userdoc\":{\"methods\":{\"calculateAuctionFee(address,uint256,uint256)\":{\"notice\":\"Calculate the fee required to launch an auction in LiBA\"},\"calculateReward(address,uint256)\":{\"notice\":\"Calculate reward for a commitment\"},\"commitFund(address,uint256,uint256)\":{\"notice\":\"Lock fund into the PoLC contract for a specific duration. The longer the duration and larger locked token value, more rewards will be earned. Once, the fund is locked, it can only be drawn when the lock expired. If the duration is set to 0, the fund will be lock-free, but there will be no reward.\"},\"drainToken(address,uint256)\":{\"notice\":\"Onwer drains one type of tokens when the contract is paused\"},\"lendCommitment(address,uint256,address,uint256)\":{\"notice\":\"Send a specific value to Liba for lending. Can only be called from LiBA\"},\"renounceOwnership()\":{\"notice\":\"Renouncing to ownership will leave the contract without an owner. It will not be possible to call the functions with the `onlyOwner` modifier anymore.\"},\"repayCommitment(address,uint256,address,uint256)\":{\"notice\":\"Repay to the commitment when borrower returns money through LiBA\"},\"setLibaAddress(address)\":{\"notice\":\"Set libaAddress state variable\"},\"updateSupportedToken(address,bool)\":{\"notice\":\"Update a token in the supported list\"},\"withdrawFund(uint256)\":{\"notice\":\"Withdraw all available fund in a commitment if its lock has expired\"},\"withdrawReward(uint256)\":{\"notice\":\"Withdraw all available reward in a commitment if the lock has expired\"}},\"notice\":\"Contract allows user to lock fund and collect reward.\"}},\"settings\":{\"compilationTarget\":{\"/Users/Frank/mygit/celer/cEconomy/contracts/PoLC.sol\":\"PoLC\"},\"evmVersion\":\"byzantium\",\"libraries\":{},\"optimizer\":{\"enabled\":false,\"runs\":200},\"remappings\":[]},\"sources\":{\"/Users/Frank/mygit/celer/cEconomy/contracts/PoLC.sol\":{\"keccak256\":\"0xc3058d08050a0176b53f0929bf8362536c9fe69137ae2d66d0238db770d5e685\",\"urls\":[\"bzz-raw://113dd6a1f9f8dd1f1c41aeaaf4a184d4af14c8fccc05d34ff13a9c143f875a92\",\"dweb:/ipfs/QmfGshy6rjotu3uqkxucM92HRoWVjtZDMDbcwm74Ke9aHi\"]},\"/Users/Frank/mygit/celer/cEconomy/contracts/lib/IPoLC.sol\":{\"keccak256\":\"0x5cae89c251e0a256b885565f08b34930832b1c9f1458b84c7b1be6c1f948a988\",\"urls\":[\"bzz-raw://6ff18756e83263f809baaadcc3af51ebfb4c403927d53b4db5aff5dc1442eb34\",\"dweb:/ipfs/Qmevnj4Ak3HcFQsYAm6ayEUibXJPvMkkMV4eTtLNB3axGR\"]},\"/Users/Frank/mygit/celer/cEconomy/contracts/lib/TokenUtil.sol\":{\"keccak256\":\"0xe6a325950d0402a5254c6c3e6fd4ad2c65b3770ddf5da6eee26a65435cbc3991\",\"urls\":[\"bzz-raw://3d48ac812f5d5e989d06a1365718ba289f6946c763eb190264a27b176cdd93ac\",\"dweb:/ipfs/QmepGLgfkqf1yPqEUHamyma5LWGidqFVMnQAefhjihZK5N\"]},\"openzeppelin-solidity/contracts/access/Roles.sol\":{\"keccak256\":\"0x659ba0f9a3392cd50a8a5fafaf5dfd8c6a0878f6a4613bceff4e90dceddcd865\",\"urls\":[\"bzz-raw://4ca6617349a9b36fd82e9442a8e445ce9021a174e4399d1457ddc894ee3f5df3\",\"dweb:/ipfs/QmcmyB4cNazZ1sw963Afaijt67M9bDgwmGXCgQajGTD4tm\"]},\"openzeppelin-solidity/contracts/access/roles/PauserRole.sol\":{\"keccak256\":\"0x6506133e295a7199df2ac5dfc52853d9d767f68450b6d0193e9d8056b164ce86\",\"urls\":[\"bzz-raw://9c03592a9e6b1377e401b74eccf175a250232b5a341347d3fc5cb50e9bc86ba2\",\"dweb:/ipfs/QmYAr1yXT89hNUMJ37aiBpD9HtYfBDqmueVCzphRuuU7oZ\"]},\"openzeppelin-solidity/contracts/lifecycle/Pausable.sol\":{\"keccak256\":\"0x3b0ed31deeba7e3c6cfbbe8092a6b427084ee390800a06acdea5c17c8185d606\",\"urls\":[\"bzz-raw://bbdbf9d3754fcdcc85aec0432fabcec914317b1c2081b43753442ed53853a34a\",\"dweb:/ipfs/QmVHWQBn5xQkQEHhyGNEeS5gjjALZEk5ZfcjFt7kL6MoLy\"]},\"openzeppelin-solidity/contracts/math/SafeMath.sol\":{\"keccak256\":\"0x965012d27b4262d7a41f5028cbb30c51ebd9ecd4be8fb30380aaa7a3c64fbc8b\",\"urls\":[\"bzz-raw://1eb493553b27efd46c231a836a83ce50d215639feb97b4aac9f301d0fd034ff5\",\"dweb:/ipfs/QmbMdvSXcqGKxeeYvzF3VrWpoHQyVzMXBhzhAokF2Gdymv\"]},\"openzeppelin-solidity/contracts/ownership/Ownable.sol\":{\"keccak256\":\"0x980de387a1a020a498f53d00f89fecebb12c949a17e8f160093c0303ede2b786\",\"urls\":[\"bzz-raw://f07a2c393caa85f62f0aaa461e3edd50aa59371d4209778ba0558d7f8b4b856c\",\"dweb:/ipfs/QmeN3ZiYGSjCnQFeYaJNgoXjF9eDue1g3e9pqManRkeBtV\"]},\"openzeppelin-solidity/contracts/token/ERC20/IERC20.sol\":{\"keccak256\":\"0x079c4e23ee448f529e43bfa3c4e8fb4be52cd0318ee923a276835bedf45b93d8\",\"urls\":[\"bzz-raw://ee762ff5b7746e41d27dcbcea00c7a3034b58adb1b45ddadddb5b721aff450df\",\"dweb:/ipfs/QmdxqtgEFZjHCoiYyz6pUAQ5iBm7As25jcyEbZoTaAgyDa\"]},\"openzeppelin-solidity/contracts/token/ERC20/SafeERC20.sol\":{\"keccak256\":\"0x7b8ac1266b66d7218a5f81ec381c3fd5cf55a6673369356c6e7c409fa21f987a\",\"urls\":[\"bzz-raw://7b0063d8f31296f787ba1b64b7e68b63e2e2ca53b77341be689ad7f83550b4f5\",\"dweb:/ipfs/QmV7ED65vpqJCKFxupqHSUJHJvPQGtQQt7P8Acwp9zZn17\"]},\"openzeppelin-solidity/contracts/utils/Address.sol\":{\"keccak256\":\"0x5c731061b804fa256fc8c05150eafe5d20b6bb94541a8f187912bf84f7033f34\",\"urls\":[\"bzz-raw://a3c2d9f046beebab7fb41b1b124a6a124a36f510f7c67365861402ac831bdc71\",\"dweb:/ipfs/QmUtASRgitregbKH83anopLtF9vFQe3BKeAjhUa6F7t9YV\"]}},\"version\":1}",
@@ -21449,7 +21416,7 @@
     }
   },
   "schemaVersion": "3.0.6",
-  "updatedAt": "2019-12-12T20:20:40.141Z",
+  "updatedAt": "2019-12-13T23:04:38.992Z",
   "devdoc": {
     "methods": {
       "calculateAuctionFee(address,uint256,uint256)": {
