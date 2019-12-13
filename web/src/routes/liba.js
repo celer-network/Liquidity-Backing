@@ -29,7 +29,7 @@ class LiBA extends React.Component {
     constructor(props, context) {
         super(props);
 
-        this.state = { isModalVisible: false, tab: 'all' };
+        this.state = { isModalVisible: false, tab: 'all', filter: {} };
         this.contracts = context.drizzle.contracts;
     }
 
@@ -43,9 +43,15 @@ class LiBA extends React.Component {
         }));
     };
 
+    updateFilter = change => {
+        this.setState(prevState => ({
+            filter: { ...prevState.filter, ...change }
+        }));
+    };
+
     renderAuction = auction => {
-        const { network, LiBA } = this.props;
-        const { asker, value, duration, tokenAddress } = auction.value;
+        const { network } = this.props;
+        const { asker, value, duration, tokenAddress, period } = auction.value;
         const unit = getUnitByAddress(network.supportedTokens, tokenAddress);
 
         return (
@@ -62,16 +68,7 @@ class LiBA extends React.Component {
                             <Statistic title="Asker" value={asker} />
                         </Col>
                         <Col span={12}>
-                            <Statistic
-                                title="Period"
-                                value={getCurrentPeriod(
-                                    getAuctionPeriod(
-                                        LiBA.getAuctionPeriod,
-                                        auction
-                                    ),
-                                    _.get(network, 'block.number')
-                                )}
-                            />
+                            <Statistic title="Period" value={period} />
                         </Col>
                         <Col span={12}>
                             <Statistic
@@ -90,37 +87,78 @@ class LiBA extends React.Component {
             </List.Item>
         );
     };
-    
-    renderFilters = () => {
-        // const { LiBA } = this.props;
-        const periodOptions = ALL_PERIODS.map(period => [period, period]);
 
-        return (<Filter name="period" options={periodOptions} />)
-    }
+    renderFilters = () => {
+        const periodOptions = ALL_PERIODS.map(period => [period, period]);
+        const askerOptions = _(this.auctions)
+            .map(auction => auction.value.asker)
+            .uniq()
+            .map(asker => [asker, asker])
+            .value();
+
+        return (
+            <>
+                <Filter
+                    name="period"
+                    options={periodOptions}
+                    style={{ width: 100 }}
+                    onChange={this.updateFilter}
+                    allowClear
+                />
+                <Filter
+                    name="asker"
+                    options={askerOptions}
+                    style={{ width: 200 }}
+                    onChange={this.updateFilter}
+                    allowClear
+                />
+            </>
+        );
+    };
 
     renderAuctions = () => {
-        const { accounts, LiBA } = this.props;
-        const { tab } = this.state;
+        const { accounts, LiBA, network } = this.props;
+        const { tab, filter } = this.state;
 
-        let data = _.values(LiBA.getAuction);
+        let auctions = _.values(LiBA.getAuction);
 
         if (tab === 'own') {
-            data = _.filter(
-                data,
+            auctions = _.filter(
+                auctions,
                 auction => auction.value.asker === accounts[0]
             );
         }
 
         if (tab === 'bid') {
-            data = _.filter(data, auction =>
+            auctions = _.filter(auctions, auction =>
                 _.includes(LiBA.bids, auction.args[0])
             );
         }
 
+        auctions = _.filter(auctions, auction => {
+            const { asker } = auction.value;
+            if (filter.asker && filter.asker !== asker) {
+                return false;
+            }
+
+            const period = getCurrentPeriod(
+                getAuctionPeriod(LiBA.getAuctionPeriod, auction),
+                _.get(network, 'block.number')
+            );
+
+            if (filter.period && filter.period !== period) {
+                return false;
+            }
+
+            auction.value.period = period;
+            return true;
+        });
+        this.auctions = auctions;
+
         return (
             <List
                 grid={{ gutter: 16, column: 3 }}
-                dataSource={data}
+                dataSource={auctions}
                 renderItem={this.renderAuction}
             />
         );

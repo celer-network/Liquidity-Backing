@@ -31,6 +31,10 @@
 }
 
 .dropdown-filter {
-  display: inline-block !important;
-  line-height: 2.5;
+    display: inline-block;
+    margin-right: 10px;
+}
+
+.dropdown-filter .ant-form-item-control-wrapper {
+    display: inline-block;
 }
