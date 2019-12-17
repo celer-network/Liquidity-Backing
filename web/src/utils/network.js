@@ -10,6 +10,10 @@ const localNetworkConfig = {
         {
             symbol: 'ETH',
             address: '0x0000000000000000000000000000000000000000'
+        },
+        {
+            symbol: 'CELR',
+            address: '0x0f302CA36CDa137e4bAC9527d8242CDBC0bE5A45'
         }
     ]
 };

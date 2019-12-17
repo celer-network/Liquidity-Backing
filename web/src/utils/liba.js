@@ -11,14 +11,22 @@ export const FINALIZE = 'Finalize';
 export const FINALIZED = 'Finalized';
 export const EXPIRED = 'Expired';
 export const UNKNOWN = 'Unknown';
-export const ALL_PERIODS = [BID, REVEAL, CLAIM, CHALLENGE, FINALIZE, FINALIZED, EXPIRED];
+export const ALL_PERIODS = [
+    BID,
+    REVEAL,
+    CLAIM,
+    CHALLENGE,
+    FINALIZE,
+    FINALIZED,
+    EXPIRED
+];
 
 export const getAuctionPeriod = (auctionPeriods, auction) => {
     return _.find(
         auctionPeriods,
         auctionPeriod => auctionPeriod.args[0] === auction.args[0]
     );
-}
+};
 
 export const getCurrentPeriod = (auctionPeriod, blockNumber) => {
     const {
@@ -95,7 +103,6 @@ export const calculateRepay = (bids, winners) => {
         }
 
         result = result.add(new BN(value).muln(100 + parseInt(rate)).divn(100));
-        console.log(rate, result.toString());
     });
 
     return result;
