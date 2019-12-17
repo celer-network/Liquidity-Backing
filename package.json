@@ -1,8 +1,8 @@
 {
-    "name": "cEconomy",
+    "name": "Liquidity-Backing",
     "version": "1.0.1",
-    "description": "cEconomy.",
-    "repository": "https://github.com/celer-network/cEconomy",
+    "description": "Liquidity-Backing.",
+    "repository": "https://github.com/celer-network/Liquidity-Backing",
     "scripts": {
         "test": "npx truffle test",
         "compile": "npx truffle compile",
