@@ -47,6 +47,6 @@ module.exports = function(deployer, network, accounts) {
             );
         })
         .then(() => {
-            polc.setLibaAddress(LiBA.address);
+            return polc.setLibaAddress(LiBA.address);
         });
 };

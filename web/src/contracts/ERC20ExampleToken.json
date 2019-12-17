@@ -1122,6 +1122,65 @@
       "address": "0xe930cbfc8ca42313073409dd0e7b4301920cdcc3",
       "transactionHash": "0xc9da2456ef1adaf99212a0dc7824827b0192c4befa1bdfa145735d6df5c6c232"
     },
+    "5777": {
+      "events": {
+        "0x8c5be1e5ebec7d5bd14f71427d1e84f3dd0314c0f7b2291e5b200ac8c7c3b925": {
+          "anonymous": false,
+          "inputs": [
+            {
+              "indexed": true,
+              "internalType": "address",
+              "name": "owner",
+              "type": "address"
+            },
+            {
+              "indexed": true,
+              "internalType": "address",
+              "name": "spender",
+              "type": "address"
+            },
+            {
+              "indexed": false,
+              "internalType": "uint256",
+              "name": "value",
+              "type": "uint256"
+            }
+          ],
+          "name": "Approval",
+          "type": "event",
+          "signature": "0x8c5be1e5ebec7d5bd14f71427d1e84f3dd0314c0f7b2291e5b200ac8c7c3b925"
+        },
+        "0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef": {
+          "anonymous": false,
+          "inputs": [
+            {
+              "indexed": true,
+              "internalType": "address",
+              "name": "from",
+              "type": "address"
+            },
+            {
+              "indexed": true,
+              "internalType": "address",
+              "name": "to",
+              "type": "address"
+            },
+            {
+              "indexed": false,
+              "internalType": "uint256",
+              "name": "value",
+              "type": "uint256"
+            }
+          ],
+          "name": "Transfer",
+          "type": "event",
+          "signature": "0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef"
+        }
+      },
+      "links": {},
+      "address": "0x992E7b56FbF1082a71A49bA9c3FdeAE624545C1b",
+      "transactionHash": "0xb4c040d3c8f1686f5d2ec4f081ba884d668ca1ed052cf89c2228e423be71ac5c"
+    },
     "1573684612940": {
       "events": {
         "0x8c5be1e5ebec7d5bd14f71427d1e84f3dd0314c0f7b2291e5b200ac8c7c3b925": {
@@ -1242,7 +1301,7 @@
     }
   },
   "schemaVersion": "3.0.16",
-  "updatedAt": "2019-12-17T20:56:01.705Z",
+  "updatedAt": "2019-12-17T22:45:47.970Z",
   "devdoc": {
     "methods": {
       "allowance(address,address)": {

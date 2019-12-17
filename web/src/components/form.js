@@ -48,7 +48,6 @@ class CustomizeForm extends React.Component {
         const { form, formItemLayout, items } = this.props;
         const { getFieldDecorator } = form;
 
-        console.log(items);
         return _.map(items, item => {
             const {
                 field = 'input',
@@ -85,9 +84,10 @@ class CustomizeForm extends React.Component {
                     {...formItemLayout}
                     label={!label ? _.capitalize(name) : label}
                 >
-                    {getFieldDecorator(name, decoratorOptions)(
-                        <Field {...fieldOptions} />
-                    )}
+                    {getFieldDecorator(
+                        name,
+                        decoratorOptions
+                    )(<Field {...fieldOptions} />)}
                 </FormItem>
             );
         });

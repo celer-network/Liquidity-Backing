@@ -32,7 +32,6 @@ class RevealForm extends React.Component {
             }
 
             const { celerValue, value, rate, passcode, commitmentID } = values;
-
             this.contracts.LiBA.methods.revealBid.cacheSend(
                 auction.args[0],
                 rate * RATE_BASE,

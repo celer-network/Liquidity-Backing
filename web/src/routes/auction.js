@@ -140,6 +140,8 @@ class Auction extends React.Component {
                 return this.challengeWinners();
             case FINALIZE:
                 return this.finalizeAuction();
+            default:
+                console.error('invalid period');
         }
     };
 
@@ -301,15 +303,21 @@ class Auction extends React.Component {
             ownBidResult = (
                 <Row>
                     <Col span={12}>
-                        <Statistic title="Value" value={defaultValues.value} />
+                        <Statistic
+                            title="Value"
+                            value={`${defaultValues.value}  ${unit}`}
+                        />
                     </Col>
                     <Col span={12}>
-                        <Statistic title="Rate" value={defaultValues.rate} />
+                        <Statistic
+                            title="Rate"
+                            value={`${defaultValues.rate} %`}
+                        />
                     </Col>{' '}
                     <Col span={12}>
                         <Statistic
                             title="Celer Value"
-                            value={defaultValues.celerValue}
+                            value={`${defaultValues.celerValue} CELR`}
                         />
                     </Col>{' '}
                     <Col span={12}>
@@ -428,13 +436,7 @@ class Auction extends React.Component {
 
     render() {
         const { network } = this.props;
-        const {
-            auction,
-            currentStep,
-            currentPeriod,
-            isBidModalVisible,
-            isRevealModalVisible
-        } = this.state;
+        const { auction, isBidModalVisible, isRevealModalVisible } = this.state;
 
         if (!auction) {
             return <Skeleton />;

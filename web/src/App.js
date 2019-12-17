@@ -3,8 +3,7 @@ import PropTypes from 'prop-types';
 import _ from 'lodash';
 import { drizzleConnect } from 'drizzle-react';
 import { withRouter, Link } from 'dva/router';
-import { Card, Layout, Menu, Button } from 'antd';
-import { AccountData } from 'drizzle-react-components';
+import { Layout, Menu, Button } from 'antd';
 
 import ApproveCELRForm from './components/approve-celr';
 import AccountInfo from './components/account-info';

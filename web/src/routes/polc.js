@@ -2,7 +2,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import _ from 'lodash';
 import { drizzleConnect } from 'drizzle-react';
-import { Button, Card, List, Statistic, Row, Col, Icon, message } from 'antd';
+import { Button, Card, List, Statistic, Row, Col, message } from 'antd';
 
 import CommimentForm from '../components/polc/commitment-form';
 import { getUnitByAddress, formatCurrencyValue } from '../utils/unit';
