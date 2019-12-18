@@ -13,7 +13,7 @@ const localNetworkConfig = {
         },
         {
             symbol: 'CELR',
-            address: '0x0f302CA36CDa137e4bAC9527d8242CDBC0bE5A45'
+            address: '0x992E7b56FbF1082a71A49bA9c3FdeAE624545C1b'
         }
     ]
 };
