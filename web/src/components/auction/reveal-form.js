@@ -50,15 +50,22 @@ class RevealForm extends React.Component {
             network.supportedTokens,
             auction.value.tokenAddress
         );
-        const commitmentOptions = _.map(PoLC.commitmentsByUser, commitment => {
-            const id = commitment.args[1];
-            const availableValue = formatCurrencyValue(
-                commitment.value.availableValue,
-                unit
-            );
+        const commitmentOptions = _(PoLC.commitmentsByUser)
+            .filter(
+                commitment =>
+                    commitment.value.tokenAddress === auction.value.tokenAddress
+            )
+            .map(commitment => {
+                const id = commitment.args[1];
+                console.log(commitment);
+                const availableValue = formatCurrencyValue(
+                    commitment.value.availableValue,
+                    unit
+                );
 
-            return [id, `ID: ${id}, Available Value: ${availableValue}`];
-        });
+                return [id, `ID: ${id}, Available Value: ${availableValue}`];
+            })
+            .value();
         const defaultValues = JSON.parse(
             localStorage.getItem(`auction${auction.args[0]}`) || '{}'
         );
