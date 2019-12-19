@@ -3,7 +3,7 @@
     "version": "0.1.0",
     "description": "truffle dapp with react/redux",
     "private": true,
-    "homepage": "https://celer-network.github.io/cEconomy",
+    "homepage": "https://celer-network.github.io/Liquidity-Backing",
     "dependencies": {
         "antd": "^3.26.3",
         "date-fns": "^2.8.1",
