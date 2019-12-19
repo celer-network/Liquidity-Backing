@@ -1,6 +1,6 @@
 self.__precacheManifest = (self.__precacheManifest || []).concat([
   {
-    "revision": "da2dd2d7a331bddfb6259fbc4ceb1a9a",
+    "revision": "be0b4a0c8525fe9f0781e901067f9b7d",
     "url": "/Liquidity-Backing/index.html"
   },
   {
@@ -8,7 +8,7 @@ self.__precacheManifest = (self.__precacheManifest || []).concat([
     "url": "/Liquidity-Backing/static/css/3.bea6f0b1.chunk.css"
   },
   {
-    "revision": "3e561c0cfbf103e1cf46",
+    "revision": "45003ad4e074b81bae56",
     "url": "/Liquidity-Backing/static/css/main.9aaaf6bf.chunk.css"
   },
   {
@@ -40,8 +40,8 @@ self.__precacheManifest = (self.__precacheManifest || []).concat([
     "url": "/Liquidity-Backing/static/js/7.e2d0cb23.chunk.js"
   },
   {
-    "revision": "3e561c0cfbf103e1cf46",
-    "url": "/Liquidity-Backing/static/js/main.2086323f.chunk.js"
+    "revision": "45003ad4e074b81bae56",
+    "url": "/Liquidity-Backing/static/js/main.c71283e3.chunk.js"
   },
   {
     "revision": "57a24b34e979dd7c8f9a",
