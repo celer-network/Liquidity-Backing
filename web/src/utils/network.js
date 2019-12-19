@@ -3,14 +3,26 @@ import { Modal } from 'antd';
 const MAINNET = '1';
 const ROPSTEN = '3';
 
-const networkConfigs = {};
+const ethToken = {
+    symbol: 'ETH',
+    address: '0x0000000000000000000000000000000000000000'
+};
+
+const networkConfigs = {
+    [ROPSTEN]: {
+        supportedTokens: [
+            ethToken,
+            {
+                symbol: 'DAI',
+                address: '0x8Cdb4e548E779388a68BF1a618ca7C0B24d448B4'
+            }
+        ]
+    }
+};
 
 const localNetworkConfig = {
     supportedTokens: [
-        {
-            symbol: 'ETH',
-            address: '0x0000000000000000000000000000000000000000'
-        },
+        ethToken,
         {
             symbol: 'CELR',
             address: '0x992E7b56FbF1082a71A49bA9c3FdeAE624545C1b'

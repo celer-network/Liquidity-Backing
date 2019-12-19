@@ -54,7 +54,7 @@ export const getCurrentPeriod = (auctionPeriod, blockNumber) => {
         return CHALLENGE;
     }
 
-    if (blockNumber < _.toNumber(finalizeEnd)) {
+    if (!finalized && blockNumber < _.toNumber(finalizeEnd)) {
         return FINALIZE;
     }
 

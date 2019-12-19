@@ -71,7 +71,7 @@ class PoLC extends React.Component {
         } = commitment.value;
         const commitmentId = commitment.args[1];
         const unit = getUnitByAddress(network.supportedTokens, tokenAddress);
-
+        console.log(network.supportedTokens, tokenAddress);
         return (
             <List.Item>
                 <Card
