@@ -11,10 +11,10 @@ const ethToken = {
 const networkConfigs = {
     [ROPSTEN]: {
         supportedTokens: [
-            ethToken,
+            // ethToken,
             {
                 symbol: 'DAI',
-                address: '0x8Cdb4e548E779388a68BF1a618ca7C0B24d448B4'
+                address: '0x2f195b301a224f285ee4a7fb3c41fcf58a9b6e79'
             }
         ]
     }
