@@ -111,7 +111,7 @@ class BidForm extends React.Component {
                     placeholder: 'A random number used to hide your bid info'
                 },
                 rules: [
-                    minValueRule(0),
+                    minValueRule(10000),
                     {
                         message: 'Please enter a passcode!',
                         required: true
