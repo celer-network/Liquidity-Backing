@@ -72,10 +72,11 @@ class BidForm extends React.Component {
             },
             {
                 name: 'rate',
+                label: 'Daily Rate',
                 field: 'number',
                 fieldOptions: {
                     ...rateFieldOptions,
-                    placeholder: 'The lending interest rate',
+                    placeholder: 'The daily lending interest rate',
                     step: 0.1,
                     precision: RATE_PRECISION
                 },

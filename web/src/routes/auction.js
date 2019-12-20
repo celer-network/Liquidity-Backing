@@ -310,7 +310,7 @@ class Auction extends React.Component {
                     </Col>
                     <Col span={12}>
                         <Statistic
-                            title="Rate"
+                            title="Daily Rate"
                             value={`${defaultValues.rate} %`}
                         />
                     </Col>{' '}
@@ -355,7 +355,7 @@ class Auction extends React.Component {
                 </Col>
                 <Col span={12}>
                     <Statistic
-                        title="Max Rate"
+                        title="Max Daily Rate"
                         value={`${maxRate / RATE_BASE} %`}
                     />
                 </Col>

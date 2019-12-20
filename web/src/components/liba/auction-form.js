@@ -126,13 +126,13 @@ class AuctionForm extends React.Component {
             },
             {
                 name: 'maxRate',
-                label: 'Max Rate',
+                label: 'Max Daily Rate',
                 field: 'number',
                 fieldOptions: {
                     ...rateFieldOptions,
                     step: 0.1,
                     precision: RATE_PRECISION,
-                    placeholder: 'The maximum interest rate'
+                    placeholder: 'The maximum daily interest rate'
                 },
                 rules: [
                     minValueRule(0),
