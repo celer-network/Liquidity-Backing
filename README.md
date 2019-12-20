@@ -10,7 +10,7 @@
 
 ## Overview
 
-Liquidity Backing is a cryptoeconomics mechanism to enable off-chain service providers (OSP) to tap into large amounts of liquidity to support and expand their off-chain payment relay services. It consists of Proof of Liquidity Commitment (PoLC) and Liquidity Backing Auction (LiBA) processes. PoLC encourages Network Liquidity Backers (NLB) to lock their digital assets into a smart contract for a long time by rewarding them with CELR tokens and therefore establishing a stable and abundant liquidity pool. LiBA enables OSPs to solicit liquidity in PoLC through crowdlending whenever they need to. 
+Liquidity Backing is a cryptoeconomics mechanism to enable off-chain service providers (OSP) to tap into large amounts of liquidity to support and expand their off-chain payment relay services. It consists of Proof of Liquidity Commitment (PoLC) and Liquidity Backing Auction (LiBA) processes. PoLC encourages Network Liquidity Backers (NLB) to lock their digital assets into a smart contract for a long time by rewarding them with CELR tokens and therefore establishing a stable and abundant liquidity pool. LiBA enables OSPs to solicit liquidity in PoLC through crowdlending whenever they need to.
 
 For more details about Liquidity Backing, please refer to [CelerCore technical documentation](https://www.celer.network/docs/celercore/liquidity/problem.html).
 
@@ -20,14 +20,13 @@ For more details about Liquidity Backing, please refer to [CelerCore technical d
 
 #### PoLC
 
--   Contract address: [0x66804e13b02d2d2d4174ae3b538bf968411bb6c1](https://ropsten.etherscan.io/address/0x66804e13b02d2d2d4174ae3b538bf968411bb6c1)
--   Deployed code: [PoLC.sol](https://github.com/celer-network/cEconomy/blob/v0.11.0/contracts/CelerChannel.sol)
+-   Contract address: [0x2e0213d303d9e0caa4090915a1afe1767953302a](https://ropsten.etherscan.io/address/0x2e0213d303d9e0caa4090915a1afe1767953302a)
+-   Deployed code: [PoLC.sol](https://github.com/celer-network/Liquidity-Backing/blob/3320021cde9317363256f68dd851d57f27357bdd/contracts/PoLC.sol)
 
 #### LiBA
 
--   Contract address: [0x66804e13b02d2d2d4174ae3b538bf968411bb6c1](https://ropsten.etherscan.io/address/0x66804e13b02d2d2d4174ae3b538bf968411bb6c1)
--   Deployed code: [LiBA.sol](https://github.com/celer-network/cEconomy/blob/v0.11.0/contracts/CelerChannel.sol)
-
+-   Contract address: [0x4191b20f182f0853bd51b5b4852cc794dae06899](https://ropsten.etherscan.io/address/0x4191b20f182f0853bd51b5b4852cc794dae06899)
+-   Deployed code: [LiBA.sol](https://github.com/celer-network/Liquidity-Backing/blob/3320021cde9317363256f68dd851d57f27357bdd/contracts/LiBA.sol)
 
 ## Core Concepts
 
