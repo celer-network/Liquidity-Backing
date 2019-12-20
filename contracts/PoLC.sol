@@ -45,7 +45,7 @@ contract PoLC is Ownable, Pausable, IPoLC, TokenUtil {
         blockReward = _blockReward;
 
         // Enable eth support by default
-        // supportedTokens[address(0)] = true;
+        supportedTokens[address(0)] = true;
     }
 
     event NewCommitment(uint commitmentId, address indexed user);
