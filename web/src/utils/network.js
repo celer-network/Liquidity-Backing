@@ -1,7 +1,12 @@
 import { Modal } from 'antd';
 
+// network
 const MAINNET = '1';
 const ROPSTEN = '3';
+
+// token
+export const CELR = 'CELR';
+export const DAI = 'DAI';
 
 const ethToken = {
     symbol: 'ETH',
@@ -13,7 +18,7 @@ const networkConfigs = {
         supportedTokens: [
             ethToken,
             {
-                symbol: 'DAI',
+                symbol: DAI,
                 address: '0x8Cdb4e548E779388a68BF1a618ca7C0B24d448B4'
             }
         ]
@@ -24,7 +29,7 @@ const localNetworkConfig = {
     supportedTokens: [
         ethToken,
         {
-            symbol: 'CELR',
+            symbol: CELR,
             address: '0x992E7b56FbF1082a71A49bA9c3FdeAE624545C1b'
         }
     ]
