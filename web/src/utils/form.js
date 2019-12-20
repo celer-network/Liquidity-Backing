@@ -44,3 +44,14 @@ export const minValueRule = minValue => ({
         callback();
     }
 });
+
+export const maxValueRule = maxValue => ({
+    validator: (rule, value, callback) => {
+        if (value > maxValue) {
+            const msg = `value is larger than ${maxValue}`;
+            callback(msg);
+        }
+
+        callback();
+    }
+});

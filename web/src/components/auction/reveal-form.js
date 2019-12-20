@@ -89,13 +89,14 @@ class RevealForm extends React.Component {
             },
             {
                 name: 'rate',
+                label: 'Daily Rate',
                 field: 'number',
                 initialValue: defaultValues.rate,
                 fieldOptions: {
                     ...rateFieldOptions,
                     step: 0.1,
                     precision: RATE_PRECISION,
-                    placeholder: 'The lending interest rate'
+                    placeholder: 'The daily lending interest rate'
                 },
                 rules: [
                     minValueRule(0),

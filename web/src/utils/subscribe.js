@@ -1,7 +1,7 @@
 const POLL_INTERVAL = 1000;
 
 export const subscribeEvent = (account, contracts, dispatch) => {
-    const { PoLC, LiBA, ERC20ExampleToken } = contracts;
+    const { PoLC, LiBA, CELRToken } = contracts;
 
     PoLC.events.NewCommitment(
         {
@@ -55,7 +55,7 @@ export const subscribeEvent = (account, contracts, dispatch) => {
         }
     );
 
-    ERC20ExampleToken.events.Approval(
+    CELRToken.events.Approval(
         {
             filter: {
                 owner: account,
@@ -96,6 +96,6 @@ export const subscribeChainInfo = (web3, dispatch) => {
 };
 
 const getCelrAllowance = (account, contracts) => {
-    const { ERC20ExampleToken, LiBA } = contracts;
-    ERC20ExampleToken.methods.allowance.cacheCall(account, LiBA.address);
+    const { CELRToken, LiBA } = contracts;
+    CELRToken.methods.allowance.cacheCall(account, LiBA.address);
 };

@@ -8,9 +8,10 @@ import {
     currencyFieldOptions,
     celerFieldOptions,
     rateFieldOptions,
-    minValueRule
+    minValueRule,
+    maxValueRule
 } from '../../utils/form';
-import { getUnitByAddress } from '../../utils/unit';
+import { getUnitByAddress, formatCurrencyValue } from '../../utils/unit';
 import { RATE_PRECISION, RATE_BASE } from '../../utils/constant';
 
 class BidForm extends React.Component {
@@ -50,10 +51,8 @@ class BidForm extends React.Component {
 
     render() {
         const { auction, network, visible, onClose } = this.props;
-        const unit = getUnitByAddress(
-            network.supportedTokens,
-            auction.value.tokenAddress
-        );
+        const { tokenAddress, maxRate, minValue } = auction.value;
+        const unit = getUnitByAddress(network.supportedTokens, tokenAddress);
         const formItems = [
             {
                 name: 'value',
@@ -63,7 +62,7 @@ class BidForm extends React.Component {
                     placeholder: 'The amount of token to lend'
                 },
                 rules: [
-                    minValueRule(0),
+                    minValueRule(formatCurrencyValue(minValue)),
                     {
                         message: 'Please enter a value!',
                         required: true
@@ -72,15 +71,17 @@ class BidForm extends React.Component {
             },
             {
                 name: 'rate',
+                label: 'Daily Rate',
                 field: 'number',
                 fieldOptions: {
                     ...rateFieldOptions,
-                    placeholder: 'The lending interest rate',
+                    placeholder: 'The daily lending interest rate',
                     step: 0.1,
                     precision: RATE_PRECISION
                 },
                 rules: [
                     minValueRule(0),
+                    maxValueRule(maxRate / RATE_BASE),
                     {
                         message: 'Please enter a rate!',
                         required: true
@@ -96,7 +97,7 @@ class BidForm extends React.Component {
                     placeholder: 'The amount of celer token for bidding'
                 },
                 rules: [
-                    minValueRule(0),
+                    minValueRule(network.minCELR),
                     {
                         message: 'Please enter a celer value!',
                         required: true
@@ -110,7 +111,7 @@ class BidForm extends React.Component {
                     placeholder: 'A random number used to hide your bid info'
                 },
                 rules: [
-                    minValueRule(0),
+                    minValueRule(10000),
                     {
                         message: 'Please enter a passcode!',
                         required: true

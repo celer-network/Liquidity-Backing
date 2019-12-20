@@ -42,9 +42,9 @@ class App extends React.Component {
 
     render() {
         const { isModalVisible } = this.state;
-        const { children, location, CelrToken } = this.props;
+        const { children, location, CELRToken } = this.props;
         const { pathname } = location;
-        const celerAllowance = _.values(CelrToken.allowance)[0] || {};
+        const celerAllowance = _.values(CELRToken.allowance)[0] || {};
 
         return (
             <Layout>
@@ -67,7 +67,7 @@ class App extends React.Component {
                                 block
                                 onClick={this.toggleModal}
                             >
-                                Approve CELR
+                                Approve Token
                             </Button>
                         </Menu.Item>
                     </Menu>
@@ -103,7 +103,7 @@ function mapStateToProps(state) {
 
     return {
         accounts,
-        CelrToken: contracts.ERC20ExampleToken
+        CELRToken: contracts.CELRToken
     };
 }
 

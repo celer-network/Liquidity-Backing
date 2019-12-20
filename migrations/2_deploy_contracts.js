@@ -1,4 +1,5 @@
-const ERC20ExampleToken = artifacts.require('ERC20ExampleToken');
+const CELRToken = artifacts.require('CELRToken');
+const DAIToken = artifacts.require('DAIToken');
 const PoLC = artifacts.require('PoLC');
 const LiBA = artifacts.require('LiBA');
 const LiBAStruct = artifacts.require('LiBAStruct');
@@ -9,9 +10,9 @@ let polc;
 
 module.exports = function(deployer, network, accounts) {
     return deployer
-        .deploy(ERC20ExampleToken)
+        .deploy(CELRToken)
         .then(() => {
-            return ERC20ExampleToken.deployed();
+            return CELRToken.deployed();
         })
         .then(token => {
             if (network === 'development') {
@@ -19,7 +20,18 @@ module.exports = function(deployer, network, accounts) {
             }
         })
         .then(() => {
-            return deployer.deploy(PoLC, ERC20ExampleToken.address, 100);
+            return deployer.deploy(DAIToken);
+        })
+        .then(() => {
+            return DAIToken.deployed();
+        })
+        .then(token => {
+            if (network === 'development') {
+                token.transfer(accounts[1], '100000000000000000000000');
+            }
+        })
+        .then(() => {
+            return deployer.deploy(PoLC, CELRToken.address, 100);
         })
         .then(p => {
             polc = p;
@@ -40,7 +52,7 @@ module.exports = function(deployer, network, accounts) {
             deployer.link(LiBABidder, LiBA);
             return deployer.deploy(
                 LiBA,
-                ERC20ExampleToken.address,
+                CELRToken.address,
                 PoLC.address,
                 false,
                 10

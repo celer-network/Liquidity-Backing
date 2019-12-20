@@ -1,6 +1,7 @@
 import PoLC from './../contracts/PoLC.json';
 import LiBA from './../contracts/LiBA.json';
-import ERC20 from './../contracts/ERC20ExampleToken.json';
+import CELRToken from './../contracts/CELRToken.json';
+import DAIToken from './../contracts/DAIToken.json';
 
 // let drizzle know what contracts we want
 const contractOptions = {
@@ -11,7 +12,7 @@ const contractOptions = {
             url: 'ws://localhost:8545'
         }
     },
-    contracts: [PoLC, LiBA, ERC20],
+    contracts: [PoLC, LiBA, CELRToken, DAIToken],
     polls: {
         accounts: 1000,
         blocks: 1000
