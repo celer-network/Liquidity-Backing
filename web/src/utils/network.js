@@ -21,7 +21,8 @@ const networkConfigs = {
                 symbol: DAI,
                 address: '0x2f195b301a224f285ee4a7fb3c41fcf58a9b6e79'
             }
-        ]
+        ],
+        minCELR: 500
     }
 };
 
@@ -32,7 +33,8 @@ const localNetworkConfig = {
             symbol: CELR,
             address: '0x992E7b56FbF1082a71A49bA9c3FdeAE624545C1b'
         }
-    ]
+    ],
+    minCELR: 500
 };
 
 export const getNetworkConfig = networkID => {
