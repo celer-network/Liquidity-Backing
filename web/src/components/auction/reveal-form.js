@@ -67,7 +67,9 @@ class RevealForm extends React.Component {
             })
             .value();
         const defaultValues = JSON.parse(
-            localStorage.getItem(`auction${auction.args[0]}`) || '{}'
+            localStorage.getItem(
+                `auction-${this.contracts.LiBA.address}-${auction.args[0]}`
+            ) || '{}'
         );
 
         const formItems = [
