@@ -291,7 +291,9 @@ class Auction extends React.Component {
         } = auction.value;
         const unit = getUnitByAddress(network.supportedTokens, tokenAddress);
         const defaultValues = JSON.parse(
-            localStorage.getItem(`auction${auction.args[0]}`) || '{}'
+            localStorage.getItem(
+                `auction-${this.contracts.LiBA.address}-${auction.args[0]}`
+            ) || '{}'
         );
         let ownBidResult;
 

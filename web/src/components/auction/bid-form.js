@@ -44,7 +44,10 @@ class BidForm extends React.Component {
                 web3.utils.toWei(celerValue.toString(), 'ether')
             );
 
-            localStorage.setItem(`auction${auctionId}`, JSON.stringify(values));
+            localStorage.setItem(
+                `auction-${this.contracts.LiBA.address}-${auctionId}`,
+                JSON.stringify(values)
+            );
             onClose();
         });
     };
