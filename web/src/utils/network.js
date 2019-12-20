@@ -19,7 +19,7 @@ const networkConfigs = {
             // ethToken,
             {
                 symbol: DAI,
-                address: '0x2f195b301a224f285ee4a7fb3c41fcf58a9b6e79'
+                address: '0x6a3a9a07a0d687b73322d2F66FB42cC473162a0B'
             }
         ],
         minCELR: 500
