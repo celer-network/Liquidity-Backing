@@ -109,8 +109,8 @@ export const calculateRepay = (bids, winners) => {
 };
 
 const compareBid = (bid1, bid2) => {
-    const { rate1, celerValue1 } = bid1.value;
-    const { rate2, celerValue2 } = bid2.value;
+    const { rate: rate1, celerValue: celerValue1 } = bid1.value;
+    const { rate: rate2, celerValue: celerValue2 } = bid2.value;
 
     if (rate1 !== rate2) {
         return rate1 - rate2;
