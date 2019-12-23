@@ -4,6 +4,7 @@ import _ from 'lodash';
 import { drizzleConnect } from 'drizzle-react';
 import { Table } from 'antd';
 
+import { RATE_BASE } from '../../utils/constant';
 import {
     formatCurrencyValue,
     formatCelrValue,
@@ -39,12 +40,12 @@ class BidTable extends React.Component {
 
         const dataSource = _.filter(bids).map(bid => {
             const bidder = bid.args[0];
-
+            const { celerValue, rate, value } = bid.value;
             return {
-                ...bid.value,
                 bidder,
-                value: formatCurrencyValue(bid.value.value, unit),
-                celerValue: formatCelrValue(bid.value.celerValue)
+                celerValue: formatCelrValue(celerValue),
+                rate: rate / RATE_BASE,
+                value: formatCurrencyValue(value, unit)
             };
         });
 
