@@ -55,8 +55,7 @@ class Auction extends React.Component {
             isRevealModalVisible: false
         };
 
-        const auctionId = parseInt(props.match.params.id);
-
+        const auctionId = props.match.params.id;
         this.contracts.LiBA.events.RevealBid(
             {
                 fromBlock: 0,
