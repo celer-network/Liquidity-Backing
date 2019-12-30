@@ -224,10 +224,10 @@ class Auction extends React.Component {
     renderAction = () => {
         const { accounts } = this.props;
         const { auction, currentPeriod, currentStep, winners } = this.state;
+        const { asker, collateralValue } = auction.value;
         const currentAccount = accounts[0];
-        const isAsker = currentAccount === auction.value.asker;
 
-        if (isAsker) {
+        if (currentAccount === asker) {
             if (currentPeriod === FINALIZED) {
                 return [
                     <Button block type="primary" onClick={this.repayAuction}>
@@ -251,7 +251,7 @@ class Auction extends React.Component {
                 ];
             }
 
-            if (currentPeriod === FINALIZED) {
+            if (currentPeriod === FINALIZED && collateralValue > 0) {
                 return [
                     <Button
                         block
