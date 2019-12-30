@@ -129,7 +129,6 @@ library LiBABidder {
         require(_auction.finalized, "auction must be finalized");
         require(block.timestamp > _auction.lendingStart.add(_auction.duration.mul(1 days)),  "must pass auction lending duration");
         require(LiBAUtil._checkWinner(_auction.winners, msg.sender), "sender must be a winner");
-        require(_bid.value > 0, "bid value must be larger than zero");
 
         collateralReward = _auction.collateraValue.mul(_bid.value).div(_auction.value);
         _bid.value = 0;

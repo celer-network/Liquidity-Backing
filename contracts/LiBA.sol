@@ -351,6 +351,8 @@ contract LiBA is Ownable, Pausable, TokenUtil, PullPayment, WhitelistedRole {
      */
     function collectCollateral(uint _auctionId) external whenNotPaused {
         LiBAStruct.Auction storage auction = auctions[_auctionId];
+        require(auction.collateraValue > 0, "auction collateraValue must be larger than zero");
+
         LiBAStruct.Bid storage bid = bidsByUser[msg.sender][_auctionId];
 
         uint collateralReward = auction.collectCollateral(bid);
