@@ -75,7 +75,7 @@ export const getWinners = (auction, bids) => {
         const [bidder] = bid.args;
         const { value } = bid.value;
 
-        if (remainingValue < 0) {
+        if (remainingValue <= 0) {
             topLoser = bidder;
             return false;
         }
