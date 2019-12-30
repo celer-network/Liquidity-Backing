@@ -341,6 +341,7 @@ contract LiBA is Ownable, Pausable, TokenUtil, PullPayment, WhitelistedRole {
             celerToken.safeTransferFrom(auction.asker, address(polc), borrowFee);
         }
 
+        auction.lendingStart = 0;
         emit RepayAuction(_auctionId);
     }
 
