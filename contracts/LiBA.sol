@@ -173,7 +173,6 @@ contract LiBA is Ownable, Pausable, TokenUtil, PullPayment, WhitelistedRole {
         LiBAStruct.Bid storage bid = bidsByUser[msg.sender][_auctionId];
 
         if (bid.hash == 0) {
-            auction.bidders.push(msg.sender);
             emit NewBid(_auctionId, msg.sender);
         } else {
             emit UpdateBid(_auctionId, msg.sender);
