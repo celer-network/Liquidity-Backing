@@ -391,6 +391,7 @@ contract('LiBA', ([provider, bidder0, bidder1, bidder2]) => {
         auctionId = args.auctionId.toNumber();
         libaHelper.setAuctionId(auctionId);
 
+        await utils.updateTimestamp(1);
         await libaHelper.commitFund(BID0, bidder1, borrowToken.address);
         await libaHelper.commitFund(BID1, bidder2, borrowToken.address);
         await libaHelper.placeBid(BID0, bidder1, 'NewBid');
