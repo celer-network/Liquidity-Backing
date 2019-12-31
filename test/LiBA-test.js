@@ -364,6 +364,7 @@ contract('LiBA', ([provider, bidder0, bidder1, bidder2]) => {
     });
 
     it('should run ERC20 auction successfully', async () => {
+        await utils.updateTimestamp(1);
         await celerToken.approve(liba.address, AUCTION_DEPOSIT);
         await borrowToken.transfer(bidder1, 10000);
         await borrowToken.transfer(bidder2, 10000);
@@ -391,7 +392,6 @@ contract('LiBA', ([provider, bidder0, bidder1, bidder2]) => {
         auctionId = args.auctionId.toNumber();
         libaHelper.setAuctionId(auctionId);
 
-        await utils.updateTimestamp(1);
         await libaHelper.commitFund(BID0, bidder1, borrowToken.address);
         await libaHelper.commitFund(BID1, bidder2, borrowToken.address);
         await libaHelper.placeBid(BID0, bidder1, 'NewBid');
