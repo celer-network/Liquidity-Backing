@@ -8,11 +8,8 @@ const PoLC = artifacts.require('PoLC');
 
 chai.use(chaiAsPromised);
 const assert = chai.assert;
+const web3 = new Web3('http://localhost:8545');
 
-const web3 = new Web3(new Web3.providers.HttpProvider('http://localhost:8545'));
-
-const EMPTY_ADDRESS = '0x0000000000000000000000000000000000000000';
-const DAY = 60 * 60 * 24;
 const BLOCK_REWARD = 100;
 const LOCK_DURATION = 10;
 
@@ -34,7 +31,7 @@ contract('PoLC', ([owner, liba]) => {
 
     it('should fail to commit eth fund for unequal value', async () => {
         try {
-            await polc.commitFund(EMPTY_ADDRESS, LOCK_DURATION, 2, {
+            await polc.commitFund(utils.EMPTY_ADDRESS, LOCK_DURATION, 2, {
                 value: '1'
             });
         } catch (e) {
@@ -49,9 +46,14 @@ contract('PoLC', ([owner, liba]) => {
     });
 
     it('should commit eth fund successfully', async () => {
-        const receipt = await polc.commitFund(EMPTY_ADDRESS, LOCK_DURATION, 1, {
-            value: '1'
-        });
+        const receipt = await polc.commitFund(
+            utils.EMPTY_ADDRESS,
+            LOCK_DURATION,
+            1,
+            {
+                value: '1'
+            }
+        );
         const { event, args } = receipt.logs[0];
         assert.equal(event, 'NewCommitment');
         commitmentId = args.commitmentId.toNumber();
@@ -60,7 +62,7 @@ contract('PoLC', ([owner, liba]) => {
             owner,
             commitmentId
         );
-        const lockStart = Math.ceil(commitmentId / DAY);
+        const lockStart = Math.ceil(commitmentId / utils.DAY);
         assert.equal(commitment.lockStart.toNumber(), lockStart);
         assert.equal(commitment.lockEnd.toNumber(), lockStart + LOCK_DURATION);
         assert.equal(commitment.committedValue.toNumber(), 1);
@@ -91,7 +93,7 @@ contract('PoLC', ([owner, liba]) => {
     });
 
     it('should withdraw eth fund successfully', async () => {
-        await utils.updateTimestamp((LOCK_DURATION + 2) * DAY);
+        await utils.updateTimestamp((LOCK_DURATION + 2) * utils.DAY);
 
         const receipt = await polc.withdrawFund(commitmentId);
         const { event } = receipt.logs[0];
@@ -172,7 +174,7 @@ contract('PoLC', ([owner, liba]) => {
             owner,
             commitmentId
         );
-        const lockStart = Math.ceil(commitmentId / DAY);
+        const lockStart = Math.ceil(commitmentId / utils.DAY);
         assert.equal(commitment.lockStart.toNumber(), lockStart);
         assert.equal(commitment.lockEnd.toNumber(), lockStart + LOCK_DURATION);
         assert.equal(commitment.committedValue.toNumber(), 1);
@@ -182,7 +184,7 @@ contract('PoLC', ([owner, liba]) => {
     });
 
     it('should withdraw ERC20 fund successfully', async () => {
-        await utils.updateTimestamp((LOCK_DURATION + 2) * DAY);
+        await utils.updateTimestamp((LOCK_DURATION + 2) * utils.DAY);
 
         const receipt = await polc.withdrawFund(commitmentId);
         const { event } = receipt.logs[0];
@@ -211,7 +213,12 @@ contract('PoLC', ([owner, liba]) => {
 
     it('should fail to lendCommitment for wrong sender', async () => {
         try {
-            await polc.lendCommitment(owner, commitmentId, EMPTY_ADDRESS, 1);
+            await polc.lendCommitment(
+                owner,
+                commitmentId,
+                utils.EMPTY_ADDRESS,
+                1
+            );
         } catch (e) {
             assert.isAbove(
                 e.message.search('sender must be liba contract'),
@@ -224,9 +231,14 @@ contract('PoLC', ([owner, liba]) => {
     });
 
     it('should fail to lendCommitment for wrong token address', async () => {
-        const receipt = await polc.commitFund(EMPTY_ADDRESS, LOCK_DURATION, 1, {
-            value: '1'
-        });
+        const receipt = await polc.commitFund(
+            utils.EMPTY_ADDRESS,
+            LOCK_DURATION,
+            1,
+            {
+                value: '1'
+            }
+        );
         const { args } = receipt.logs[0];
         commitmentId = args.commitmentId.toNumber();
 
@@ -256,7 +268,7 @@ contract('PoLC', ([owner, liba]) => {
     it('should lendCommitment successfully', async () => {
         const balance0 = await web3.eth.getBalance(liba);
 
-        await polc.lendCommitment(owner, commitmentId, EMPTY_ADDRESS, 1, {
+        await polc.lendCommitment(owner, commitmentId, utils.EMPTY_ADDRESS, 1, {
             from: liba
         });
         const commitment = await polc.commitmentsByUser.call(
@@ -303,7 +315,7 @@ contract('PoLC', ([owner, liba]) => {
         await polc.pause();
 
         try {
-            await polc.commitFund(EMPTY_ADDRESS, LOCK_DURATION, 1, {
+            await polc.commitFund(utils.EMPTY_ADDRESS, LOCK_DURATION, 1, {
                 value: '1'
             });
         } catch (e) {
@@ -346,22 +358,24 @@ contract('PoLC', ([owner, liba]) => {
     });
 
     it('should drainToken successfully after pauce contract', async () => {
-        const receipt = await polc.drainToken(EMPTY_ADDRESS, 1);
+        const receipt = await polc.drainToken(utils.EMPTY_ADDRESS, 1);
         const { event, args } = receipt.logs[0];
         assert.equal(event, 'DrainToken');
-        assert.equal(args.tokenAddress, EMPTY_ADDRESS);
+        assert.equal(args.tokenAddress, utils.EMPTY_ADDRESS);
         assert.equal(args.amount.toNumber(), 1);
     });
 
     it('should commitFund successfully again after unpauce contract', async () => {
         await polc.unpause();
         await utils.updateTimestamp(1);
-        await polc.commitFund(EMPTY_ADDRESS, LOCK_DURATION, 1, { value: '1' });
+        await polc.commitFund(utils.EMPTY_ADDRESS, LOCK_DURATION, 1, {
+            value: '1'
+        });
     });
 
     it('should fail to drainToken for unpauced contract', async () => {
         try {
-            await polc.drainToken(EMPTY_ADDRESS, 1);
+            await polc.drainToken(utils.EMPTY_ADDRESS, 1);
         } catch (e) {
             assert.isAbove(
                 e.message.search('VM Exception while processing transaction'),

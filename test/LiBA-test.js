@@ -2,6 +2,7 @@ const chai = require('chai');
 const chaiAsPromised = require('chai-as-promised');
 const Web3 = require('web3');
 const utils = require('./utils');
+const helper = require('./helper');
 
 const ERC20ExampleToken = artifacts.require('ERC20ExampleToken');
 const LiBAStruct = artifacts.require('LiBAStruct');
@@ -12,10 +13,8 @@ const PoLC = artifacts.require('PoLC');
 
 chai.use(chaiAsPromised);
 const assert = chai.assert;
-const web3 = new Web3(new Web3.providers.HttpProvider('http://localhost:8545'));
+const web3 = new Web3('http://localhost:8545');
 
-const EMPTY_ADDRESS = '0x0000000000000000000000000000000000000000';
-const DAY = 60 * 60 * 24;
 const AUCTION_DEPOSIT = 100;
 const BID_DURATION = 8;
 const REVEAL_DURATION = 8;
@@ -38,80 +37,13 @@ const BID1 = {
     rate: 4
 };
 
-const calculateBidHash = bid => {
-    const { rate, value, celerValue, salt } = bid;
-    bid.hash = web3.utils.soliditySha3(rate, value, celerValue, salt);
-};
-
-calculateBidHash(BID0);
-calculateBidHash(BID1);
-
 contract('LiBA', ([provider, bidder0, bidder1, bidder2]) => {
     let celerToken;
     let borrowToken;
     let liba;
     let polc;
     let auctionId;
-
-    const placeBid = async (bid, bidder, eventName) => {
-        await celerToken.approve(liba.address, bid.celerValue, {
-            from: bidder
-        });
-        const receipt = await liba.placeBid(
-            auctionId,
-            bid.hash,
-            bid.celerValue,
-            {
-                from: bidder
-            }
-        );
-        const { event, args } = receipt.logs[0];
-        assert.equal(event, eventName);
-        assert.equal(args.auctionId.toNumber(), auctionId);
-        assert.equal(args.bidder, bidder);
-
-        const userBid = await liba.bidsByUser.call(bidder, auctionId);
-        assert.equal(userBid.hash, bid.hash);
-        assert.equal(userBid.celerValue.toNumber(), bid.celerValue);
-    };
-
-    const commitFund = async (bid, bidder, tokenAddress = EMPTY_ADDRESS) => {
-        const isEmptyAddress = tokenAddress === EMPTY_ADDRESS;
-        const receipt = await polc.commitFund(tokenAddress, 1, bid.value, {
-            value: isEmptyAddress ? bid.value : 0,
-            from: bidder
-        });
-        const { args } = receipt.logs[0];
-        bid.commitmentId = args.commitmentId.toNumber();
-    };
-
-    const revealBid = async (bid, bidder) => {
-        const { rate, value, celerValue, salt, commitmentId } = bid;
-        const receipt = await liba.revealBid(
-            auctionId,
-            rate,
-            value,
-            celerValue,
-            salt,
-            commitmentId,
-            {
-                from: bidder
-            }
-        );
-        const { event, args } = receipt.logs[0];
-        assert.equal(event, 'RevealBid');
-        assert.equal(args.auctionId.toNumber(), auctionId);
-        assert.equal(args.bidder, bidder);
-
-        const userBid = await liba.bidsByUser.call(bidder, auctionId);
-        assert.equal(
-            userBid.hash,
-            '0x0000000000000000000000000000000000000000000000000000000000000000'
-        );
-        assert.equal(userBid.rate.toNumber(), rate);
-        assert.equal(userBid.value.toNumber(), value);
-        assert.equal(userBid.celerValue.toNumber(), celerValue);
-    };
+    let libaHelper;
 
     before(async () => {
         celerToken = await ERC20ExampleToken.new();
@@ -136,12 +68,16 @@ contract('LiBA', ([provider, bidder0, bidder1, bidder2]) => {
         await celerToken.transfer(bidder0, 10000);
         await celerToken.transfer(bidder1, 10000);
         await celerToken.transfer(bidder2, 10000);
+
+        libaHelper = new helper.LiBAHelper(polc, liba, celerToken);
+        utils.calculateBidHash(BID0);
+        utils.calculateBidHash(BID1);
     });
 
     it('should init auction successfully', async () => {
         await borrowToken.approve(liba.address, VALUE);
         const receipt = await liba.initAuction(
-            EMPTY_ADDRESS,
+            utils.EMPTY_ADDRESS,
             BID_DURATION,
             REVEAL_DURATION,
             CLAIM_DURATION,
@@ -157,6 +93,7 @@ contract('LiBA', ([provider, bidder0, bidder1, bidder2]) => {
 
         const { event, args } = receipt.logs[0];
         auctionId = args.auctionId.toNumber();
+        libaHelper.setAuctionId(auctionId);
         assert.equal(event, 'NewAuction');
         assert.equal(args.asker, provider);
         assert.equal(auctionId, 0);
@@ -206,17 +143,17 @@ contract('LiBA', ([provider, bidder0, bidder1, bidder2]) => {
     });
 
     it('should bid auction correctly', async () => {
-        await placeBid(BID0, bidder0, 'NewBid');
-        await placeBid(BID1, bidder1, 'NewBid');
+        await libaHelper.placeBid(BID0, bidder0, 'NewBid');
+        await libaHelper.placeBid(BID1, bidder1, 'NewBid');
     });
 
     it('should update bid correctly', async () => {
-        await placeBid(BID0, bidder0, 'UpdateBid');
+        await libaHelper.placeBid(BID0, bidder0, 'UpdateBid');
     });
 
     it('should fail to bid auction for passing bid duration', async () => {
         try {
-            await placeBid(BID0, bidder0);
+            await libaHelper.placeBid(BID0, bidder0);
         } catch (e) {
             assert.isAbove(e.message.search('must be within bid duration'), -1);
             return;
@@ -227,7 +164,10 @@ contract('LiBA', ([provider, bidder0, bidder1, bidder2]) => {
 
     it('should fail to reveal auction for large rate', async () => {
         try {
-            await revealBid({ ...BID0, rate: MAX_RATE + 1 }, bidder0);
+            await libaHelper.revealBid(
+                { ...BID0, rate: MAX_RATE + 1 },
+                bidder0
+            );
         } catch (e) {
             assert.isAbove(
                 e.message.search('rate must be smaller than maxRate'),
@@ -241,7 +181,10 @@ contract('LiBA', ([provider, bidder0, bidder1, bidder2]) => {
 
     it('should fail to reveal auction for small value', async () => {
         try {
-            await revealBid({ ...BID0, value: MIN_VALUE - 1 }, bidder0);
+            await libaHelper.revealBid(
+                { ...BID0, value: MIN_VALUE - 1 },
+                bidder0
+            );
         } catch (e) {
             assert.isAbove(
                 e.message.search('value must be larger than minValue'),
@@ -255,7 +198,10 @@ contract('LiBA', ([provider, bidder0, bidder1, bidder2]) => {
 
     it('should fail to reveal auction for wrong hash', async () => {
         try {
-            await revealBid({ ...BID0, salt: BID0.salt - 1 }, bidder0);
+            await libaHelper.revealBid(
+                { ...BID0, salt: BID0.salt - 1 },
+                bidder0
+            );
         } catch (e) {
             assert.isAbove(
                 e.message.search('hash must be same as the bid hash'),
@@ -268,15 +214,15 @@ contract('LiBA', ([provider, bidder0, bidder1, bidder2]) => {
     });
 
     it('should reveal auction correctly', async () => {
-        await commitFund(BID0, bidder0);
-        await commitFund(BID1, bidder1);
-        await revealBid(BID0, bidder0);
-        await revealBid(BID1, bidder1);
+        await libaHelper.commitFund(BID0, bidder0);
+        await libaHelper.commitFund(BID1, bidder1);
+        await libaHelper.revealBid(BID0, bidder0);
+        await libaHelper.revealBid(BID1, bidder1);
     });
 
     it('should fail to reveal auction for passing reveal duration', async () => {
         try {
-            await revealBid(BID0, bidder0);
+            await libaHelper.revealBid(BID0, bidder0);
         } catch (e) {
             assert.isAbove(
                 e.message.search('must be within reveal duration'),
@@ -438,18 +384,19 @@ contract('LiBA', ([provider, bidder0, bidder1, bidder2]) => {
             DURATION,
             MAX_RATE,
             MIN_VALUE,
-            EMPTY_ADDRESS,
+            utils.EMPTY_ADDRESS,
             0
         );
         const { args } = receipt.logs[0];
         auctionId = args.auctionId.toNumber();
+        libaHelper.setAuctionId(auctionId);
 
-        await commitFund(BID0, bidder1, borrowToken.address);
-        await commitFund(BID1, bidder2, borrowToken.address);
-        await placeBid(BID0, bidder1, 'NewBid');
-        await placeBid(BID1, bidder2, 'NewBid');
-        await revealBid(BID1, bidder2);
-        await revealBid(BID0, bidder1);
+        await libaHelper.commitFund(BID0, bidder1, borrowToken.address);
+        await libaHelper.commitFund(BID1, bidder2, borrowToken.address);
+        await libaHelper.placeBid(BID0, bidder1, 'NewBid');
+        await libaHelper.placeBid(BID1, bidder2, 'NewBid');
+        await libaHelper.revealBid(BID1, bidder2);
+        await libaHelper.revealBid(BID0, bidder1);
         await liba.claimWinners(auctionId, [bidder2], bidder1);
         await borrowToken.approve(liba.address, 10000);
         await liba.finalizeAuction(auctionId);
@@ -466,7 +413,7 @@ contract('LiBA', ([provider, bidder0, bidder1, bidder2]) => {
         await celerToken.approve(liba.address, AUCTION_DEPOSIT);
 
         const receipt = await liba.initAuction(
-            EMPTY_ADDRESS,
+            utils.EMPTY_ADDRESS,
             2,
             2,
             1,
@@ -481,10 +428,11 @@ contract('LiBA', ([provider, bidder0, bidder1, bidder2]) => {
         );
         const { args } = receipt.logs[0];
         auctionId = args.auctionId.toNumber();
+        libaHelper.setAuctionId(auctionId);
 
-        await placeBid(BID0, bidder1, 'NewBid');
-        await commitFund(BID0, bidder1);
-        await revealBid(BID0, bidder1);
+        await libaHelper.placeBid(BID0, bidder1, 'NewBid');
+        await libaHelper.commitFund(BID0, bidder1);
+        await libaHelper.revealBid(BID0, bidder1);
         await liba.claimWinners(auctionId, [bidder1], bidder1);
         await borrowToken.approve(liba.address, 10000);
         await liba.finalizeAuction(auctionId);
@@ -505,7 +453,7 @@ contract('LiBA', ([provider, bidder0, bidder1, bidder2]) => {
     });
 
     it('should fail to collect collateral for non winner', async () => {
-        await utils.updateTimestamp(DURATION * DAY);
+        await utils.updateTimestamp(DURATION * utils.DAY);
         try {
             await liba.collectCollateral(auctionId, {
                 from: bidder2
@@ -556,7 +504,7 @@ contract('LiBA', ([provider, bidder0, bidder1, bidder2]) => {
 
         try {
             await liba.initAuction(
-                EMPTY_ADDRESS,
+                utils.EMPTY_ADDRESS,
                 BID_DURATION,
                 REVEAL_DURATION,
                 CLAIM_DURATION,
@@ -566,7 +514,7 @@ contract('LiBA', ([provider, bidder0, bidder1, bidder2]) => {
                 DURATION,
                 MAX_RATE,
                 MIN_VALUE,
-                EMPTY_ADDRESS,
+                utils.EMPTY_ADDRESS,
                 0
             );
         } catch (e) {
@@ -585,7 +533,7 @@ contract('LiBA', ([provider, bidder0, bidder1, bidder2]) => {
     it('should init auction successfully if in whitelist', async () => {
         await liba.addWhitelisted(provider);
         await liba.initAuction(
-            EMPTY_ADDRESS,
+            utils.EMPTY_ADDRESS,
             BID_DURATION,
             REVEAL_DURATION,
             CLAIM_DURATION,
@@ -595,7 +543,7 @@ contract('LiBA', ([provider, bidder0, bidder1, bidder2]) => {
             DURATION,
             MAX_RATE,
             MIN_VALUE,
-            EMPTY_ADDRESS,
+            utils.EMPTY_ADDRESS,
             0
         );
     });
@@ -606,7 +554,7 @@ contract('LiBA', ([provider, bidder0, bidder1, bidder2]) => {
 
         try {
             await liba.initAuction(
-                EMPTY_ADDRESS,
+                utils.EMPTY_ADDRESS,
                 BID_DURATION,
                 REVEAL_DURATION,
                 CLAIM_DURATION,
@@ -616,7 +564,7 @@ contract('LiBA', ([provider, bidder0, bidder1, bidder2]) => {
                 DURATION,
                 MAX_RATE,
                 MIN_VALUE,
-                EMPTY_ADDRESS,
+                utils.EMPTY_ADDRESS,
                 0
             );
         } catch (e) {
@@ -633,7 +581,7 @@ contract('LiBA', ([provider, bidder0, bidder1, bidder2]) => {
     it('should initAuction successfully for unpauced contract', async () => {
         await liba.unpause();
         await liba.initAuction(
-            EMPTY_ADDRESS,
+            utils.EMPTY_ADDRESS,
             BID_DURATION,
             REVEAL_DURATION,
             CLAIM_DURATION,
@@ -643,7 +591,7 @@ contract('LiBA', ([provider, bidder0, bidder1, bidder2]) => {
             DURATION,
             MAX_RATE,
             MIN_VALUE,
-            EMPTY_ADDRESS,
+            utils.EMPTY_ADDRESS,
             0
         );
     });
