@@ -27,24 +27,24 @@ contract LiBA is Ownable, Pausable, TokenUtil, PullPayment, WhitelistedRole {
     uint constant private RATE_PRECISION = 1000;
 
     IPoLC private polc;
+    IERC20 private celerToken;
     uint private auctionCount;
-    bool private enableWhitelist;
+    bool public enableWhitelist;
     uint public minCelerValue; // Minimum celer value required when bidding
-    IERC20 public celerToken;
     mapping(uint => LiBAStruct.Auction) private auctions;
     mapping(address => mapping(uint => LiBAStruct.Bid)) public bidsByUser;
 
-    event NewAuction(uint auctionId, address asker);
-    event NewBid(uint auctionId, address indexed bidder);
-    event UpdateBid(uint auctionId, address bidder);
+    event NewAuction(uint indexed auctionId, address asker);
+    event NewBid(uint indexed auctionId, address indexed bidder);
+    event UpdateBid(uint indexed auctionId, address bidder);
     event RevealBid(uint indexed auctionId, address bidder);
     event ClaimWinners(uint indexed auctionId, address[] winners, address topLoser);
     event ChallengeWinners(uint indexed auctionId, address challenger, address[] winners, address topLoser);
-    event FinalizeAuction(uint auctionId);
-    event FinalizeBid(uint auctionId, address bidder);
-    event RepayAuction(uint auctionId);
-    event CollectCollateral(uint auctionId, address winner);
-    event TransferFeeDeposit(uint auctionId);
+    event FinalizeAuction(uint indexed auctionId);
+    event FinalizeBid(uint indexed auctionId, address bidder);
+    event RepayAuction(uint indexed auctionId);
+    event CollectCollateral(uint indexed auctionId, address winner);
+    event TransferFeeDeposit(uint indexed auctionId);
 
     constructor(
         address _celerTokenAddress,
