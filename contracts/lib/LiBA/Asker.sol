@@ -81,19 +81,7 @@ library LiBAAsker {
                 LiBAUtil._repayCommitment(_polc, _auction.tokenAddress, winner, winnerBid.commitmentId, repayValue);
                 winnerBid.value = winnerBid.value.sub(repayValue);
                 value = _auction.value;
-                break;
             }
-        }
-
-        // return rest of winners fund
-        for (; i < winners.length; i++) {
-            address winner = winners[i];
-            LiBAStruct.Bid storage winnerBid = _bidsByUser[winner][_auctionId];
-            LiBAUtil._repayCommitment(_polc, _auction.tokenAddress, winner, winnerBid.commitmentId, winnerBid.value);
-            _celerToken.safeTransfer(winner, winnerBid.celerValue);
-            winnerBid.celerValue = 0;
-            winnerBid.rate = 0;
-            winnerBid.value = 0;
         }
 
         _auction.lendingStart = block.timestamp;
