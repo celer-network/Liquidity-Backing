@@ -80,6 +80,7 @@ library LiBABidder {
         _bid.rate = _rate;
         _bid.value = _value;
         _bid.hash = bytes32(0);
+        _auction.bidders.push(msg.sender);
         _polc.lendCommitment(msg.sender, _commitmentId, _auction.tokenAddress, _value);
     }
 
