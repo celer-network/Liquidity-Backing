@@ -112,7 +112,6 @@ library LiBABidder {
         LiBAUtil._repayCommitment(_polc, _auction.tokenAddress, msg.sender, _bid.commitmentId, _bid.value);
         _celerToken.safeTransfer(msg.sender, _bid.celerValue);
         _bid.celerValue = 0;
-        _bid.rate = 0;
         _bid.value = 0;
     }
 
