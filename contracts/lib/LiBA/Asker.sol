@@ -81,7 +81,6 @@ library LiBAAsker {
                 LiBAUtil._repayCommitment(_polc, _auction.tokenAddress, winner, winnerBid.commitmentId, repayValue);
                 winnerBid.value = winnerBid.value.sub(repayValue);
                 value = _auction.value;
-                break;
             }
         }
 
