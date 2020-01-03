@@ -238,10 +238,19 @@ contract(
             });
             await celerToken.approve(liba.address, AUCTION_DEPOSIT);
             await liba.finalizeAuction(auctionId);
+            await liba.finalizeBid(auctionId, {
+                from: bidder4
+            });
 
-            const commitment = await polc.commitmentsByUser(
+            let commitment = await polc.commitmentsByUser(
                 bidder3,
                 bids[bidder3].commitmentId
+            );
+            assert.equal(commitment.availableValue, 100);
+
+            commitment = await polc.commitmentsByUser(
+                bidder4,
+                bids[bidder4].commitmentId
             );
             assert.equal(commitment.availableValue, 100);
 
@@ -268,6 +277,9 @@ contract(
                     assert.equal(commitment.availableValue, 100);
                 }
             }
+
+            const allowance = await celerToken.allowance(asker, liba.address);
+            assert.equal(allowance.toNumber(), 719);
         });
     }
 );
