@@ -18,7 +18,7 @@ const web3 = new Web3('http://localhost:8545');
 const AUCTION_DEPOSIT = 100;
 const MIN_CELER = 10;
 const VALUE = 600;
-const DURATION = 2;
+const DURATION = 3;
 const MAX_RATE = 10;
 const MIN_VALUE = 2;
 const BID = {
@@ -115,9 +115,10 @@ contract(
             await celerToken.approve(liba.address, AUCTION_DEPOSIT);
             await liba.finalizeAuction(auctionId);
 
-            await utils.updateTimestamp(DURATION * utils.DAY);
+            await utils.updateTimestamp((DURATION - 1) * utils.DAY);
             const value =
-                5 * BID.value + (5 * DURATION * BID.value * BID.rate) / 1000;
+                5 * BID.value +
+                (5 * (DURATION - 1) * BID.value * BID.rate) / 1000;
             await liba.repayAuction(auctionId, { value });
 
             for (const winner of winners) {
@@ -176,9 +177,10 @@ contract(
             await celerToken.approve(liba.address, AUCTION_DEPOSIT);
             await liba.finalizeAuction(auctionId);
 
-            await utils.updateTimestamp(DURATION * utils.DAY);
+            await utils.updateTimestamp((DURATION - 1) * utils.DAY);
             const value =
-                4 * BID.value + (4 * DURATION * BID.value * BID.rate) / 1000;
+                4 * BID.value +
+                (4 * (DURATION - 1) * BID.value * BID.rate) / 1000;
             await liba.repayAuction(auctionId, { value });
 
             for (const winner of winners) {
@@ -244,10 +246,10 @@ contract(
             );
             assert.equal(commitment.availableValue, 100);
 
-            await utils.updateTimestamp(DURATION * utils.DAY);
+            await utils.updateTimestamp((DURATION - 1) * utils.DAY);
             const value =
                 4 * BID.value +
-                (4 * DURATION * BID.value * bids[topLoser].rate) / 1000;
+                (4 * (DURATION - 1) * BID.value * bids[topLoser].rate) / 1000;
             await liba.repayAuction(auctionId, { value });
 
             for (const winner of winners) {
