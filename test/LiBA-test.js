@@ -16,6 +16,7 @@ const assert = chai.assert;
 const web3 = new Web3('http://localhost:8545');
 
 const AUCTION_DEPOSIT = 100;
+const MIN_CELER = 10;
 const BID_DURATION = 8;
 const REVEAL_DURATION = 8;
 const CLAIM_DURATION = 3;
@@ -37,7 +38,7 @@ const BID1 = {
     rate: 4
 };
 
-contract('LiBA', ([provider, bidder0, bidder1, bidder2]) => {
+contract('LiBA', ([asker, bidder0, bidder1, bidder2]) => {
     let celerToken;
     let borrowToken;
     let liba;
@@ -48,7 +49,7 @@ contract('LiBA', ([provider, bidder0, bidder1, bidder2]) => {
     before(async () => {
         celerToken = await ERC20ExampleToken.new();
         borrowToken = await ERC20ExampleToken.new();
-        polc = await PoLC.new(celerToken.address, AUCTION_DEPOSIT / 2);
+        polc = await PoLC.new(celerToken.address, 1);
 
         const libaStruct = await LiBAStruct.new();
         await LiBAAsker.link('LiBAStruct', libaStruct.address);
@@ -59,12 +60,17 @@ contract('LiBA', ([provider, bidder0, bidder1, bidder2]) => {
         await LiBA.link('LiBAStruct', libaStruct.address);
         await LiBA.link('LiBAAsker', libaAsker.address);
         await LiBA.link('LiBABidder', libaBidder.address);
-        liba = await LiBA.new(celerToken.address, polc.address, false, 10);
+        liba = await LiBA.new(
+            celerToken.address,
+            polc.address,
+            false,
+            MIN_CELER
+        );
 
         await polc.setLibaAddress(liba.address);
         await liba.updateSupportedToken(borrowToken.address, true);
         await polc.updateSupportedToken(borrowToken.address, true);
-        await celerToken.transfer(provider, 10000);
+        await celerToken.transfer(asker, 10000);
         await celerToken.transfer(bidder0, 10000);
         await celerToken.transfer(bidder1, 10000);
         await celerToken.transfer(bidder2, 10000);
@@ -95,13 +101,13 @@ contract('LiBA', ([provider, bidder0, bidder1, bidder2]) => {
         auctionId = args.auctionId.toNumber();
         libaHelper.setAuctionId(auctionId);
         assert.equal(event, 'NewAuction');
-        assert.equal(args.asker, provider);
+        assert.equal(args.asker, asker);
         assert.equal(auctionId, 0);
 
         const auction = await liba.getAuction.call(auctionId);
         const auctionPeriod = await liba.getAuctionPeriod.call(auctionId);
         const latestBlock = await web3.eth.getBlockNumber();
-        assert.equal(auction.asker, provider);
+        assert.equal(auction.asker, asker);
         assert.equal(auction.value.toNumber(), VALUE);
         assert.equal(auction.duration.toNumber(), DURATION);
         assert.equal(auction.maxRate.toNumber(), MAX_RATE);
@@ -252,7 +258,7 @@ contract('LiBA', ([provider, bidder0, bidder1, bidder2]) => {
 
     it('should claim winner successfully', async () => {
         const receipt = await liba.claimWinners(auctionId, [bidder0], bidder1, {
-            from: provider
+            from: asker
         });
         const { event, args } = receipt.logs[0];
         assert.equal(event, 'ClaimWinners');
@@ -262,7 +268,7 @@ contract('LiBA', ([provider, bidder0, bidder1, bidder2]) => {
     it('should fail to claim winner for passing claim duration', async () => {
         try {
             await liba.claimWinners(auctionId, [bidder0], bidder1, {
-                from: provider
+                from: asker
             });
         } catch (e) {
             assert.isAbove(
@@ -359,7 +365,7 @@ contract('LiBA', ([provider, bidder0, bidder1, bidder2]) => {
         const { event, args } = receipt.logs[0];
         assert.equal(event, 'RepayAuction');
         assert.deepEqual(args.auctionId.toNumber(), auctionId);
-        const balance = await borrowToken.balanceOf(provider);
+        const balance = await borrowToken.balanceOf(asker);
         assert.equal(balance.toString(), '300000000000000000000000');
     });
 
@@ -401,7 +407,7 @@ contract('LiBA', ([provider, bidder0, bidder1, bidder2]) => {
         await liba.claimWinners(auctionId, [bidder2], bidder1);
         await borrowToken.approve(liba.address, 10000);
         await liba.finalizeAuction(auctionId);
-        const balance = await borrowToken.balanceOf(provider);
+        const balance = await borrowToken.balanceOf(asker);
         assert.equal(balance.toString(), '299999999999999999980100');
         await borrowToken.approve(polc.address, 10000);
         await liba.repayAuction(auctionId);
@@ -532,7 +538,7 @@ contract('LiBA', ([provider, bidder0, bidder1, bidder2]) => {
     });
 
     it('should init auction successfully if in whitelist', async () => {
-        await liba.addWhitelisted(provider);
+        await liba.addWhitelisted(asker);
         await liba.initAuction(
             utils.EMPTY_ADDRESS,
             BID_DURATION,
