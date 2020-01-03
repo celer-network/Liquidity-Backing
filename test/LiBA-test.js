@@ -49,7 +49,7 @@ contract('LiBA', ([asker, bidder0, bidder1, bidder2]) => {
     before(async () => {
         celerToken = await ERC20ExampleToken.new();
         borrowToken = await ERC20ExampleToken.new();
-        polc = await PoLC.new(celerToken.address, 1);
+        polc = await PoLC.new(celerToken.address, 100);
 
         const libaStruct = await LiBAStruct.new();
         await LiBAAsker.link('LiBAStruct', libaStruct.address);

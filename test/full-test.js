@@ -13,9 +13,8 @@ const PoLC = artifacts.require('PoLC');
 
 chai.use(chaiAsPromised);
 const assert = chai.assert;
-const web3 = new Web3('http://localhost:8545');
 
-const AUCTION_DEPOSIT = 100;
+const AUCTION_DEPOSIT = 1000;
 const MIN_CELER = 10;
 const VALUE = 600;
 const DURATION = 3;
@@ -41,7 +40,7 @@ contract(
 
         before(async () => {
             celerToken = await ERC20ExampleToken.new();
-            polc = await PoLC.new(celerToken.address, 1);
+            polc = await PoLC.new(celerToken.address, 100);
 
             const libaStruct = await LiBAStruct.new();
             await LiBAAsker.link('LiBAStruct', libaStruct.address);
