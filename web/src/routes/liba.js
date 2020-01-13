@@ -137,7 +137,6 @@ class LiBA extends React.Component {
 
         auctions = _.filter(auctions, auction => {
             const { asker } = auction.value;
-            console.log(auction);
             if (filter.asker && filter.asker !== asker) {
                 return false;
             }
@@ -154,7 +153,9 @@ class LiBA extends React.Component {
             auction.value.period = period;
             return true;
         });
-        auctions = _.sortBy(auctions, 'args.0').reverse();
+        auctions.sort(
+            (auction0, auction1) => auction1.args[0] - auction0.args[0]
+        );
         this.auctions = auctions;
 
         return (
