@@ -64,3 +64,4 @@ build
 web/src/contracts
 
 .DS_Store
+.git/
