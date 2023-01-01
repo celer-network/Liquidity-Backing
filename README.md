@@ -65,3 +65,4 @@ For more details about Liquidity Backing, please refer to [CelerCore technical d
 7. **finalizeBid(\_auctionId)**: After the finalization period or the auction has been finalized, the unselected bider is able to collect CELR value and commitment value in the bid.
 8. **repayAuction(\_auctionId)**: The auction asker should repay the fund and interest when the lending duration is about to end. LiBA will refund the feeDeposit to the auction asker, the auction asker also needs to make the payment for auction fee, which is discussed in detail below.
 9. **collectCollateral(\_auctionId)**: If the auction asker is not able to make the repayment on time, the lender can collect collateral associated with the auction.
+test
